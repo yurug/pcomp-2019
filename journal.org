@@ -1,0 +1,46 @@
+#+STARTUP: hidestars
+#+TODO: TODO(t!) FOCUSED (f@/!) STARTED(s@/!) WAITING(w@/!) SOMEDAY(S@/!) URGENT (u!) | DONE(d!) CANCELLED(c@!)
+
+*Programmation comparée 2019*
+
+Sous Emacs, utiliser [TAB] pour ouvrir ou fermer les différentes sections.
+
+* Comment lire ce qui suit?
+  À chaque séance, vous *devez* effectuer la liste des tâches.
+  Les tâches préfixées par "Discussion" ou "Cours" sont faites en groupe-classe.
+  Les autres tâches sont faites en petits groupes ou individuellement.
+
+* Séances
+** <2019-01-07>
+*** Introduction du cours
+    - Motivations du cours
+    - Comment catégoriser les langages de programmation?
+    - Comment étudier les styles de programmation?
+    - Fonctionnement du cours
+*** Un premier défi et deux expériences
+    - Voir defis/0
+*** Projet
+**** Sujet
+     - Un tableur multi-site, multi-utilisateur pour le bigdata.
+**** Contraintes de cette année
+***** Approches
+- dans un style fonctionnel pur ;
+- avec le framework Spark / Spark Streaming / Apache Storm :
+- en orienté objet ;
+- en utilisant un GPU ;
+- en programmation réactive en ReactiveML ;
+- en théorie des types.
+***** Langages
+- Rust, Julia, ReactiveML, Scala, C, Java, Idris, Haskell, OCaml.
+*** Choses à faire
+**** TODO Former les groupes de projet
+**** TODO S'inscrire sur le GIT
+**** TODO S'inscrire sur Framapad
+**** TODO Discussion: Défi 0
+**** TODO Discussion: Défi 1
+**** TODO Faire son choix de contraintes
+**** TODO Se documenter sur 'git' (comment faire une branche, une pull-request, etc)
+**** TODO Se documenter sur 'Docker'
+**** TODO Lire https://en.wikipedia.org/wiki/Programming_paradigm
+**** TODO Lire https://en.wikipedia.org/wiki/Comparison_of_programming_languages
+
