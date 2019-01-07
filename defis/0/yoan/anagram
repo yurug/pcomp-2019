@@ -12,12 +12,10 @@ end
 
 dic = ARGV.shift
 words = ARGV
-
 words_list = File.readlines(dic).map(&:chomp)
 
 words.each do |w|
   list = (w.anagram & words_list).sort
   puts "#{w}:"
   puts list
-  puts
 end
