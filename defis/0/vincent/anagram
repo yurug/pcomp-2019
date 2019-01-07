@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+
+dict = ARGV.shift
+
+puts dict
+
+def char_freq(word)
+  chars = {}
+  word.each_char do |char|
+    if chars[char].nil?
+      chars[char] = 1
+    else
+      chars[char] = chars[char] + 1
+    end
+  end
+  return chars
+end
+
+ARGV.each do |word|
+  File.open(dict, 'r') do |file|
+    word_freq = char_freq(word)
+    puts "#{word}:"
+    file.each_line do |line|
+      anagram_freq = char_freq(line.strip)
+      if word_freq == anagram_freq and word != line.strip
+        puts line
+      end
+    end
+  end
+end
