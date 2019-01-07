@@ -21,32 +21,23 @@ words = ARGV
 # Méthode 5
 #
 # O(NK + MK) BOOM
-
-
+# Hash, keys: letter frequencies, values: array of words with this letter frequencies.
+# Just have to puts the corresponding array. 
 
 frequencies_hash = Hash.new()
 
-words.each do |w|
-  formatted_word = w + ':'
-  f = w.frequencies
-  if frequencies_hash.has_key?(f)
-    frequencies_hash[f] << formatted_word
-  else
-    frequencies_hash[f] = [formatted_word]
-  end
-end
+words.each { |w| frequencies_hash[w.frequencies] = [] }
 
-dico.each do |w| 
+IO.foreach(dico_name) do |w|
+  w = w.chomp
   f = w.frequencies
-  if frequencies_hash.has_key?(f) && (!frequencies_hash[f][0].start_with?(w))
-    frequencies_hash[f] << w
-  end  
+  frequencies_hash[f] << w if frequencies_hash.has_key?(f)
 end
 
 words.each do |w|
-  puts frequencies_hash[w.frequencies]
+  puts "#{w}:"
+  puts frequencies_hash[w.frequencies].reject { |w1| w1 == w }.sort
 end
-
  
 # ===== Méthode 4
 #
