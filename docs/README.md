@@ -127,7 +127,12 @@ qui a mené à ces choix.
 ## Méthodes
 
 - Étude de l'Histoire et de la théorie des langages de programmation
-- Expériences de communication autour du code
+- Expériences de communication autour du code:
+  - Expliquer son code.
+  - Expliquer le code d'un autre programmeur (avec ou sans accès à ce dernier).
+  - Comparer plusieurs programmes proposés pour résoudre un problème donné.
+  - Faire une revue de code.
+  - Faire un exposé technique sur une technologie de programmation.
 - Cours orienté "défis"
 
 ## Thèmes abordés
@@ -140,6 +145,7 @@ La liste suivante est indicative et évoluera:
 - L'art de la programmation (lettrée, dirigée par les tests, par les types, "live", ...)
 - L'optimisation des programmes séquentiels
 - Programmation à grande échelle
+- Programmation orientée langages, aspects, composants, acteurs, services, ...
 
 ## Validation
 
