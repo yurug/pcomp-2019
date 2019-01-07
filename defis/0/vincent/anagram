@@ -16,8 +16,8 @@ def char_freq(word)
   return chars
 end
 
-File.open(dict, 'r') do |file|
-  ARGV.each do |word|
+ARGV.each do |word|
+  File.open(dict, 'r') do |file|
     word_freq = char_freq(word)
     puts "#{word}:"
     file.each_line do |line|
