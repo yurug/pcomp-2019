@@ -77,6 +77,7 @@ end
 trie = make_trie(dico)
 
 words.each do |w|
+  puts "#{w}:"
   puts anagram(trie, w)
 end
 
