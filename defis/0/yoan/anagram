@@ -30,10 +30,17 @@ frequencies_hash = Hash.new()
 
 words.each { |w| frequencies_hash[w.frequencies] = [] }
 
-IO.foreach(dico_name) do |w|
-  w = w.chomp
-  f = w.frequencies
-  frequencies_hash[f] << w if frequencies_hash.has_key?(f)
+begin
+  IO.foreach(dico_name) do |w|
+    w = w.chomp
+    f = w.frequencies
+    if frequencies_hash.has_key?(f)
+      frequencies_hash[f] << w
+    end
+  end
+rescue Errno::ENOENT => e
+  puts "Impossible to open the file : #{e.message}"
+  exit
 end
 
 words.each do |w|
