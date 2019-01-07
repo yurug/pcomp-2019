@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# def anagrams(str)
+# def anagram(str)
 # str.chars.permutation.uniq.map(&:join).reject { |s| s == str }
 # end
 
@@ -17,6 +17,7 @@ end
 dico = File.readlines(ARGV.shift).map(&:chomp)
 words = ARGV
 
+
 # ===== Méthode 4
 #
 # Transforming the list of words into a trie
@@ -27,7 +28,8 @@ words = ARGV
 #
 #
 # improves by creating the trie while reading the file (esay to do)
-
+# 
+# WARNING : does not get a trie where the keys are sorted, easy to fix.
 
 def make_trie(words)
   trie = Hash.new()
@@ -95,9 +97,20 @@ end
 # numbers to frequent characters.
 
 
+
 # ======
 
 # Méthode 2
+# |dic| = M, |words| = N, |w| < K for all w in words + dico
+# tri des listes => M ln M + N ln N
+# tri des mots (K ln K) (M + N)
+# recherche => M
+#
+# N (ln N + K ln K) + M (ln M + K ln K)
+# 
+# Suppose M >> N, K
+#
+# O(M ln M)
 
 # sorted_dico = dico.each_with_index.map { |w, i| [i, w.chars.sort.join] }.sort_by {|e| e[1]}
 # sorted_words = words.each_with_index.map { |w, i| [i, w.chars.sort.join] }.sort_by {|e| e[1]}
@@ -116,10 +129,10 @@ end
 
 # ======
 
+# Méthode 1 : basic enumeration and intersection
+
 # words.each do |w|
   # list = (w.anagrams & words_list).sort
   # puts "#{w}:"
   # puts list
-  # puts
 # end
-
