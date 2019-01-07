@@ -1,13 +1,11 @@
 #!/usr/bin/env ruby
 
-require 'set'
-
-# def anagram(str)
+# def anagrams(str)
 # str.chars.permutation.uniq.map(&:join).reject { |s| s == str }
 # end
 
 class String
-  def anagram
+  def anagrams
     chars.permutation.uniq.map(&:join).reject { |s| s == self }
   end
   
@@ -118,7 +116,7 @@ end
 # ======
 
 # words.each do |w|
-  # list = (w.anagram & words_list).sort
+  # list = (w.anagrams & words_list).sort
   # puts "#{w}:"
   # puts list
   # puts
