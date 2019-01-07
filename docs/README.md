@@ -104,7 +104,20 @@ personne ou par soi-même:
 
 #### Peut-on vraiment répondre à cette question?
 
-Cette question admet-elle des réponses "scientifiques"?
+Cette question admet-elle des réponses "scientifiques"? Sans aucun
+doute!  Dans ce cours, nous verrons que l'on peut se doter d'une
+ méthodologie rigoureuse  pour évaluer un code source ou plus
+généralement la pertinence d'une approche de programmation pour
+résoudre un problème fixé.
+
+Les critères d'évaluation sont multiples et complexes : ils peuvent
+être qualitatifs ou quantitatifs, s'appuyer sur des résultats
+théoriques et formels ou sur des modèles construits de façon
+empirique. Dans tous les cas, le positionnement du programmeur
+vis-à-vis des approches et techniques de programmation est le résultat
+d'un compromis visant à maximiser des mesures, parfois difficilement
+conciliables. Une approche rigoureuse permet de retracer le raisonnement
+qui a mené à ces choix.
 
 ## Objectifs
 
