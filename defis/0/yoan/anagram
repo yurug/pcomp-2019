@@ -14,9 +14,11 @@ class String
   end
 end
 
-dico = File.readlines(ARGV.shift).map(&:chomp)
+dico_name = ARGV.shift
 words = ARGV
 
+# Not necesary for method 5
+# dico = File.readlines(ARGV.shift).map(&:chomp) 
 
 # Méthode 5
 #
