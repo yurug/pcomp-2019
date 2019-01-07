@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 def anagram(str)
   str.chars.permutation.uniq.map(&:join).reject { |s| s == str }
 end
