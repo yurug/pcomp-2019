@@ -22,7 +22,7 @@ File.open(dict, 'r') do |file|
     puts "#{word}:"
     file.each_line do |line|
       anagram_freq = char_freq(line.strip)
-      if word_freq == anagram_freq
+      if word_freq == anagram_freq and word != line.strip
         puts line
       end
     end
