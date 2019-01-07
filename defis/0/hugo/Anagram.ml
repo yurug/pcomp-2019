@@ -37,8 +37,10 @@ let read_file p =
 let usage = "usage: " ^ (Sys.argv.(0)) ^ " file w1 ... wn"
   
 let main() = match read_file (Sys.argv.(1)) with
-  | lines -> let params = Array.sub Sys.argv 2 (Array.length Sys.argv - 2) in
-             Array.iter (check_word print_endline lines) params
+  | lines -> Array.sub Sys.argv 2 (Array.length Sys.argv - 2)
+             |> Array.to_list
+             |> List.sort String.compare
+             |> List.iter (check_word print_endline lines)
   | exception Invalid_argument(_) -> prerr_endline usage
   | exception Sys_error(m) -> prerr_endline m ;;
 
