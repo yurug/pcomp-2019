@@ -2,8 +2,6 @@
 
 dict = ARGV.shift
 
-puts dict
-
 def char_freq(word)
   chars = {}
   word.each_char do |char|

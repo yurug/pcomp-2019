@@ -14,11 +14,18 @@ Sous Emacs, utiliser [TAB] pour ouvrir ou fermer les différentes sections.
 ** <2019-01-07>
 *** Introduction du cours
     - Motivations du cours
+    - Qu'est-ce qu'un langage de programmation?
     - Comment catégoriser les langages de programmation?
+    - Qu'est-ce qu'un style de programmation?
     - Comment étudier les styles de programmation?
     - Fonctionnement du cours
 *** Un premier défi et deux expériences
     - Voir defis/0
+    - Explication du code:
+      - Toujours procéder du général au particulier.
+      - Comment se convaincre de la correction d'un programme?
+    - Comment évaluer du code?
+"Any fool can write code that a computer can understand. Good programmers write code that humans can understand." - Martin Fowler
 *** Projet
 **** Sujet
      - Un tableur multi-site, multi-utilisateur pour le bigdata.
@@ -33,11 +40,13 @@ Sous Emacs, utiliser [TAB] pour ouvrir ou fermer les différentes sections.
 ***** Langages
 - Rust, Julia, ReactiveML, Scala, C, Java, Idris, Haskell, OCaml.
 *** Choses à faire
-**** TODO Former les groupes de projet
-**** TODO S'inscrire sur le GIT
-**** TODO S'inscrire sur Framapad
+**** DONE S'inscrire sur le GIT
+     - State "DONE"       from "TODO"       [2019-01-07 Mon 12:17]
+**** DONE S'inscrire sur Framapad
+     - State "DONE"       from "TODO"       [2019-01-07 Mon 12:17]
 **** TODO Discussion: Défi 0
 **** TODO Discussion: Défi 1
+**** TODO Former les groupes de projet
 **** TODO Faire son choix de contraintes
 **** TODO Se documenter sur 'git' (comment faire une branche, une pull-request, etc)
 **** TODO Se documenter sur 'Docker'

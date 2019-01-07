@@ -104,7 +104,20 @@ personne ou par soi-même:
 
 #### Peut-on vraiment répondre à cette question?
 
-Cette question admet-elle des réponses "scientifiques"?
+Cette question admet-elle des réponses "scientifiques"? Sans aucun
+doute!  Dans ce cours, nous verrons que l'on peut se doter d'une
+ méthodologie rigoureuse  pour évaluer un code source ou plus
+généralement la pertinence d'une approche de programmation pour
+résoudre un problème fixé.
+
+Les critères d'évaluation sont multiples et complexes : ils peuvent
+être qualitatifs ou quantitatifs, s'appuyer sur des résultats
+théoriques et formels ou sur des modèles construits de façon
+empirique. Dans tous les cas, le positionnement du programmeur
+vis-à-vis des approches et techniques de programmation est le résultat
+d'un compromis visant à maximiser des mesures, parfois difficilement
+conciliables. Une approche rigoureuse permet de retracer le raisonnement
+qui a mené à ces choix.
 
 ## Objectifs
 
@@ -114,7 +127,12 @@ Cette question admet-elle des réponses "scientifiques"?
 ## Méthodes
 
 - Étude de l'Histoire et de la théorie des langages de programmation
-- Expériences de communication autour du code
+- Expériences de communication autour du code:
+  - Expliquer son code.
+  - Expliquer le code d'un autre programmeur (avec ou sans accès à ce dernier).
+  - Comparer plusieurs programmes proposés pour résoudre un problème donné.
+  - Faire une revue de code.
+  - Faire un exposé technique sur une technologie de programmation.
 - Cours orienté "défis"
 
 ## Thèmes abordés
@@ -127,6 +145,7 @@ La liste suivante est indicative et évoluera:
 - L'art de la programmation (lettrée, dirigée par les tests, par les types, "live", ...)
 - L'optimisation des programmes séquentiels
 - Programmation à grande échelle
+- Programmation orientée langages, aspects, composants, acteurs, services, ...
 
 ## Validation
 
