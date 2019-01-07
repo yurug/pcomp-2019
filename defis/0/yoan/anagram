@@ -1,14 +1,23 @@
 #!/usr/bin/env ruby
 
-def anagram(str)
-  str.chars.permutation.uniq.map(&:join).reject { |s| s == str }
+class String
+  def anagram
+    chars.permutation.uniq.map(&:join).reject { |s| s == self }
+  end
 end
 
-dic, words = ARGV[0], ARGV[1..-1]
-words_list = File.readlines(ARGV[0]).map(&:chomp)
+# def anagram(str)
+# str.chars.permutation.uniq.map(&:join).reject { |s| s == str }
+# end
+
+dic = ARGV.shift
+words = ARGV
+
+words_list = File.readlines(dic).map(&:chomp)
 
 words.each do |w|
-  list = (anagram(w) & words_list).sort
+  list = (w.anagram & words_list).sort
   puts "#{w}:"
   puts list
+  puts
 end
