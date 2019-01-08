@@ -1,28 +1,31 @@
-let rec string_to_list s = match s with
+let get_canon word =
+
+  let rec string_to_list s = match s with
     | "" -> []
     | s -> (String.get s 0 ) :: (String.sub s 1 (String.length s - 1)
-                                 |> string_to_list)
+                               |> string_to_list) in
 
-let are_anagrams s1 s2 =
+  string_to_list word |> List.sort (Char.compare)
 
-  let rec are_same_lists l1 l2 = match l1,l2 with
-    | [], [] -> true
-    | h1::t1, h2::t2 when h1 = h2 -> are_same_lists t1 t2
-    | _ -> false in
+let get_anagrams_table lines =
 
-  let l1 = string_to_list s1 |> List.sort (Char.compare) in
-  let l2 = string_to_list s2 |> List.sort (Char.compare) in
-  are_same_lists l1 l2
-
-let check_word log lines w =
-  
-  let rec check_word' = function
-    | [] -> ()
-    | h :: t when are_anagrams h w -> log h ; check_word' t
-    | _ :: t -> check_word' t in
-  
-  log (w ^ ":") ; check_word' lines
-  
+  let put_away hashtable word =
+    let canon = get_canon word in
+    match Hashtbl.find hashtable canon with
+    | anagrams -> Hashtbl.replace hashtable canon (word :: anagrams)
+    | exception Not_found -> Hashtbl.add hashtable canon [word] in
+                                  
+  let table = Hashtbl.create (List.length lines) in
+  List.iter (put_away table) lines ;
+  table
+                                       
+let log_anagrams log table word =
+  let canon = get_canon word in
+  log (word ^ ":") ;
+  match Hashtbl.find table canon with
+  | anagrams -> List.rev anagrams |> List.iter log
+  | exception Not_found -> ()
+                      
 let read_file p =
 
   let ic = open_in p in
@@ -37,10 +40,12 @@ let read_file p =
 let usage = "usage: " ^ (Sys.argv.(0)) ^ " file w1 ... wn"
   
 let main() = match read_file (Sys.argv.(1)) with
-  | lines -> Array.sub Sys.argv 2 (Array.length Sys.argv - 2)
-             |> Array.to_list
-             |> List.sort String.compare
-             |> List.iter (check_word print_endline lines)
+  | lines ->
+     let table = List.sort String.compare lines
+                 |> get_anagrams_table in
+     Array.sub Sys.argv 2 (Array.length Sys.argv - 2)
+     |> Array.to_list
+     |> List.iter (log_anagrams print_endline table)
   | exception Invalid_argument(_) -> prerr_endline usage
   | exception Sys_error(m) -> prerr_endline m ;;
 
