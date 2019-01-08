@@ -1,9 +1,5 @@
 #!/usr/bin/env ruby
 
-# def anagram(str)
-# str.chars.permutation.uniq.map(&:join).reject { |s| s == str }
-# end
-
 class String
   def anagrams
     chars.permutation.uniq.map(&:join).reject { |s| s == self }
@@ -14,40 +10,107 @@ class String
   end
 end
 
-dico_name = ARGV.shift
-words = ARGV
+def help
+  puts "Usage ./anagram dico word_1 word_2 ..."
+end
 
-# Not necesary for method 5
-# dico = File.readlines(ARGV.shift).map(&:chomp) 
+
+module AnagramsByFrequenciesHash
+  def self.compute_word_by_frequencies(filename)
+    words_by_frequencies = Hash.new { |h, k| h[k] = [] } 
+    File.open(filename) do |f|
+      f.each_line do |word|
+        word.chomp!
+        words_by_frequencies[word.frequencies] << word
+      end
+    end
+  rescue Errno::ENOENT => e
+    puts "Impossible to open the file : #{e.message}"
+  ensure
+    return words_by_frequencies
+  end
+
+  def self.anagrams(filename, words)
+    words_by_frequencies = compute_word_by_frequencies(filename)
+    words.each do |w|
+      puts "#{w}:"
+      puts words_by_frequencies[w.frequencies].reject { |w1| w1 == w }.sort
+    end
+  end
+end
+
+
+ARGV.size < 1 ? help : AnagramsByFrequenciesHash.anagrams(ARGV[0], ARGV.drop(1))
+
+
+module AnagramsByTrie
+  def self.add_word(word, trie)
+    hash = trie
+    word.chars.sort.each do |c|
+      hash[c] = hash[c].nil? ? {} : hash[c]
+      hash = hash[c]
+    end
+    if hash[0].nil? 
+      hash[0] = [word]
+    else
+      hash[0] << word
+    end
+  end
+  
+  def self.compute_trie(filename)
+    trie = Hash.new
+    File.open(filename) do |f|
+      f.each_line do |word|
+        word.chomp!
+        add_word(word, trie)
+      end
+    end
+  rescuce Errno::ENOENT => e
+    puts "Impossible to open the file : #{e.message}"
+  ensure
+    return trie
+  end
+  
+  def self.get_anagram(trie, w)
+    hash = trie
+    w.chars.sort.each do |c|
+      return [] unless hash.has_key?(c)
+      hash = hash[c]
+    end
+    hash[0].to_a
+  end
+  
+  def self.anagrams(filename, words)
+    trie = compute_trie(filename)
+    words.each do |w|
+      puts "#{w}:"
+      puts get_anagram(trie, w).sort
+    end
+  end
+end
+
+
+module AnagramsBrutal
+  def self.anagrams(filename, words)
+    dict = File.readlines(ARGV.shift).map(&:chomp)
+  rescue Errno::ENOENT => e
+    puts "Impossible to open the file : #{e.message}"
+  ensure
+    words.each do |w|
+      puts "#{w}:"
+      puts (w.anagrams & dict).sort
+    end  
+  end
+end
+
 
 # Méthode 5
 #
 # O(NK + MK) BOOM
 # Hash, keys: letter frequencies, values: array of words with this letter frequencies.
 # Just have to puts the corresponding array. 
-
-frequencies_hash = Hash.new()
-
-words.each { |w| frequencies_hash[w.frequencies] = [] }
-
-begin
-  IO.foreach(dico_name) do |w|
-    w = w.chomp
-    f = w.frequencies
-    if frequencies_hash.has_key?(f)
-      frequencies_hash[f] << w
-    end
-  end
-rescue Errno::ENOENT => e
-  puts "Impossible to open the file : #{e.message}"
-  exit
-end
-
-words.each do |w|
-  puts "#{w}:"
-  puts frequencies_hash[w.frequencies].reject { |w1| w1 == w }.sort
-end
- 
+#
+#
 # ===== Méthode 4
 #
 # Transforming the list of words into a trie
@@ -60,62 +123,8 @@ end
 # improves by creating the trie while reading the file (esay to do)
 # 
 # WARNING : does not get a trie where the keys are sorted, easy to fix.
-
-
-
-# def make_trie(words)
-  # trie = Hash.new()
-  # words.each do |w|
-    # d = trie
-    # w.each_char do |c|
-      # d[c] = d[c].nil? ? {} : d[c]
-      # d = d[c]
-    # end
-    # d["\0"] = {}
-  # end
-  # trie
-# end
-
-# def in_trie(trie, word)
-  # d = trie
-  # word.each_char do |l|
-    # return false unless d.keys.include?(l)
-    # d = d[l]
-  # end
-  # return true
-# end
-
-# def anagram(trie, word)
-  # result = []
-  
-  # def aux(frequencies, path, root, length, result, word)
-    # if length == path.length && root.has_key?("\0")
-      # ret = path.join
-      # result << ret if ret != word
-    # else
-      # root.each do |letter, d|
-        # if frequencies[letter] > 0
-          # path << letter
-          # frequencies[letter] -= 1
-          # aux(frequencies, path, d, length, result, word)
-          # path.pop()
-          # frequencies[letter] += 1
-        # end
-      # end
-    # end
-  # end
-  # aux(word.frequencies, [], trie, word.length, result, word)
-  # result
-# end
-
-# trie = make_trie(dico)
-
-# words.each do |w|
-  # puts "#{w}:"
-  # puts anagram(trie, w)
-# end
-
-
+#
+#
 # ===== Méthode 3
 #
 # TODO 
@@ -127,10 +136,10 @@ end
 #
 # Warning : too big number with long string. Maybe try to associate short prime
 # numbers to frequent characters.
-
-
+#
+#
 # ======
-
+#
 # Méthode 2
 # |dic| = M, |words| = N, |w| < K for all w in words + dico
 # tri des listes => M ln M + N ln N
@@ -162,8 +171,4 @@ end
 
 # Method 1 basic enumeration and intersection
 
-# words.each do |w|
-  # list = (w.anagrams & words_list).sort
-  # puts "#{w}:"
-  # puts list
-# end
+
