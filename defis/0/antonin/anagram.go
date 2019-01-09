@@ -1,8 +1,7 @@
 package main
 
-// Being overly pedantic, iterate on words using UTF-8 codepoints.  I
-// could also normalize the input, and convert to lower, but I think
-// it’s unnecessary.
+// Being overly pedantic, iterate on words using UTF-8 runes.  I could
+// also normalize the input, but I think it’s unnecessary.
 
 // I don’t assume that the dictionary is sorted (which it should,
 // otherwise it shouldn’t be called a dictionary), so I need to sort
@@ -14,6 +13,7 @@ import (
 	"log"
 	"os"
 	"sort"
+	"strings"
 )
 
 func build_freqs(s string) (m map[rune]int) {
@@ -33,9 +33,8 @@ func freqs_eq(f1 map[rune]int, f2 map[rune]int) bool {
 	return true
 }
 
-func is_anagram(freqs map[rune]int, s string) bool {
-	m := build_freqs(s)
-	return freqs_eq(freqs, m) && freqs_eq(m, freqs)
+func is_anagram(f1, f2 map[rune]int) bool {
+	return freqs_eq(f1, f2) && freqs_eq(f2, f1)
 }
 
 func main() {
@@ -54,14 +53,15 @@ func main() {
 	anagrams := make([]([]string), nwords)
 	for i := 0; i < nwords; i++ {
 		anagrams[i] = make([]string, 0)
-		freqs[i] = build_freqs(os.Args[i+2])
+		freqs[i] = build_freqs(strings.ToLower(os.Args[i+2]))
 	}
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		for i, freq := range freqs {
-			word := scanner.Text()
-			if is_anagram(freq, word) {
+		word := scanner.Text()
+		freq := build_freqs(strings.ToLower(word))
+		for i, argfreq := range freqs {
+			if is_anagram(freq, argfreq) {
 				anagrams[i] = append(anagrams[i], word)
 			}
 		}
