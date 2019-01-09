@@ -1,4 +1,4 @@
-let get_canon word =
+let sort_string word =
 
   let rec string_to_list s = match s with
     | "" -> []
@@ -7,10 +7,10 @@ let get_canon word =
 
   string_to_list word |> List.sort (Char.compare)
 
-let get_anagrams_table lines =
+let group_anagrams lines =
 
   let put_away hashtable word =
-    let canon = get_canon word in
+    let canon = sort_string word in
     match Hashtbl.find hashtable canon with
     | anagrams -> Hashtbl.replace hashtable canon (word :: anagrams)
     | exception Not_found -> Hashtbl.add hashtable canon [word] in
@@ -19,21 +19,21 @@ let get_anagrams_table lines =
   List.iter (put_away table) lines ;
   table
                                        
-let log_anagrams log table word =
-  let canon = get_canon word in
-  log (word ^ ":") ;
+let print_anagrams table word =
+  let canon = sort_string word in
+  print_endline (word ^ ":") ;
   match Hashtbl.find table canon with
-  | anagrams -> List.rev anagrams |> List.iter log
+  | anagrams -> List.rev anagrams |> List.iter print_endline
   | exception Not_found -> ()
                       
-let read_file p =
+let read_file path =
 
-  let ic = open_in p in
+  let file = open_in path in
           
   let rec build_list l =
-    match input_line ic with
+    match input_line file with
     | line -> build_list (line :: l)
-    | exception End_of_file -> close_in ic ; List.rev l in
+    | exception End_of_file -> close_in file ; List.rev l in
   
   build_list []
 
@@ -42,10 +42,10 @@ let usage = "usage: " ^ (Sys.argv.(0)) ^ " file w1 ... wn"
 let main() = match read_file (Sys.argv.(1)) with
   | lines ->
      let table = List.sort String.compare lines
-                 |> get_anagrams_table in
+                 |> group_anagrams in
      Array.sub Sys.argv 2 (Array.length Sys.argv - 2)
      |> Array.to_list
-     |> List.iter (log_anagrams print_endline table)
+     |> List.iter (print_anagrams table)
   | exception Invalid_argument(_) -> prerr_endline usage
   | exception Sys_error(m) -> prerr_endline m ;;
 
