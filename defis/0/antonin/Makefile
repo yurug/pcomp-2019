@@ -1,5 +1,5 @@
-anagram:
-	ln -s anagram.lua anagram
+anagram: anagram.go
+	go build -o anagram
 
 clean:
 	rm -rf anagram
