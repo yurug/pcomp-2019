@@ -1,6 +1,6 @@
 class String
   def anagrams
-    chars.permutation.uniq.map(&:join) - [s]
+    chars.permutation.uniq.map(&:join) - [self]
   end
 end
 
