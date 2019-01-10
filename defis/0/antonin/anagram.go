@@ -58,11 +58,16 @@ func main() {
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
+		var freq map[rune]int
 		word := scanner.Text()
-		freq := build_freqs(strings.ToLower(word))
 		for i, argfreq := range freqs {
-			if is_anagram(freq, argfreq) {
-				anagrams[i] = append(anagrams[i], word)
+			if len(os.Args[i+2]) == len(word) {
+				if freq == nil {
+					freq = build_freqs(strings.ToLower(word))
+				}
+				if is_anagram(freq, argfreq) {
+					anagrams[i] = append(anagrams[i], word)
+				}
 			}
 		}
 	}
