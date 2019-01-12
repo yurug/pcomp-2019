@@ -1,169 +1,21 @@
 #!/usr/bin/env ruby
 
-# def anagram(str)
-# str.chars.permutation.uniq.map(&:join).reject { |s| s == str }
-# end
+#require 'benchmark'
+#require_relative 'anagram_frequencies_hash'
+#require_relative 'anagram_trie'
+#require_relative 'anagram_brutal'
+#require_relative 'anagram_frequencies'
+require_relative 'anagram_prime_number'    
 
-class String
-  def anagrams
-    chars.permutation.uniq.map(&:join).reject { |s| s == self }
-  end
-  
-  def frequencies
-    each_char.with_object(Hash.new(0)) { |letter, freq| freq[letter] += 1}
-  end
+def help
+  puts "Usage ./anagram dico word_1 word_2 ..."
 end
 
-dico_name = ARGV.shift
-words = ARGV
-
-# Not necesary for method 5
-# dico = File.readlines(ARGV.shift).map(&:chomp) 
-
-# Méthode 5
-#
-# O(NK + MK) BOOM
-# Hash, keys: letter frequencies, values: array of words with this letter frequencies.
-# Just have to puts the corresponding array. 
-
-frequencies_hash = Hash.new()
-
-words.each { |w| frequencies_hash[w.frequencies] = [] }
-
-begin
-  IO.foreach(dico_name) do |w|
-    w = w.chomp
-    f = w.frequencies
-    if frequencies_hash.has_key?(f)
-      frequencies_hash[f] << w
-    end
-  end
+def main(filename, words)
+  dictionary = File.readlines(filename).map(&:chomp)
+  AnagramsPrimeNumber.anagrams(dictionary, words)
 rescue Errno::ENOENT => e
-  puts "Impossible to open the file : #{e.message}"
-  exit
+  puts "Failed to load dictionary: #{e.message}"
 end
 
-words.each do |w|
-  puts "#{w}:"
-  puts frequencies_hash[w.frequencies].reject { |w1| w1 == w }.sort
-end
- 
-# ===== Méthode 4
-#
-# Transforming the list of words into a trie
-#
-# To comment and explain 
-#
-# improves by go through the trie once for all the words
-#
-#
-# improves by creating the trie while reading the file (esay to do)
-# 
-# WARNING : does not get a trie where the keys are sorted, easy to fix.
-
-
-
-# def make_trie(words)
-  # trie = Hash.new()
-  # words.each do |w|
-    # d = trie
-    # w.each_char do |c|
-      # d[c] = d[c].nil? ? {} : d[c]
-      # d = d[c]
-    # end
-    # d["\0"] = {}
-  # end
-  # trie
-# end
-
-# def in_trie(trie, word)
-  # d = trie
-  # word.each_char do |l|
-    # return false unless d.keys.include?(l)
-    # d = d[l]
-  # end
-  # return true
-# end
-
-# def anagram(trie, word)
-  # result = []
-  
-  # def aux(frequencies, path, root, length, result, word)
-    # if length == path.length && root.has_key?("\0")
-      # ret = path.join
-      # result << ret if ret != word
-    # else
-      # root.each do |letter, d|
-        # if frequencies[letter] > 0
-          # path << letter
-          # frequencies[letter] -= 1
-          # aux(frequencies, path, d, length, result, word)
-          # path.pop()
-          # frequencies[letter] += 1
-        # end
-      # end
-    # end
-  # end
-  # aux(word.frequencies, [], trie, word.length, result, word)
-  # result
-# end
-
-# trie = make_trie(dico)
-
-# words.each do |w|
-  # puts "#{w}:"
-  # puts anagram(trie, w)
-# end
-
-
-# ===== Méthode 3
-#
-# TODO 
-#
-# Hash all the words and collect the ones which has the same hash value.
-# - Find a way to have the same hash iff anagrams.
-# - idea : map each character to a prime number, the value of a string is the product
-# of its character. We have f(s1) = f(s2) iff s1 equivalent to s2 (anagram)
-#
-# Warning : too big number with long string. Maybe try to associate short prime
-# numbers to frequent characters.
-
-
-# ======
-
-# Méthode 2
-# |dic| = M, |words| = N, |w| < K for all w in words + dico
-# tri des listes => M ln M + N ln N
-# tri des mots (K ln K) (M + N)
-# recherche => M
-#
-# N (ln N + K ln K) + M (ln M + K ln K)
-# 
-# Suppose M >> N, K
-#
-# O(M ln M)
-
-# sorted_dico = dico.each_with_index.map { |w, i| [i, w.chars.sort.join] }.sort_by {|e| e[1]}
-# sorted_words = words.each_with_index.map { |w, i| [i, w.chars.sort.join] }.sort_by {|e| e[1]}
-
-# i = 0
-# sorted_words.each do |j, w|
-  # puts "#{words[j]}:"
-  # while sorted_dico[i][1] < w
-    # i += 1
-  # end
-  # while sorted_dico[i][1] == w
-    # puts dico[sorted_dico[i][0]] if  dico[sorted_dico[i][0]] != words[j]
-    # i += 1
-  # end
- # end
-
-# ======
-
-# Method 1 basic enumeration and intersection
-
-# words.each do |w|
-  # list = (w.anagrams & words_list).sort
-  # puts "#{w}:"
-  # puts list
-# end
+ARGV.size < 1 ? help : main(ARGV[0], ARGV.drop(1))
