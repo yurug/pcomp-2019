@@ -30,6 +30,6 @@ module AnagramsByTrie
   
   def self.anagrams(dictionary, words)
     trie = Trie.new(dictionary)
-    words.each { |w| puts "#{w}:", (trie[w] - [w]).sort }
+    words.each.with_object({}) { |w, h| h[w] = (trie[w] - [w]).sort }
   end
 end
