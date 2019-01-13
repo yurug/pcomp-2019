@@ -1,11 +1,10 @@
 #!/usr/bin/env ruby
 
-#require 'benchmark'
-#require_relative 'anagram_frequencies_hash'
-#require_relative 'anagram_trie'
-#require_relative 'anagram_brutal'
-#require_relative 'anagram_frequencies'
-require_relative 'anagram_prime_number'    
+require_relative 'anagrams_by_prime_number'
+#require_relative 'anagrams_by_frequencies'
+#require_relative 'anagrams_by_trie'
+#require_relative 'anagrams_by_frequencies_hash'
+#require_relative 'anagrams_brutal'    
 
 def help
   puts "Usage ./anagram dico word_1 word_2 ..."
@@ -13,7 +12,8 @@ end
 
 def main(filename, words)
   dictionary = File.readlines(filename).map(&:chomp)
-  AnagramsPrimeNumber.anagrams(dictionary, words)
+  result = AnagramsByPrimeNumber.anagrams(dictionary, words)
+  words.each { |w| puts "#{w}:", result[w] }
 rescue Errno::ENOENT => e
   puts "Failed to load dictionary: #{e.message}"
 end

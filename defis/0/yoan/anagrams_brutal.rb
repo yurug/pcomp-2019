@@ -6,6 +6,6 @@ end
 
 module AnagramsBrutal
   def self.anagrams(dictionary, words)
-    words.each { |w| puts "#{w}:", (w.anagrams & dictionary).sort }
+    words.each.with_object({}) { |w, h| h[w] = (w.anagrams & dictionary).sort }
   end
 end
