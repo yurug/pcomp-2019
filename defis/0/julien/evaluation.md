@@ -8,8 +8,9 @@
 * taille du mot référence = N 
 complexité <= O (N2 * M)
 * Optimisation 1 : ne teste que les mots de bonne longueur
-* Optimisation 2 : arrete la comparaison au premier caractère différent
-* Quadratique en N : A cause de count
+* Optimisation 2 : arrête la comparaison au premier caractère différent
+* Quadratique en N : à cause de count
+* Autre limite : le mot ne décroit pas à chaque itération
 # Performance :
 ./anagram ../american-english eat
 -> plus de 1 s
