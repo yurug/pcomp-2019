@@ -1,0 +1,11 @@
+- Correction : exhiber des cas d'utilisation reproductibles (tests)
+- L'évaluateur est d'abord attentif à ce qui est critique
+- Puis il cherche des critères d'amélioration
+- Complexité : existe-t-il une meilleure complexité ?
+- Performances : sont-elles raisonnables ? Comment les améliorer ?
+- Si on a plusieurs programmes implémentant la même spécification : benchmarks comparatifs
+- Robustesse : planter le moins possible et planter le plus grâcieusement possible
+- Portabilité : de l'environnement de développement
+- Lisibilité : identificateurs globaux longs et précis
+- Modularité : remplacement d'un comportement en modifiant le moins de fonctions possibles dans le programme
+- Généralité : le code doit pouvoir être appliqué à d'autres instances du même problème général
