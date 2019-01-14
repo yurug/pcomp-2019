@@ -1,0 +1,9 @@
+* Noms
+Antonin
+Kostia
+Pierre
+Carine
+* Contraintes
+1. Fonctionnel Pur, Ocam
+2. Réactive, Reactive ML
+3. Fonctionnel Pur, Reason ML
