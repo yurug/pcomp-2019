@@ -3,7 +3,7 @@
 Correction : le code respect la specification
 	->ca marche mais il prend les doublons en sortie
 
-Complexité : N*M*F
+Complexité : N*(M*log(M)+F*log(F))
 
 Performance : faire des test avec des fichiers de grand taille 
    -> mydict 52 oct
