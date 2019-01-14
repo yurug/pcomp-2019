@@ -5,7 +5,7 @@
 
 *Complexité*
 - Définition: Complexité de l'algorithme
-- Un unique parcours du fichier, ça me paraît correct.
+- Un unique parcours du fichier par mot, ça me paraît correct.
 
 *Performance*
 - Définition: Jugement du temps d'exécution
@@ -25,7 +25,7 @@
 - Seul isAnagram est à modifier en cas de problème et on peut changer de critère comme on le voudrait
 
 *Généralité*
-- Je ne comprends pas.
+- Va de paire avec Modularité, donc voir Modularité.
 
 *Extensibilité*
 - Va de paire avec Modularité, donc voir Modularité.
