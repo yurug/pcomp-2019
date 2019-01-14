@@ -18,10 +18,11 @@ Modularité: Séparation claire et peu/pas de dépendance entre les différents 
 Généralité: ??
 
 Portabilité: Fonctionne sur n'importe quelle machine
-	* 
+	* simple fichier .ml, très portable.
 
 Extensibilité: Facile d'ajouter des fonctionnalités au programme, sans modifier le code déjà présent
 	* difficile à évaluer compte tenu du défi mais il serait simple d'ajouter d'autres traitement des mots du fichier ou de changer de type de fichier
 
 Evolutivité:
 
+Evalué par Khawla
