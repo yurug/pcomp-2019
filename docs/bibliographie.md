@@ -5,6 +5,7 @@
 - _The Pragmatic Programmer: From Journeyman to Master_ – Andrew Hunt
 - _Concepts, Techniques and Models of Computer Programming_ – Peter Van Roy, Seif Haridi
 - _Beautiful Code_ –  Andy Oram, Greg Wilson
+- _Code Complete_ – Steve McConnell
 
 ## Articles
 

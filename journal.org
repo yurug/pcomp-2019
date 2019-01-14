@@ -52,4 +52,15 @@ Sous Emacs, utiliser [TAB] pour ouvrir ou fermer les différentes sections.
 **** TODO Se documenter sur 'Docker'
 **** TODO Lire https://en.wikipedia.org/wiki/Programming_paradigm
 **** TODO Lire https://en.wikipedia.org/wiki/Comparison_of_programming_languages
-
+** <2019-01-14>
+*** Retour sur le défi 0
+    - Retour sur la grille d'évaluation de la qualité du code
+    - Expérience d'évaluation de code : évaluez le code de quelqu'un d'autres
+    - Synthèse : qu'avez-vous appris?
+*** Début du défi 1
+    - Affectation des contraintes de programmation
+    - Début d'analyse de la spécification, objectif: chaque groupe propose une architecture.
+*** TODO Lire https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf
+*** TODO Lire http://oberon2005.oberoncore.ru/classics/dk1974b.pdf
+*** TODO Programmer une solution au défi 1
+*** TODO Faire un pull-request "soignée" pour présenter votre solution
