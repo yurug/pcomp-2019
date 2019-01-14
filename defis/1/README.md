@@ -1,6 +1,6 @@
 # Défi 1 : un moteur de tableur minimaliste
 
-On doit pouvoir lancer les commandes suivantes:
+On doit pouvoir lancer les commandes suivantes :
 
 ``` shell
 cd votre-nom-de-groupe
@@ -11,7 +11,7 @@ make
 
 ## Entrées :
 - un fichier `data.csv` (avec `;` pour séparateur) qui contient deux
-  types de données:
+  types de données :
   + des entiers compris entre 0 et 255 ;
   + des formules de la forme :
 
