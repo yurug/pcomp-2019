@@ -8,8 +8,9 @@
 
  Soit n le nombre de mots a tester
  Soit m le nombre de lignes du dictionnaire
+ Soit x la taille moyenne des mots a tester
 
- Complexite => O(m * n)
+ Complexite => O(m * n * x * log(x))
 
 # Performance
 
