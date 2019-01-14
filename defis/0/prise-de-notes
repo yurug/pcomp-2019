@@ -1,0 +1,7 @@
+ProgComp
+
+Un evaluateur recherche les problèmes critiques, puis les possibles amelioration.
+Est-ce qu’il existe une meilleure complexité ? Pas forcement optimale
+Les performances sont-elles raisonnables selon le cadre d’application du programme ?
+Un code lisible est un code dont le flow d’execution est clair et dont le coding style est bien défini
+Un programme est general si l’on peut facilement l’applique a un autre problème similaire.

@@ -1,0 +1,9 @@
+* Noms
+Antonin Décimo
+Kostia Chardonnet 
+Pierre Nigron
+Carine Morel
+* Contraintes
+1. Fonctionnel Pur, Ocam
+2. Réactive, Reactive ML
+3. Fonctionnel Pur, Reason ML
