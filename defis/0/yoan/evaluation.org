@@ -1,0 +1,62 @@
+Évaluation par Antonin.
+
+* Correction
+On passe un dictionnaire en paramètre, et une liste de mot. Il faut
+sortir, pour chaque mot, la liste des anagrammes de ce mot présents
+dans le dictionnaire, dans le format du sujet.
+
+Le programme est très correct.
+
+Quand on passe le mot `dog` en paramètre, il n’est pas donné en sortie
+alors que `dog` est dans le dictionnaire (la spec a changé). Ça se
+corrige très facilement.
+
+```
+$ time ./anagram ../american-english dog dare small shingle
+dog:
+god
+dare:
+dear
+read
+small:
+malls
+shingle:
+```
+
+Le programme ne gère pas les mots capitalisés (_English_ est un
+anagramme de _shingle_).
+
+* Complexité
+Je cherche si la complexité algorithmique est bonne.
+
+Excellente complexité. L’auteur a même implémenté plusieurs
+algorithmes pour comparer.
+
+* Performance
+Par rapport au temps d’exécution des autres projets.
+
+Convenable pour un langage comme Ruby.
+
+* Portabilité
+Le programme peut-il s’exécuter sans (trop) de modifications sur
+plusieurs systèmes ?
+
+Assurée par l’interpréteur Ruby.
+
+* Lisibilité
+Pour quelqu’un qui parle Ruby, sans doute. Pour moi, ça n’est pas
+clair.
+Il reste des espaces en fin de ligne ;-)
+
+* Modularité
+Très modulaire, puisque chaque algo est un module qui peut être
+remplacé. Préféré un autre mécanisme de sélection de
+l’algorithme. Noms des modules pas cohérent.
+
+* Généralité$
+Autant que se peut.
+
+* Extensibilité
+Par l’aspect modulaire du code, oui, car on peut facilement rajouter
+une implémentation, mais s’il faut changer qqch ça veut dire qu’il
+faut modifier tous les modules.
