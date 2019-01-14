@@ -17,7 +17,7 @@ make
 
         =#(r1, c1, r2, c2, v)
 
-    qui s'évaluent en le nombre d’occurrences de la valeur *v* parmi
+    qui s’évaluent en le nombre d’occurrences de la valeur *v* parmi
     les cellules de coordonnées
 
         { (r, c) | r1 ≤ r ≤ r2 ∧ c1 ≤ c ≤ c2 }
@@ -33,7 +33,7 @@ make
   *(a)* ou *(b)* précédent.
 
 ## Sorties :
-- un fichier `view0.csv` qui contient l'évaluation initiale de la
+- un fichier `view0.csv` qui contient l’évaluation initiale de la
   feuille de calcul. Il contient donc uniquement des entiers tels
   que :
   + les cellules qui contenaient des entiers contiennent les mêmes
@@ -42,7 +42,7 @@ make
     l’évaluation de ces formules. Les cellules de formules mal formées
     devront contenir `P`.
 
-  `view0.csv` correspond à l'évaluation de `data.csv` avant les
+  `view0.csv` correspond à l’évaluation de `data.csv` avant les
   actions de `user.txt`.
 
 - un fichier `changes.txt` de la forme :
@@ -54,9 +54,9 @@ make
       rN cN vN
 
   Pour chaque ligne `r c d` du fichier `user.txt` initial et tel que
-  `rI cI vI` indique qu'après l’exécution de la commande `r c d` la
-  valeur de la cellule à la *rI*-ième ligne et la *cI*-ième colonne vaut
-  l’entier *vI*.
+  `rI cI vI` indique qu’après l’exécution de la commande `r c d` la
+  valeur de la cellule à la *rI*-ième ligne et la *cI*-ième colonne
+  vaut l’entier *vI*.
 
   En d’autres termes, `changes.txt` indique comment mettre à jour les
   données de `view0.csv` après les commandes décrites dans `user.txt`.
