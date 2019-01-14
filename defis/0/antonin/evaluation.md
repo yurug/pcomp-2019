@@ -1,4 +1,5 @@
-Anthonin
+Evaluation of Antonin
+By Samy Metadjer and Paul Parisot
 
 Correction
 	anagram(String s) should not return s into the results
