@@ -6,7 +6,8 @@
 # Complexité pour mot: 
 * nombre de mot du dict = M 
 * taille du mot référence = N 
-complexité <= O (N2 * M)
+* taille du plus long mot du dict = T
+complexité <= O (N2 * M + T * M ) (si méthode length linéaire)
 * Optimisation 1 : ne teste que les mots de bonne longueur
 * Optimisation 2 : arrête la comparaison au premier caractère différent
 * Quadratique en N : à cause de count
