@@ -16,23 +16,29 @@ def readFile(fileName):
     lines = text.split('\n')
     return lines
 
-# Retrouve les anagrammes de word dans le fichier nomme fileName et les affiche
+# Retrouve les anagrammes de word dans lines et les affiche
 def applyFunction(lines, word, function):
     for line in lines:
         if(function(line, word)):
             print(line)
     print(";")
 
+def run(fileName, wordList, function):
+    lines = readFile("anagrams")
+    print("```")
+    for word in wordList:
+        applyFunction(lines, word, isAnagram)
+    print("```")
+
+
 # Retrouve les anagrammes de word dans le fichier nomme fileName et les exporte dans le fichier output
 def export(lines, word, function, output):
-    o   p = open(output, "w")
+    op = open(output, "w")
     for line in lines:
         if(function(line, word)):
             op.write(line + "\n")
     op.write(";")
 
-lines = readFile("anagrams")
-applyFunction(lines, "foo", isAnagram)
-applyFunction(lines, "bar", isAnagram)
-applyFunction(lines, "baz", isAnagram)
-export(lines, "foo", isAnagram, "output")
+
+
+run("anagrams", ["foo", "bar", "baz"], isAnagram)
