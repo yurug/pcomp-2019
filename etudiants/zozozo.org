@@ -1,8 +1,8 @@
 * Noms
-Antonin
-Kostia
-Pierre
-Carine
+Antonin Décimo
+Kostia Chardonnet 
+Pierre Nigron
+Carine Morel
 * Contraintes
 1. Fonctionnel Pur, Ocam
 2. Réactive, Reactive ML
