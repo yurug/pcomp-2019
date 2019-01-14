@@ -35,7 +35,7 @@ Sous Emacs, utiliser [TAB] pour ouvrir ou fermer les différentes sections.
 - avec le framework Spark / Spark Streaming / Apache Storm :
 - en orienté objet ;
 - en utilisant un GPU ;
-- en programmation réactive en ReactiveML ;
+- en programmation réactive ;
 - en théorie des types.
 ***** Langages
 - Rust, Julia, ReactiveML, Scala, C, Java, Idris, Haskell, OCaml.

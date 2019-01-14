@@ -3,7 +3,7 @@
  - si le dictionnaire contient exactement le mot a tester,
    cette anagramme n'est pas considere comme tel
  - anagrames pas triees
- 
+
 # Complexite
 
  Soit n le nombre de mots a tester
