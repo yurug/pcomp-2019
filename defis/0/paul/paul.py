@@ -10,7 +10,7 @@ def isAnagram(s1, s2):
     return False
 
 # Retrouve les anagrammes de word dans le fichier nomme fileName et les affiche
-def findAnagrams(fileName, word, function):
+def applyFunction(fileName, word, function):
     file = open(fileName, "r")
     text = file.read()
     lines = text.split('\n')
@@ -20,6 +20,6 @@ def findAnagrams(fileName, word, function):
     print(";")
 
 
-findAnagrams("anagrams", "foo", isAnagram)
-findAnagrams("anagrams", "bar", isAnagram)
-findAnagrams("anagrams", "baz", isAnagram)
+applyFunction("anagrams", "foo", isAnagram)
+applyFunction("anagrams", "bar", isAnagram)
+applyFunction("anagrams", "baz", isAnagram)
