@@ -9,29 +9,30 @@ def isAnagram(s1, s2):
         return True
     return False
 
-# Retrouve les anagrammes de word dans le fichier nomme fileName et les affiche
-def applyFunction(fileName, word, function):
+# Recupere sous le format attendu le contenu de fileName
+def readFile(fileName):
     file = open(fileName, "r")
     text = file.read()
     lines = text.split('\n')
+    return lines
+
+# Retrouve les anagrammes de word dans le fichier nomme fileName et les affiche
+def applyFunction(lines, word, function):
     for line in lines:
         if(function(line, word)):
             print(line)
     print(";")
 
 # Retrouve les anagrammes de word dans le fichier nomme fileName et les exporte dans le fichier output
-def export(fileName, word, function, output):
-    file = open(fileName, "r")
-    op = open(output, "w")
-    text = file.read()
-    lines = text.split('\n')
+def export(lines, word, function, output):
+    o   p = open(output, "w")
     for line in lines:
         if(function(line, word)):
             op.write(line + "\n")
     op.write(";")
 
-
-applyFunction("anagrams", "foo", isAnagram)
-applyFunction("anagrams", "bar", isAnagram)
-applyFunction("anagrams", "baz", isAnagram)
-export("anagrams", "foo", isAnagram, "output")
+lines = readFile("anagrams")
+applyFunction(lines, "foo", isAnagram)
+applyFunction(lines, "bar", isAnagram)
+applyFunction(lines, "baz", isAnagram)
+export(lines, "foo", isAnagram, "output")
