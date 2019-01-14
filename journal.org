@@ -55,7 +55,7 @@ Sous Emacs, utiliser [TAB] pour ouvrir ou fermer les différentes sections.
 ** <2019-01-14>
 *** Retour sur le défi 0
     - Retour sur la grille d'évaluation de la qualité du code
-    - Expérience d'évaluation de code : évaluez le code de quelqu'un d'autres
+    - Expérience d'évaluation de code : évaluez le code de quelqu'un d'autre.
     - Synthèse : qu'avez-vous appris?
 *** Début du défi 1
     - Affectation des contraintes de programmation
