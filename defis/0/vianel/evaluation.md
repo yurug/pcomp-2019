@@ -24,11 +24,14 @@ manoir
 
 # Complexité
 ## Définition
-La complexité algorithmique du programme est proche de la meilleur complexité algorithmique
+La complexité algorithmique du programme est proche de la meilleure complexité algorithmique
 de l'algorithme résolvant le problème.
 
 ## Évaluation
-La complexité du programme est en *O(n² . log(n))* (en supposant que le tri à une complexité en *O(n . log(n)))*.
+On prend _n_ le nombre de mot dans le dictionnaire.
+On prend _l_ la taille maximum des mots du dictionnaire.
+
+La complexité du programme est en _O(n * l * log(l))_ (en supposant que le tri à une complexité en *O(n . log(n)))*.
 
 
 # Performance
@@ -44,14 +47,14 @@ Le programme peut se remettre d'une erreur ou s'arrêter avec un message d'erreu
 en libérant les ressources allouées.
 
 ## Évaluation
-Le programme affiche un message d'erreur explicite lorsque le fichier n'a pas pût être ouvert.
+Le programme affiche un message d'erreur explicite lorsque le fichier n'a pas pu être ouvert.
 
 # Portabilité
 ## Définition
 Le programme peut être compilé et exécuté sur différents environnements sans être modifié.
 
 ## Évaluation
-Ce programme peut être compiler sans modification dans tout environnement possédant un compilateur C++.
+Ce programme peut être compilé sans modification dans tout environnement possédant un compilateur C++.
 
 # Lisibilité
 ## Définition
