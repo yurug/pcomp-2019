@@ -1,4 +1,6 @@
 
+# s2 est un anagram de s1 s'il a le même nombre de lettres et le même nombre d'occurrence
+# de chaque lettre
 def isAnagram(s1, s2):
     if(len(s1) == len(s2)):
         for letter in s1:
