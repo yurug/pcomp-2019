@@ -19,7 +19,19 @@ def applyFunction(fileName, word, function):
             print(line)
     print(";")
 
+# Retrouve les anagrammes de word dans le fichier nomme fileName et les exporte dans le fichier output
+def export(fileName, word, function, output):
+    file = open(fileName, "r")
+    op = open(output, "w")
+    text = file.read()
+    lines = text.split('\n')
+    for line in lines:
+        if(function(line, word)):
+            op.write(line + "\n")
+    op.write(";")
+
 
 applyFunction("anagrams", "foo", isAnagram)
 applyFunction("anagrams", "bar", isAnagram)
 applyFunction("anagrams", "baz", isAnagram)
+export("anagrams", "foo", isAnagram, "output")
