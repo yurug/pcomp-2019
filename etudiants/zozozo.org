@@ -4,6 +4,6 @@ Kostia Chardonnet
 Pierre Nigron
 Carine Morel
 * Contraintes
-1. Fonctionnel Pur, Ocam
+1. Fonctionnel Pur, Ocaml
 2. Réactive, Reactive ML
 3. Fonctionnel Pur, Reason ML
