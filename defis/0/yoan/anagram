@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-# There is some modules with compute the anagrams set of the words 
-# present in the dictionary. In this code, I use the module 
+# There is some modules which compute the anagrams set of the words 
+# w.r.t. the dictionary. In this code, I use the module 
 # AnagramsByPrimeNumber. It is based on prime factorization
-# see the code of the module for further explanations).
+# (see the code of the module for further explanations).
 
 require_relative 'anagrams_by_prime_number'
 #require_relative 'anagrams_by_frequencies'
