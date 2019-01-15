@@ -1,0 +1,57 @@
+
+* Cours 2
+** Evaluation
+Role de l'évaluateur : 
+- pas de pb critiques dans le pb
+- crières d'amélioration 
+
+*** Correction = distance à la spécification
+reproductivité = il faut donner tous les tests pour pouvoir reproduire
+les remarques faites
+
+Plusieurs moyens de  se convaincre de la correction d'un programme :
+-  il faut que l'algo soit capable de nous convaincre par lui même
+   qu'il respecte la spécification (i.e. raccourcir la distance entre
+   le code et la spécification)
+-> faire plein de tests
+
+Avoir un code proche de la spécification rend aussi plus facile de
+faire évoluer le code avec la spécification
+*** Complexité 
+- Est-ce qu'il existe une meilleure complexité ?
+*** Performance = 
+-> par rapport à des jeux de données réalistes 
+-> il faut avoir une contrainte ou des programmes comparatifs
+-> à tester dans le champs d'application (ex: un dictionnaire ne 
+-> faire des warnings éventuellement (genre relire le fichier)
+-> Est-on dans des performances raisonnables ?
+-> Benchmark
+*** Robustesse = planter gracieusement et le moins possible
+En java : prise en charge des erreurs par le langage -> au pire (si
+pas attrapé), on a une erreur (sans message d'erreur)
+
+C'est donc déjà mieux que C (seg fault)
+
+- prendre en charge toutes les erreurs qui peuvent l'être
+
+*** Portabilité = 
+- Codage des fichiers du dictionnaire
+*** Lisibilité = 
+- lisible par un autre développeur de l'équipe
+- coding style (homogénéité dans le code)
+- bon identificateur : 
++ qui décrit précisément ce qu'il définit
++ identificateurs globaux = doivent être précis
++ identificateurs locaux = peuvent être court sur convention (n pour un entier)
+
+- le flow du calcul doit être clair 
+
+*** Modularité = 
+- chaque composant logiciel à une responsabilité précise (définissable
+avec un unique verbe)
+- possibilité de remplacer un composant par un autre sans tout changer
+*** Generalité = Réutisabilité du logiciel
+- exemple sur l'anagramme = peut-on changer facilement la relation
+  d'équivalence ?
+*** Extensibilité = pas pertinent ici
+*** Evolutivité = pas pertinent ici
