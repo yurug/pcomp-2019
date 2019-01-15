@@ -3,7 +3,7 @@ Hamza Achahour
 Zhenlei Hu
 
 Voeux:
-* Scala & POO
-* Ocaml et fonctionnel pur
+* Scala & Framework
+* Java & POO
 * C et GPU
 
