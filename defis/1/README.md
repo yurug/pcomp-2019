@@ -12,8 +12,8 @@ make
 ## Entrées :
 - un fichier `data.csv` (avec `;` pour séparateur) qui contient deux
   types de données :
-  + des entiers compris entre 0 et 255 ;
-  + des formules de la forme :
+  + *(a)* des entiers compris entre 0 et 255 ;
+  + *(b)* des formules de la forme :
 
         =#(r1, c1, r2, c2, v)
 
