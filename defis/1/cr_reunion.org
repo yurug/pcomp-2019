@@ -1,0 +1,23 @@
+* 17/01
+** Généralité 
+*** Ocaml version : 4.06
+*** Compiler : dune (ocaml) / rmlbuild (rml) 
+*** Communication : discord 
+*** TODO DOCKER
+** TODOlist  
+*** Antonin
+**** TODO : squelette Makefile
+**** TODO : tuto Reactive Ml
+**** TODO : réfléchir aux optimisations d'accès mémoire 
+**** TODO : Module avec tableau abstrait en structure de données
+*** Carine
+**** TODO : tuto Reactive Ml
+**** TODO : coding style + doc
+**** TODO : Ecriture fichier + main
+*** Kostia
+**** TODO : tuto Reactive Ml
+**** TODO : fonction update + eval
+*** Pierre
+**** TODO : tuto Reactive Ml
+**** TODO : Petit parseur pour les expressions (CSV)
+**** TODO : Lecture fichier 
