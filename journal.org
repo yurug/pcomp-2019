@@ -38,7 +38,8 @@ Sous Emacs, utiliser [TAB] pour ouvrir ou fermer les différentes sections.
 - en programmation réactive ;
 - en théorie des types.
 ***** Langages
-- Rust, Julia, ReactiveML, Scala, C, Java, Idris, Haskell, OCaml.
+- Rust, Julia, ReactiveML, Scala, C, Java, Idris, Haskell, OCaml,
+  ReasonML, Purescript, Typescript, Go, Elixir, Python.
 *** Choses à faire
 **** DONE S'inscrire sur le GIT
      - State "DONE"       from "TODO"       [2019-01-07 Mon 12:17]

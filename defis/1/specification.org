@@ -3,7 +3,6 @@
 On doit pouvoir lancer les commandes suivantes:
 ``
 cd votre-nom-de-groupe
-make mrproper
 make
 ./ws data.csv user.txt view0.csv changes.txt
 ``
