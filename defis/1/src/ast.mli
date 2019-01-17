@@ -9,3 +9,6 @@ and formula =
 and value =
   | Undefined
   | Int of int
+
+type action =
+  | Set of pos * cell

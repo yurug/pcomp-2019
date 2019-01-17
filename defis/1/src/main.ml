@@ -1,28 +1,29 @@
-module type Spreadsheet = sig
-  type tab
-  type action
+open Data
+    
+module Sp = Spreadsheet.Make (Data_arr) 
 
-  (* data.csv to tab *)
-  val parse_data : string -> tab
+let to_things data_filename _ _ _ : unit =
+  let _ = Sp.parse_data data_filename in
+   ()
 
-  (* print files view0.csv, changes.txt, tab *)
-  val output : string -> string -> tab -> unit
+ 
+let parse_args args =
+    args.(1), args.(2), args.(3), args.(4) 
+          
+let main () =
+  let error_message = "Bad Input, should be \"data.csv user.txt view0.csv changes.txt\"" in
+  
+  match Sys.argv with
+  | args when Array.length args = 5 ->
+    let data_filename, user_filename, view0_filename, changes_filename =
+      parse_args Sys.argv in
 
-  (* incremential action applied to the tab *)
-  val update : action -> tab -> tab
-end
+    to_things data_filename user_filename view0_filename changes_filename
+  
+  | exception Invalid_argument _ -> prerr_endline error_message
+                                      
+  | _ -> prerr_endline error_message
+;;
 
-module Spreadsheet = struct
-  type action =
-    | Set of Ast.pos * Ast.cell
 
-  type tab = unit
-  let parse_data data_filename =
-    failwith "Student! This is your job!"
-
-  let output view0 changes tab =
-    failwith "Student! This is your job!"
-
-  let update action tab =
-    failwith "Student! This is your job!"
-end
+main ()
