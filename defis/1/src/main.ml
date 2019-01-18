@@ -1,7 +1,7 @@
 open Data
 
 (* Chosen Data Representation *)
-module D = Data_arr
+module D = DataArray
 
 (* Corresponding Spreadsheet *)
 module Sp = Spreadsheet.Make (D)
