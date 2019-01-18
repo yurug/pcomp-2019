@@ -1,6 +1,5 @@
 (executable
-  (name main)
-  (modules_without_implementation ast))
+  (name main))
 
 ; Disable warning as errors
 (env
