@@ -1,6 +1,4 @@
-
-
-module Make : functor (D:Data.DATA) -> sig 
+module Make (D : Data.DATA) : sig
   type data
 
   (* data.csv to tab *)
