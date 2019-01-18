@@ -1,11 +1,13 @@
 open Data
-    
-module Sp = Spreadsheet.Make (Data_arr) 
+
+(* Chosen Data Representation *)
+module D = Data_arr
+(* Corresponding Spreadsheet *)
+module Sp = Spreadsheet.Make (D) 
 
 let to_things data_filename _ _ _ : unit =
   let _ = Sp.parse_data data_filename in
    ()
-
  
 let parse_args args =
     args.(1), args.(2), args.(3), args.(4) 
@@ -17,7 +19,6 @@ let main () =
   | args when Array.length args = 5 ->
     let data_filename, user_filename, view0_filename, changes_filename =
       parse_args Sys.argv in
-
     to_things data_filename user_filename view0_filename changes_filename
   
   | exception Invalid_argument _ -> prerr_endline error_message
