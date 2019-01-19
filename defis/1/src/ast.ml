@@ -15,3 +15,6 @@ and value =
   | Int of int
 
 type action = Set of pos * cell
+
+(* FIXME: ugly hack, needs workaround *)
+type spreadsheet = cell list list
