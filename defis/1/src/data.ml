@@ -4,6 +4,7 @@ module type DATA = sig
   type t
 
   val create : int -> int -> t
+  val resize : int -> int -> t -> t
   val get : pos -> t -> cell
   val set : pos -> cell -> t -> t
   val set_rect : pos * pos -> cell -> t -> t
@@ -24,9 +25,27 @@ module DataArray : DATA = struct
     ; rows
     ; cols }
 
+  let resize rows cols t =
+    let obj = create rows cols in
+    for r = 0 to min rows t.rows - 1 do
+      for c = 0 to min cols t.cols - 1 do
+        obj.data.(r).(c) <- t.data.(r).(c)
+      done
+    done;
+    obj
+
   let get pos t = t.data.(pos.r).(pos.c)
 
   let set pos v t =
+    let t =
+      let more_rows, more_cols = pos.r > t.rows - 1, pos.c > t.cols - 1 in
+      if more_rows || more_cols then
+        let more b t p = if b then (if p > 2 * t then p else 2 * t) else t in
+        let rows = more more_rows t.rows pos.r in
+        let cols = more more_cols t.cols pos.c in
+        resize rows cols t
+      else t
+    in
     t.data.(pos.r).(pos.c) <- v;
     t
 
