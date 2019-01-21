@@ -5,6 +5,7 @@
 * Carine Morel
 * Pierre Nigron
 * Antonin Decimo
+  - Présenter l'architecture
 * zhenlei HU
 * Julien ROLLAND
   - Présentation de son évaluation du défi 0
