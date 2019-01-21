@@ -7,9 +7,4 @@ METADJER Samy
 Nom du groupe : Gang of four (GoF)
 
 Langages souhaités:
-- Go   
-	GPU + Spark
-- typeScript
-	Spark
-- Java
-	orienté objet
+- Go + GPU
