@@ -1,0 +1,5 @@
+package donnees
+
+trait Requete {
+  
+}
