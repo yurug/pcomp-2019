@@ -4,14 +4,13 @@
 * Mohammed Ansari
 * Carine Morel
 * Pierre Nigron
-* Antonin Decimo [1/1]
-** DONE Présenter l'architecture
-* zhenlei HU [1/1]
-** DONE Présenter l'architecture
-* Julien ROLLAND [1/1]
-** DONE Présentation de son évaluation du défi 0
-* Vincent BONNEVALLE [1/1]
-** DONE Présenter son code sur le défi 0
+* Antonin Decimo
+  - Présenter l'architecture
+* zhenlei HU
+* Julien ROLLAND
+  - Présentation de son évaluation du défi 0
+* Vincent BONNEVALLE
+  - Présenter son code sur le défi 0
 * hamza achahour
 * Hugo Pompougnac [1/1]
 ** DONE Présenter l'architecture
