@@ -1,5 +1,5 @@
 # Architecture
-## Structure des données 
+## Structures des données 
 - structure de données du tableur (abstraite)
 - graphe des dépendances : pour savoir quelle évaluation de formule change sur maj d'une case
 - file avec les mises à jour effectué 
