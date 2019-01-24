@@ -1,18 +1,20 @@
+type Num = u8 ;
+
 struct Coordinates {
     x: u32,
     y: u32
 }
 
 struct Cell {
-    content: Val,
+    content: Data,
     location: Coordinates
 }
 
-enum Val {
-    Raw(u8),
+pub enum Data {
+    Val(Num),
     Fun(Function) 
 }
 
 enum Function {
-    Count(Coordinates, Coordinates, u8)
+    Count(Coordinates, Coordinates, Num)
 }
