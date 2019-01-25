@@ -1,20 +1,24 @@
 type Num = u8 ;
 
-struct Coordinates {
-    x: u32,
-    y: u32
+#[derive(Debug)]
+pub struct Point {
+    pub x: u32,
+    pub y: u32
 }
 
-struct Cell {
-    content: Data,
-    location: Coordinates
+#[derive(Debug)]
+pub struct Cell {
+    pub content: Data,
+    pub loc: Point
 }
 
+#[derive(Debug)]
 pub enum Data {
     Val(Num),
     Fun(Function) 
 }
 
-enum Function {
-    Count(Coordinates, Coordinates, Num)
+#[derive(Debug)]
+pub enum Function {
+    Count(Point, Point, Num)
 }
