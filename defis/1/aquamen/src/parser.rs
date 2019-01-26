@@ -8,6 +8,8 @@ use data::Function::Count;
 use data::Num;
 use data::{Cell, Data, Point};
 
+use combine::eof;
+
 const CSEP: char = ';';
 const LCOUNT: &'static str = "=#(";
 const RCOUNT: char = ')';
@@ -32,9 +34,7 @@ parser! {
 }
 
 parser! {
-    fn count[I]()(I) -> Data where [I: Stream<Item = char>]
-    {
-
+    fn count[I]()(I) -> Data where [I: Stream<Item = char>] {
         let p = (coord().skip(token(SEP_COUNT)),
                  coord().skip(token(SEP_COUNT)),
                  coord().skip(token(SEP_COUNT)),
@@ -50,7 +50,6 @@ parser! {
 
 parser! {
     fn wrong[I]()(I) -> Data where [I: Stream<Item = char>] {
-        // ajouter la gestion de la fin de ligne
         skip_until(token(CSEP)).with(value(Wrong))
     }
 }
@@ -74,10 +73,10 @@ parser! {
     }
 }
 
-pub fn parse_cvs(line: u64, s: &str) -> Vec<Cell> {
+pub fn parse_line(line: u64, s: &str) -> Vec<Cell> {
     let res = data_line().easy_parse(s);
-    let v = match res {
-        Ok((v, _)) => v,
+    let (v,s) = match res {
+        Ok((v, s)) => (v,s),
         _ => panic!("What a dirty parser !"),
     };
     let mut cell_vec = Vec::new();
@@ -89,6 +88,11 @@ pub fn parse_cvs(line: u64, s: &str) -> Vec<Cell> {
                 y: line,
             },
         });
+    }
+    // Il reste du texte : on finit avec Wrong
+    if s.len() > 0 {
+        cell_vec.push(Cell{content:Wrong,
+                           loc:Point{x:v.len() as u64,y:line}});
     }
     cell_vec
 }
@@ -109,7 +113,7 @@ mod tests {
     #[test]
     fn test_simple_val() {
         assert_eq!(
-            parse_cvs(0,T1.0),
+            parse_line(0,T1.0),
             vec![Cell{content:T1.1,loc:Point{x:0,y:0}}]
         );
     }
@@ -117,27 +121,23 @@ mod tests {
     #[test]
     fn test_simple_form() {
         assert_eq!(
-            parse_cvs(0,T2.0),
+            parse_line(0,T2.0),
             vec![Cell{content:T2.1,loc:Point{x:0,y:0}}]
         );
     }
 
     #[test]
-    fn test_simple_list() {
+    fn test_simple_wrong() {
         assert_eq!(
-            parse_cvs(0,&format!("{}{}{}{}{}",T1.0,CSEP,T2.0,CSEP,T1.0)),
-            vec![
-                Cell{content:T1.1,loc:Point{x:0,y:0}},
-                Cell{content:T2.1,loc:Point{x:1,y:0}},
-                Cell{content:T1.1,loc:Point{x:2,y:0}}
-            ]
+            parse_line(0,T3.0),
+            vec![Cell{content:T3.1,loc:Point{x:0,y:0}}]
         );
     }
 
     #[test]
-    fn test_list_with_wrong() {
+    fn test_list() {
         assert_eq!(
-            parse_cvs(0,&format!("{}{}{}{}{}{}",
+            parse_line(0,&format!("{}{}{}{}{}{}",
                                  T1.0,CSEP,T2.0,T3.0,CSEP,T1.0)),
             vec![
                 Cell{content:T1.1,loc:Point{x:0,y:0}},
@@ -151,7 +151,7 @@ mod tests {
     #[test]
     fn test_list_ending_wrong() {
         assert_eq!(
-            parse_cvs(0,&format!("{}{}{}",T1.0,CSEP,T3.0)),
+            parse_line(0,&format!("{}{}{}",T1.0,CSEP,T3.0)),
             vec![
                 Cell{content:T1.1,loc:Point{x:0,y:0}},
                 Cell{content:T3.1,loc:Point{x:1,y:0}}
