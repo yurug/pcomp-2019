@@ -7,6 +7,7 @@ use data::Data::{Fun, Val, Wrong};
 use data::Function::Count;
 use data::Num;
 use data::{Cell, Data, Point};
+use combine::parser::item::Token ;
 
 const CSEP: char = ';';
 const LCOUNT: &'static str = "=#(";
@@ -91,4 +92,18 @@ pub fn parse_cvs(line: u64, s: &str) -> Vec<Cell> {
         });
     }
     cell_vec
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+    
+    #[test]
+    fn test_simple_val() {
+        assert_eq!(
+            parse_cvs(0,"12"),
+            vec![Cell{content:Val(12),loc:Point{x:0,y:0}}]
+        );
+    }
 }
