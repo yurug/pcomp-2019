@@ -1,8 +1,9 @@
 module Make (D : Data.DATA) : sig
   type data
 
-  (* data.csv to tab *)
-  val parse_data : string -> data
+  (** [parse_data data.csv] parses the original data and returns the
+     spreadsheet. *)
+  val parse_data : string -> data * Graph.t
 
   (** [output tab view0.csv] write the contents of [tab]
       in the file [view0.csv], the file is created if it does not exist *)
