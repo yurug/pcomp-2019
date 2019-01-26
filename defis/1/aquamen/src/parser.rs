@@ -7,7 +7,6 @@ use data::Data::{Fun, Val, Wrong};
 use data::Function::Count;
 use data::Num;
 use data::{Cell, Data, Point};
-use combine::parser::item::Token ;
 
 const CSEP: char = ';';
 const LCOUNT: &'static str = "=#(";
@@ -98,12 +97,65 @@ pub fn parse_cvs(line: u64, s: &str) -> Vec<Cell> {
 mod tests {
 
     use super::*;
+
+    const T1 : (&str,Data) = ("12",Val(12));
+    const T2 : (&str,Data) = ("=#(1250,6000,7851,92573,125)",
+                              Fun(Count
+                                 (Point{x:1250,y:6000},
+                                  Point{x:7851,y:92573},
+                                  125)));
+    const T3 : (&str,Data) = ("aaa",Wrong);
     
     #[test]
     fn test_simple_val() {
         assert_eq!(
-            parse_cvs(0,"12"),
-            vec![Cell{content:Val(12),loc:Point{x:0,y:0}}]
+            parse_cvs(0,T1.0),
+            vec![Cell{content:T1.1,loc:Point{x:0,y:0}}]
+        );
+    }
+
+    #[test]
+    fn test_simple_form() {
+        assert_eq!(
+            parse_cvs(0,T2.0),
+            vec![Cell{content:T2.1,loc:Point{x:0,y:0}}]
+        );
+    }
+
+    #[test]
+    fn test_simple_list() {
+        assert_eq!(
+            parse_cvs(0,&format!("{}{}{}{}{}",T1.0,CSEP,T2.0,CSEP,T1.0)),
+            vec![
+                Cell{content:T1.1,loc:Point{x:0,y:0}},
+                Cell{content:T2.1,loc:Point{x:1,y:0}},
+                Cell{content:T1.1,loc:Point{x:2,y:0}}
+            ]
+        );
+    }
+
+    #[test]
+    fn test_list_with_wrong() {
+        assert_eq!(
+            parse_cvs(0,&format!("{}{}{}{}{}{}",
+                                 T1.0,CSEP,T2.0,T3.0,CSEP,T1.0)),
+            vec![
+                Cell{content:T1.1,loc:Point{x:0,y:0}},
+                Cell{content:T2.1,loc:Point{x:1,y:0}},
+                Cell{content:T3.1,loc:Point{x:2,y:0}},
+                Cell{content:T1.1,loc:Point{x:3,y:0}}
+            ]
+        );
+    }
+
+    #[test]
+    fn test_list_ending_wrong() {
+        assert_eq!(
+            parse_cvs(0,&format!("{}{}{}",T1.0,CSEP,T3.0)),
+            vec![
+                Cell{content:T1.1,loc:Point{x:0,y:0}},
+                Cell{content:T3.1,loc:Point{x:1,y:0}}
+            ]
         );
     }
 }
