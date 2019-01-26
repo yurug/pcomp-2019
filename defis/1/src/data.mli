@@ -35,6 +35,10 @@ module type DATA = sig
   val map_recti : (pos -> cell -> cell) -> pos * pos -> t -> t
   val fold_rect : ('a -> cell -> 'a) -> 'a -> pos * pos -> t -> 'a
   val fold_recti : ('a -> pos -> cell -> 'a) -> 'a -> pos * pos -> t -> 'a
+  val iter : (cell -> unit) -> t -> unit
+  val iter' : (cell -> unit) -> (unit -> unit) -> t -> unit
+  val iter_column : (cell -> unit) -> int -> t -> unit
+  val iter_row : (cell -> unit) -> int -> t -> unit
 end
 
 module DataArray : DATA
