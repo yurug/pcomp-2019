@@ -1,33 +1,20 @@
 use combine::parser::char::{spaces, digit, char};
 use combine::{choice,from_str,many1,Parser,sep_by,token,position,Stream};
 use combine::error::ParseError;
-use data::{Point,Cell};
+use data::{Point,Cell,Data};
 use data::Data::{Val};
 
 parser!{
-    fn num[I]()(I) -> Cell
-    where [
-        I: Stream<Item = char>,
-        I::Error: ParseError<char, I::Range, I::Position>,
-        <I::Error as ParseError<I::Item, I::Range, I::Position>>::StreamError:
-            From<::std::num::ParseIntError>,
-    ]
+    fn num[I]()(I) -> Data
+    where [I: Stream<Item = char>]
     {
-        (position(),from_str(many1::<String, _>(digit())))
-            .map(|(_,b) : (I::Position,u8)| {
-            Cell{content:Val(b),loc:Point{x:0,y:0}}
-        })
+        from_str(many1::<String, _>(digit())).map(Val)
     }
 }
 
 parser!{
-    fn data_vec[I]()(I) -> Vec<Cell>
-    where [
-        I: Stream<Item = char>,
-        I::Error: ParseError<char, I::Range, I::Position>,
-        <I::Error as ParseError<I::Item, I::Range, I::Position>>::StreamError:
-            From<::std::num::ParseIntError>,
-    ]
+    fn data_vec[I]()(I) -> Vec<Data>
+    where [I: Stream<Item = char>]
     {
         sep_by(choice!(
             num()
@@ -37,5 +24,5 @@ parser!{
 
 
 pub fn run() {
-    println!("{:?}", data_vec().easy_parse("123,12"));
+    println!("{:?}", data_vec().easy_parse("123,12,200"));
 }
