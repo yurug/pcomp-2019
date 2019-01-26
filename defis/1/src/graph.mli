@@ -2,7 +2,7 @@ open Ast
 
 type neighbours
 type nodeLabel = pos
-type node_content
+type node_content = content
 type node
 type t
 
@@ -24,7 +24,7 @@ val add_neighbours : t -> nodeLabel*nodeLabel -> nodeLabel -> t
 
 val get_neighbours : t -> nodeLabel -> neighbours
 
-val fold_neighbours : ('a -> nodeLabel -> 'a ) -> 'a -> neighbours -> 'a
+val fold_neighbours : (nodeLabel -> 'a -> 'a ) -> neighbours -> 'a -> 'a
 
 (*
 val del_node : t -> nodeLabel ->  t*)
