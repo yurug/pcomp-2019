@@ -1,25 +1,27 @@
 %{
     open Ast
+
+    let row, col = ref 0, ref 0
+    let data = Data.create 16 16
 %}
 
 %token <int> INT
-%token LPAREN RPAREN SEMICOLON EQ SHARP
+%token LPAREN RPAREN COLON SEMICOLON EQ SHARP NEWLINE EOF
 
-%start <Ast.spreadsheet> spreadsheet
+%start <Ast.formula> formla
 %%
 
-spreadsheet:
-  e = separated_list(line, NEWLINE) EOF { e }
+data:
 
 line:
-  l = separated_list(cell, SEMICOLON) { l }
-
-cell:
-  i = INT     { { value = i; formula = None } }
-| f = formula { { value = Undefined; formula = Some f } }
+  f = formula SEMICOLON line NEWLINE { Data.set {r = !row; c = !col} f data}
 
 formula:
-  EQ SHARP LPAREN
+  i = INT                 { Val i }
+| EQ SHARP f = occurences { f }
+
+occurences:
+  SHARP LPAREN
     r1 = INT COLON c1 = INT COLON r2 = INT COLON c2 = INT COLON v = INT
   RPAREN
   { Occ (({ r = r1; c = c1}, { r = r2; c = c2}), v) }
