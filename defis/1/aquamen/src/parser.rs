@@ -8,8 +8,6 @@ use data::Function::Count;
 use data::Num;
 use data::{Cell, Data, Point};
 
-use combine::eof;
-
 const CSEP: char = ';';
 const LCOUNT: &'static str = "=#(";
 const RCOUNT: char = ')';
