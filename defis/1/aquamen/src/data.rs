@@ -1,9 +1,9 @@
-type Num = u8 ;
+pub type Num = u8 ;
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct Point {
-    pub x: u32,
-    pub y: u32
+    pub x: u64,
+    pub y: u64
 }
 
 #[derive(Debug)]
@@ -12,13 +12,14 @@ pub struct Cell {
     pub loc: Point
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub enum Data {
     Val(Num),
-    Fun(Function) 
+    Fun(Function),
+    Wrong
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub enum Function {
     Count(Point, Point, Num)
 }
