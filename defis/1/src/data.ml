@@ -12,6 +12,10 @@ module type DATA = sig
   val map_recti : (pos -> cell -> cell) -> pos * pos -> t -> t
   val fold_rect : ('a -> cell -> 'a) -> 'a -> pos * pos -> t -> 'a
   val fold_recti : ('a -> pos -> cell -> 'a) -> 'a -> pos * pos -> t -> 'a
+  val iter : (cell -> unit) -> t -> unit
+  val iter' : (cell -> unit) -> (unit -> unit) -> t -> unit
+  val iter_column : (cell -> unit) -> int -> t -> unit
+  val iter_row : (cell -> unit) -> int -> t -> unit
 end
 
 module DataArray : DATA = struct
@@ -21,9 +25,7 @@ module DataArray : DATA = struct
     ; cols : int }
 
   let create rows cols =
-    { data = Array.make_matrix rows cols {value = Undefined; formula = None}
-    ; rows
-    ; cols }
+    {data = Array.make_matrix rows cols {value = Undefined}; rows; cols}
 
   let resize rows cols t =
     let obj = create rows cols in
@@ -39,8 +41,9 @@ module DataArray : DATA = struct
   let set pos v t =
     let t =
       let more_rows, more_cols = pos.r > t.rows - 1, pos.c > t.cols - 1 in
-      if more_rows || more_cols then
-        let more b t p = if b then (if p > 2 * t then p else 2 * t) else t in
+      if more_rows || more_cols
+      then
+        let more b t p = if b then if p > 2 * t then p else 2 * t else t in
         let rows = more more_rows t.rows pos.r in
         let cols = more more_cols t.cols pos.c in
         resize rows cols t
@@ -90,4 +93,29 @@ module DataArray : DATA = struct
       done
     done;
     !a'
+
+  let iter f t =
+    for i = 0 to t.rows do
+      for j = 0 to t.cols do
+        f t.data.(i).(j)
+      done
+    done
+
+  let iter' f f' t =
+    for i = 0 to t.rows do
+      for j = 0 to t.cols do
+        f t.data.(i).(j)
+      done;
+      f' ()
+    done
+
+  let iter_column f p t =
+    for i = 0 to t.cols do
+      f t.data.(p).(i)
+    done
+
+  let iter_row f p t =
+    for i = 0 to t.rows do
+      f t.data.(i).(p)
+    done
 end
