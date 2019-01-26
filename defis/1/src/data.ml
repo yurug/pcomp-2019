@@ -95,27 +95,27 @@ module DataArray : DATA = struct
     !a'
 
   let iter f t =
-    for i = 0 to t.rows do
-      for j = 0 to t.cols do
+    for i = 0 to t.rows - 1 do
+      for j = 0 to t.cols - 1 do
         f t.data.(i).(j)
       done
     done
 
   let iter' f f' t =
-    for i = 0 to t.rows do
-      for j = 0 to t.cols do
+    for i = 0 to t.rows - 1 do
+      for j = 0 to t.cols - 1 do
         f t.data.(i).(j)
       done;
       f' ()
     done
 
   let iter_column f p t =
-    for i = 0 to t.cols do
+    for i = 0 to t.cols - 1 do
       f t.data.(p).(i)
     done
 
   let iter_row f p t =
-    for i = 0 to t.rows do
+    for i = 0 to t.rows - 1 do
       f t.data.(i).(p)
     done
 end
