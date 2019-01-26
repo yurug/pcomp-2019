@@ -1,25 +1,25 @@
 pub type Num = u8 ;
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,PartialEq)]
 pub struct Point {
     pub x: u64,
     pub y: u64
 }
 
-#[derive(Debug)]
+#[derive(Debug,PartialEq)]
 pub struct Cell {
     pub content: Data,
     pub loc: Point
 }
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,PartialEq)]
 pub enum Data {
     Val(Num),
     Fun(Function),
     Wrong
 }
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,PartialEq)]
 pub enum Function {
     Count(Point, Point, Num)
 }
