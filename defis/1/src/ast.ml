@@ -3,8 +3,10 @@ type pos =
   { r : int
   ; c : int }
 
+let pos r c = {r;c}
+
 (* top left * bottom right *)
-type formula = Occ of (pos * pos) * value
+type content = Occ of (pos * pos) * value
              | Val of value
 
 and value =
@@ -12,8 +14,6 @@ and value =
   | Int of int
 
 type cell = {value : value}
-
-and content = Cst of value | Formula of formula
 
 type action = Set of pos * content
 

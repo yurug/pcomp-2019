@@ -21,7 +21,7 @@ module DataArray : DATA = struct
     ; cols : int }
 
   let create rows cols =
-    { data = Array.make_matrix rows cols {value = Undefined; formula = None}
+    { data = Array.make_matrix rows cols {value = Undefined}
     ; rows
     ; cols }
 
