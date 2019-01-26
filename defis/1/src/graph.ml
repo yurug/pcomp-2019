@@ -98,8 +98,8 @@ let add_node g label ({content; neighbours} as node) =
   in
   add_neighbours_ g label node
 
-(** *)
-let change_node g label ({content; neighbours} as node) =
+(** [change_node g label node] *)
+let change_node g label ({content;neighbours} as node) =
   let existing_node_opt = Mpos.find_opt label g in
   let g =
     match existing_node_opt with
