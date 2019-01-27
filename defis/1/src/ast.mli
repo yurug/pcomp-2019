@@ -2,8 +2,6 @@ type pos =
   { r : int
   ; c : int }
 
-val pos : int -> int -> pos
-
 type content =
   | Occ of (pos * pos) * value
   | Val of value
@@ -19,7 +17,8 @@ type action = Set of pos * content
 type spreadsheet = cell list list
 
 (* [value cell] return the field value of type value from [cell]. *)
-val value : cell -> value
+val value : cell ->  value
+val pos : int -> int -> pos
 val string_of_value : value -> string
 val string_of_pos : pos -> string
 val string_of_content : content -> string
