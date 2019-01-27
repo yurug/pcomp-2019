@@ -24,5 +24,10 @@
 **** TODO : Ecriture/Lecture de fichier
 *** Carine
 **** DONE : coding style
+**** DONE : graph
+**** TODO : Dependency
 *** Kostia
+**** DONE : evaluation primitive
 *** Pierre
+**** DONE : graph
+**** TODO : Dependency
