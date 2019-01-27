@@ -8,12 +8,13 @@ case class Formule(case_leftTop:Case,
 	value: Int) extends CaseData
 
 case class Case(i:Int, j:Int)
+
 trait FeuilleCalque {
   def loadCalc(): Unit
   def getCell(r:Int , c:Int): Cellule
   def writeCell(r:Int, c:Int, v:String): Unit
   def getRegion(case_leftTop:Case, case_bottomRight:Case): Array[Array[CaseData]]
   def iterator : scala.collection.Iterator
-  def getSize : Int * Int
+  def getSize : (Int,  Int)
   def getData(c: Case) : CaseData
 }

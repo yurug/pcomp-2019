@@ -6,6 +6,7 @@ class FeuilleSimple(file:String) extends FeuilleCalque {
   /*chargement du fichier et stockage dans la variable "cellules" 
   *Array [][]
   */
+  private def parseData = DataParser.parseData
   val feuille = Source.fromFile(file) 
   val lines = feuille.getLines()
   val cellules = Array.ofDim[Cellule](lines.slice(0,1).toList.headOption.get.toInt,lines.size)
@@ -28,5 +29,7 @@ class FeuilleSimple(file:String) extends FeuilleCalque {
   def writeCell(r:Int, c:Int, v:String): Unit = {
     cellules(r)(c) = new Cellule(v)
   }
+
+  def getData(c: Case) : CaseData = parseData (cellules(c.i)(c.j))
   
 }
