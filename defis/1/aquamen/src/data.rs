@@ -1,4 +1,13 @@
+
+// FIXME remove import when defining
+//       Matrix type
+use std::marker::PhantomData;
+
 pub type Num = u8 ;
+
+pub struct Matrix<T> {
+    phatom: PhantomData<T>
+}
 
 #[derive(Debug,Clone,PartialEq)]
 pub struct Point {
