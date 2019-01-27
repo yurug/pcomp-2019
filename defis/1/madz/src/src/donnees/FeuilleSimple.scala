@@ -2,7 +2,7 @@ package donnees
 import scala.io.Source
 
 class FeuilleSimple(file:String) extends FeuilleCalque {
-
+  private def parseData = DataParser.parseData
   //chargement du fichier et stockage dans la variable "cellules" (quel format pr cette var??)
   val feuille = Source.fromFile(file) 
   val lines = feuille.getLines()
@@ -27,4 +27,9 @@ class FeuilleSimple(file:String) extends FeuilleCalque {
   def writeCell(r:Int, c:Int, v:String): Unit = {
     cellules(r)(c) = new Cellule(v)
   }
+
+  def getData(c: Case) : CaseData = parseData (cellules(c.i)(c.j))
+
+
+  
 }
