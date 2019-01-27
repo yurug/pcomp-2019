@@ -5,6 +5,8 @@ module Make (D : Data.DATA) : sig
      spreadsheet. *)
   val parse_data : string -> data * (Ast.pos * Graph.node_content) list
 
+  val build_graph : data -> (Ast.pos*Graph.node_content) list -> Graph.t
+
   (** [output tab view0.csv] write the contents of [tab]
       in the file [view0.csv], the file is created if it does not exist *)
   val output : data -> string -> unit

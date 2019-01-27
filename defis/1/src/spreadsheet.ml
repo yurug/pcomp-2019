@@ -39,6 +39,16 @@ module Make (D : Data.DATA) = struct
     in
     aux (D.create 16 16) [] 0
 
+  let build_graph data formulas =
+    let rec build_acc g formulas =
+      match formulas with
+      | [] -> g
+      | (_, Ast.Val _) :: _ -> failwith "Spreadsheet.build_graph: Val in formula."
+      | Ast.(pos, (Occ _ as content)) :: r ->
+        build_acc (add_node pos (build_node content) g) r
+    in
+    build_acc empty formulas
+
   let output data view0 =
     let file = open_out view0 in
     D.iter'
@@ -58,6 +68,8 @@ module Make (D : Data.DATA) = struct
   let eval data graph = function
     | Ast.Val v -> v
     | Ast.Occ ((pos, pos'), v) -> Ast.Int (eval_occ graph data pos pos' v)
+
+  let eval_all data graph = ()
 
   let update data graph = function
     | Ast.Set (pos, content) ->

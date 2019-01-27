@@ -6,13 +6,19 @@ module D = DataArray
 (* Corresponding Spreadsheet *)
 module Sp = Spreadsheet.Make (D)
 
+
+
 let main () =
   if Array.length Sys.argv = 5
   then
     let data_filename, user_filename, view0_filename, changes_filename =
       Sys.argv.(1), Sys.argv.(2), Sys.argv.(3), Sys.argv.(4)
     in
-    let data, graph = Sp.parse_data data_filename in
+
+    (* Initialisation *)
+    let data, formulas = Sp.parse_data data_filename in
+    let graph = Sp.build_graph data formulas in
+
     Sp.output data view0_filename
   else (
     prerr_endline "Usage: ws <data.csv> <user.txt> <view0.csv> <changes.txt>";
