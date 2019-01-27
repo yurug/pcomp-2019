@@ -22,26 +22,26 @@ impl<T: Copy + Clone> Matrix<T> {
     }
 }
 
-#[derive(Debug,Clone,PartialEq)]
+#[derive(Debug,Clone,Copy,PartialEq)]
 pub struct Point {
     pub x: u64,
     pub y: u64
 }
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug,PartialEq,Copy,Clone)]
 pub struct Cell {
     pub content: Data,
     pub loc: Point
 }
 
-#[derive(Debug,Clone,PartialEq)]
+#[derive(Debug,Clone,PartialEq,Copy)]
 pub enum Data {
     Val(Num),
     Fun(Function),
     Wrong
 }
 
-#[derive(Debug,Clone,PartialEq)]
+#[derive(Debug,Clone,PartialEq,Copy)]
 pub enum Function {
     Count(Point, Point, Num)
 }
