@@ -1,6 +1,8 @@
 
-// FIXME TODO
-fn schedule(block: String) {
-    // Call function from process mod
-    unimplemented!();
+use process::process;
+
+// FIXME test!!!!
+
+pub fn schedule(block: String) {
+    process(block)
 }
