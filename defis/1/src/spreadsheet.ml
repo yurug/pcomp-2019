@@ -67,8 +67,9 @@ module Make (D : Data.DATA) = struct
       (fun c ->
         let s = Ast.string_of_value (Ast.value c) in
         Printf.fprintf file "%s;" s )
-      print_newline
-      data
+      (fun () -> Printf.fprintf file "\n")
+      data;
+    close_out file
 
   let eval_occ graph data p p' v =
     D.fold_rect
