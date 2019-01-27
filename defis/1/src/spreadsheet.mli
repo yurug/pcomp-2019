@@ -21,4 +21,8 @@ module Make (D : Data.DATA) : sig
      and updates [graph] accordingly.*)
   val update : data -> Graph.t -> Ast.action -> data * Graph.t * ((Graph.nodeLabel*Ast.value) list)
 
+  (** [eval_init data graph formulas] evaluates the formulas in
+      [formulas] is possible et updates [data] accordingly. *)
+  val eval_init : data -> Graph.t -> (Ast.pos*Graph.node_content) list -> data
+
 end

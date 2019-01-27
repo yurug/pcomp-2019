@@ -4,7 +4,7 @@ module Make (D : Data.DATA) = struct
   type data = D.t
 
   let read_value cell =
-    let value = Scanf.sscanf cell "%d" (fun d -> d) in
+    let value = Scanf.sscanf (String.trim cell) "%d" (fun d -> d) in
     Ast.Int value
 
   let read_formula cell =
@@ -92,7 +92,8 @@ module Make (D : Data.DATA) = struct
      let dependency = Dependency.remove_computed_node pos dependency
      in
      List.fold_left
-       (fun (dat, depend, changes) (content, pos) -> loop_eval dat graph depend changes content pos)
+       (fun (dat, depend, changes) (content, pos) ->
+          loop_eval dat graph depend changes content pos)
        (data, dependency, changes)
        computable
 
@@ -104,11 +105,31 @@ module Make (D : Data.DATA) = struct
         if Dependency.is_computable pos dependency then
           loop_eval data graph dependency [] content pos
         else data, dependency, [] in
-      let data = List.fold_left
-        (fun data pos -> D.set pos Ast.{value=Undefined} data)
-        data
+      (* Put non-computable node to Undefined in data*)
+      let data, changes = List.fold_left
+          (fun (data, changes) pos ->
+             D.set pos Ast.{value=Undefined} data, (pos, Ast.Undefined)::changes)
+        (data, changes)
         (Dependency.get_non_computable_nodes dependency)
       in
       data, graph, changes
 
+  let eval_init data graph formulas =
+    let dependency = Dependency.build_dependency_from_all graph formulas in
+    let computable = Dependency.get_computable_nodes dependency in
+    let data, dependency, changes =
+      List.fold_left
+        (fun (dat, depend, ch) (content, pos) ->
+           loop_eval dat graph depend ch content pos )
+        (data, dependency, [])
+        computable
+    in
+      (* Put non-computable node to Undefined in data*)
+    let data, _ = List.fold_left
+        (fun (data, changes) pos ->
+           D.set pos Ast.{value=Undefined} data, (pos, Ast.Undefined)::changes)
+        (data, changes)
+        (Dependency.get_non_computable_nodes dependency)
+    in
+    data
 end
