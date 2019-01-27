@@ -16,27 +16,27 @@ module Make (D : Data.DATA) = struct
 
   let parse_data data_filename =
     let ic = open_in data_filename in
-    let rec aux data formulas c =
+    let rec aux data formulas r =
       try
         let line = input_line ic in
         let cells = String.split_on_char ';' line in
         let read_cell (data, formulas, r, c) cell =
           try
             let value = read_value cell in
-            D.set {r; c} {value} data, formulas, r + 1, c
+            D.set {r; c} {value} data, formulas, r, c + 1
           with Scanf.Scan_failure _ ->
             (try
                let formula = read_formula cell in
-               data, (Ast.{r; c}, formula) :: formulas, r + 1, c
+               data, (Ast.{r; c}, formula) :: formulas, r, c + 1
              with Scanf.Scan_failure _ -> fail r c)
         in
         let data, formulas, _, _ =
-          List.fold_left read_cell (data, formulas, 0, c) cells
+          List.fold_left read_cell (data, formulas, r, 0) cells
         in
-        aux data formulas (c + 1)
+        aux data formulas (r + 1)
       with End_of_file -> data, formulas
     in
-    let return = aux (D.create 16 16) [] 0  in
+    let return = aux (D.create 16 16) [] 0 in
     close_in ic;
     return
 
