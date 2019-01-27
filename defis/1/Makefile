@@ -6,4 +6,7 @@ build:
 clean:
 	dune clean
 
-.PHONY: all build clean
+test:
+	dune runtest tests
+
+.PHONY: all build clean test
