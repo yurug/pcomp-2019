@@ -1,4 +1,4 @@
-sealed abstract class CaseData
+abstract class CaseData
 case class Number(value: Int) extends CaseData
 case class Formule(case_leftTop:Case, 
 	case_bottomRight:Case,
