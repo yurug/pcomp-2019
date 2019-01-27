@@ -50,9 +50,6 @@ let empty = Mpos.empty
 
 (* Functions *)
 
-(** [add_neighbour g label neigh] either adds a node with label
-   [neigh], content [Undefined] and a neighbour [label] if no such
-   node exists or adds a neighbour [label] to the node [neigh] *)
 let add_neighbour g label new_neighbour =
   let node_opt = Mpos.find_opt new_neighbour g in
   match node_opt with
@@ -64,8 +61,6 @@ let add_neighbour g label new_neighbour =
   | Some {content; neighbours} ->
     Mpos.add new_neighbour {content; neighbours = label ++ neighbours} g
 
-(** [add_neighbours g region edge] adds a edge [edge] to
-   each node in the region [region] *)
 let add_neighbours g region label =
   let s = region_to_set region in
   Spos.fold (fun neigh g -> add_neighbour g label neigh) s g
@@ -75,18 +70,12 @@ let add_neighbours_ g label {content; _} =
   | Val _ -> g
   | Occ (region, _) -> add_neighbours g region label
 
-(** [get_neighbours g label] returns the neighbours of node labelled
-   [label] in graph [g] or raises [NonExistingNode]. *)
 let get_neighbours g label =
   let node_opt = Mpos.find_opt label g in
   match node_opt with
   | None -> raise NonExistingNode
   | Some node -> node.neighbours
 
-(** [add_node g label node] adds the node [node] with the label
-   [label] to the graph [g]. If the added node if a formula, adds also
-   the corresponding dependencies.Fails if [node] is already a
-   non-[Undefined] value *)
 let add_node g label ({content; neighbours} as node) =
   let existing_node_opt = Mpos.find_opt label g in
   let g =
@@ -98,7 +87,6 @@ let add_node g label ({content; neighbours} as node) =
   in
   add_neighbours_ g label node
 
-(** [change_node g label node] *)
 let change_node g label ({content;neighbours} as node) =
   let existing_node_opt = Mpos.find_opt label g in
   let g =
@@ -126,47 +114,34 @@ let change_node g label ({content;neighbours} as node) =
           (region_to_set region)
           g
       in
-      Mpos.add label {content; neighbours = neighbours @@ old_neighbours} g
+      Mpos.add label {content; neighbours = neighbours @@ (remove_neighbours label old_neighbours)} g
   in
   add_neighbours_ g label node
 
-let value_to_string value =
-  match value with
-  | Undefined -> "Undefined"
-  | Int n -> "Int " ^ string_of_int n
 
-let pos_to_string {r; c} = "(" ^ string_of_int r ^ "," ^ string_of_int c ^ ")"
+let print_neighbours neigh =
+      Spos.iter
+        (fun pos ->
+          let s = string_of_pos pos in
+          print_string (s ^ " ; ") )
+        neigh;
+      print_endline ""
 
-let content_to_string content =
-  match content with
-  | Val v -> value_to_string v
-  | Occ ((p1, p2), v) ->
-    "Occ ("
-    ^ pos_to_string p1
-    ^ ", "
-    ^ pos_to_string p2
-    ^ "), "
-    ^ value_to_string v
-
-let print g =
+let print_graph g =
   let bind = Mpos.bindings g in
   List.iter
     (fun (pos, {content; neighbours}) ->
-      let cs = content_to_string content in
+      let cs = string_of_content content in
       print_string
         ( "pos = "
-        ^ pos_to_string pos
+        ^ string_of_pos pos
         ^ "   content = "
         ^ cs
         ^ "   neighbours = " );
-      Spos.iter
-        (fun pos ->
-          let s = pos_to_string pos in
-          print_string (s ^ " ; ") )
-        neighbours;
-      print_endline "" )
+      print_neighbours neighbours )
     bind;
   print_endline ""
+
 
 (* [del_node g label] devrait sortir les cases à recalculer *)
 (*let del_node g label =
