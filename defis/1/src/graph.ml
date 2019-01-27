@@ -76,6 +76,12 @@ let get_neighbours label g =
   | None -> raise NonExistingNode
   | Some node -> node.neighbours
 
+let get_neighbours_content label g =
+  let node_opt = Mpos.find_opt label g in
+  match node_opt with
+  | None -> raise NonExistingNode
+  | Some node -> node.neighbours, node.content
+
 let add_node label ({content; neighbours} as node) g =
   let existing_node_opt = Mpos.find_opt label g in
   let g =
@@ -144,6 +150,8 @@ let print_graph g =
       print_neighbours neighbours )
     bind;
   print_endline ""
+
+
 
 (* [del_node g label] devrait sortir les cases à recalculer *)
 (*let del_node g label =

@@ -38,6 +38,8 @@ val add_neighbours : nodeLabel * nodeLabel -> nodeLabel -> t -> t
    [label] in graph [g] or raises [NonExistingNode]. *)
 val get_neighbours : nodeLabel -> t -> neighbours
 
+val get_neighbours_content : nodeLabel -> t -> neighbours*node_content
+
 val fold_neighbours : (nodeLabel -> 'a -> 'a) -> neighbours -> 'a -> 'a
 val print_neighbours : neighbours -> unit
 val print_graph : t -> unit

@@ -52,7 +52,7 @@ module Make (D : Data.DATA) = struct
     in
     Ast.Set ({r; c}, content)
 
-  let build_graph data formulas =
+  let build_graph formulas =
     let rec build_acc g formulas =
       match formulas with
       | [] -> g
@@ -73,24 +73,42 @@ module Make (D : Data.DATA) = struct
       data;
     close_out file
 
-  let eval_occ graph data p p' v =
+  let eval_occ data p p' v =
     D.fold_rect
       (fun acc cell -> if Ast.value cell = v then acc + 1 else acc)
       0
       (p, p')
       data
 
-  let eval data graph = function
+  let eval data = function
     | Ast.Val v -> v
-    | Ast.Occ ((pos, pos'), v) -> Ast.Int (eval_occ graph data pos pos' v)
+    | Ast.Occ ((pos, pos'), v) -> Ast.Int (eval_occ data pos pos' v)
 
-  let eval_all data graph = ()
+  let rec loop_eval data graph dependency changes content pos  =
+     let v = eval data content in
+     let data = D.set pos Ast.{value=v} data in
+     let changes = (pos, v)::changes in
+     let computable, dependency = Dependency.get_new_computable_nodes pos dependency in
+     let dependency = Dependency.remove_computed_node pos dependency
+     in
+     List.fold_left
+       (fun (dat, depend, changes) (content, pos) -> loop_eval dat graph depend changes content pos)
+       (data, dependency, changes)
+       computable
 
   let update data graph = function
     | Ast.Set (pos, content) ->
-      let node = build_node content in
-      let graph = add_node pos node graph in
-      let result = eval data graph content in
-      let result = {Ast.value = result} in
-      D.set pos result data, graph
+      let graph = change_node pos (build_node content) graph in
+      let dependency = Dependency.build_dependency_from graph pos in
+      let data, dependency, changes =
+        if Dependency.is_computable pos dependency then
+          loop_eval data graph dependency [] content pos
+        else data, dependency, [] in
+      let data = List.fold_left
+        (fun data pos -> D.set pos Ast.{value=Undefined} data)
+        data
+        (Dependency.get_non_computable_nodes dependency)
+      in
+      data, graph, changes
+
 end

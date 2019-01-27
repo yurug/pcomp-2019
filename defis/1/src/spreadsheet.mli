@@ -5,9 +5,9 @@ module Make (D : Data.DATA) : sig
      spreadsheet. *)
   val parse_data : string -> data * (Ast.pos * Graph.node_content) list
 
-  (** [build_graph data formulas] creates a dependency graph from a
-     given [data] and list of [formulas]. *)
-  val build_graph : data -> (Ast.pos * Graph.node_content) list -> Graph.t
+  (** [build_graph formulas] creates a dependency graph from a list of
+     [formulas]. *)
+  val build_graph : (Ast.pos*Graph.node_content) list -> Graph.t
 
   (** [parse_action line] creates a user action from [line], an user
      supplied action string. *)
@@ -19,8 +19,6 @@ module Make (D : Data.DATA) : sig
 
   (** [update data graph action] applies the action [action] to [data]
      and updates [graph] accordingly.*)
-  val update : data -> Graph.t -> Ast.action -> data * Graph.t
+  val update : data -> Graph.t -> Ast.action -> data * Graph.t * ((Graph.nodeLabel*Ast.value) list)
 
-  (* evaluation of one cell *)
-  val eval : data -> Graph.t -> Ast.content -> Ast.value
 end
