@@ -87,7 +87,7 @@ let add_node g label ({content; neighbours} as node) =
   in
   add_neighbours_ g label node
 
-let change_node g label ({content;neighbours} as node) =
+let change_node g label ({content; neighbours} as node) =
   let existing_node_opt = Mpos.find_opt label g in
   let g =
     match existing_node_opt with
@@ -114,18 +114,21 @@ let change_node g label ({content;neighbours} as node) =
           (region_to_set region)
           g
       in
-      Mpos.add label {content; neighbours = neighbours @@ (remove_neighbours label old_neighbours)} g
+      Mpos.add
+        label
+        { content
+        ; neighbours = neighbours @@ remove_neighbours label old_neighbours }
+        g
   in
   add_neighbours_ g label node
 
-
 let print_neighbours neigh =
-      Spos.iter
-        (fun pos ->
-          let s = string_of_pos pos in
-          print_string (s ^ " ; ") )
-        neigh;
-      print_endline ""
+  Spos.iter
+    (fun pos ->
+      let s = string_of_pos pos in
+      print_string (s ^ " ; ") )
+    neigh;
+  print_endline ""
 
 let print_graph g =
   let bind = Mpos.bindings g in
@@ -141,7 +144,6 @@ let print_graph g =
       print_neighbours neighbours )
     bind;
   print_endline ""
-
 
 (* [del_node g label] devrait sortir les cases à recalculer *)
 (*let del_node g label =

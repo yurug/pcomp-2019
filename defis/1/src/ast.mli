@@ -19,14 +19,11 @@ type action = Set of pos * content
 type spreadsheet = cell list list
 
 (* [value cell] return the field value of type value from [cell]. *)
-val value : cell ->  value
+val value : cell -> value
 val string_of_value : value -> string
 val string_of_pos : pos -> string
 val string_of_content : content -> string
-
-
 val compare_pos : pos -> pos -> int
 
 module Mpos : Map.S with type key = pos
-
 module Spos : Set.S with type elt = pos
