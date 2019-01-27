@@ -3,7 +3,7 @@ module Make (D : Data.DATA) : sig
 
   (** [parse_data data.csv] parses the original data and returns the
      spreadsheet. *)
-  val parse_data : string -> data * Graph.node_content list
+  val parse_data : string -> data * (Ast.pos * Graph.node_content) list
 
   (** [output tab view0.csv] write the contents of [tab]
       in the file [view0.csv], the file is created if it does not exist *)
