@@ -30,11 +30,17 @@ let main () =
     let line = input_line user in
     let action = Sp.parse_action line in
     let data, graph, changes = Sp.update data graph action in
+    Sp.output_changes changes changes_filename (String.trim line);
     loop data graph
   in
-  try loop data graph with End_of_file -> close_in user;
-    (* for testing *)
-    Sp.output data changes_filename
+  let _ = try loop data graph with End_of_file -> close_in user in
 
+  (* debug *)
+  let ll = String.split_on_char '/' view0_filename in
+  match List.rev ll with
+  | [] -> ()
+  | _::dir -> let dir = List.rev dir in
+    let view_final_filename = (String.concat "/" dir)^"/"^"view_final.csv" in
+    Sp.output data view_final_filename
 
 let () = main ()

@@ -17,6 +17,8 @@ module Make (D : Data.DATA) : sig
       in the file [view0.csv], the file is created if it does not exist *)
   val output : data -> string -> unit
 
+  val output_changes : (Graph.nodeLabel*Ast.value) list -> string -> string-> unit
+
   (** [update data graph action] applies the action [action] to [data]
      and updates [graph] accordingly.*)
   val update : data -> Graph.t -> Ast.action -> data * Graph.t * ((Graph.nodeLabel*Ast.value) list)

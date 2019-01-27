@@ -73,6 +73,16 @@ module Make (D : Data.DATA) = struct
       data;
     close_out file
 
+  let output_changes changes filename cmd =
+    let file = open_out filename in
+    Printf.fprintf file "after \"%s\":\n" cmd;
+    List.iter
+      (fun (Ast.{r;c}, v) ->
+        let v = Ast.string_of_value v in
+        Printf.fprintf file "%d %d %s\n" r c v)
+      changes;
+    close_out file
+
   let eval_occ data p p' v =
     D.fold_rect
       (fun acc cell -> if Ast.value cell = v then acc + 1 else acc)
