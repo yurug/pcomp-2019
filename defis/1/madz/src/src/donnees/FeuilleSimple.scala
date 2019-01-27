@@ -3,7 +3,9 @@ import scala.io.Source
 
 class FeuilleSimple(file:String) extends FeuilleCalque {
 
-  //chargement du fichier et stockage dans la variable "cellules" (quel format pr cette var??)
+  /*chargement du fichier et stockage dans la variable "cellules" 
+  *Array [][]
+  */
   val feuille = Source.fromFile(file) 
   val lines = feuille.getLines()
   val cellules = Array.ofDim[Cellule](lines.slice(0,1).toList.headOption.get.toInt,lines.size)
@@ -11,7 +13,6 @@ class FeuilleSimple(file:String) extends FeuilleCalque {
   def loadCalc(): Unit = {
     var i=0
     var j=0
-    
     for(l <- lines){
       for(c <- l.split(";")){
         cellules(i)(j) = new Cellule(c)
@@ -27,4 +28,5 @@ class FeuilleSimple(file:String) extends FeuilleCalque {
   def writeCell(r:Int, c:Int, v:String): Unit = {
     cellules(r)(c) = new Cellule(v)
   }
+  
 }
