@@ -8,7 +8,7 @@ module Make (D : Data.DATA) = struct
     Ast.Int value
 
   let read_formula cell =
-    Scanf.sscanf cell "=#(%d, %d, %d, %d %d)" (fun r1 c1 r2 c2 v ->
+    Scanf.sscanf cell "=#(%d, %d, %d, %d, %d)" (fun r1 c1 r2 c2 v ->
         Ast.Occ (({r = r1; c = c1}, {r = r2; c = c2}), Int v) )
 
   let fail r c =
