@@ -1,5 +1,5 @@
 package donnees
 
-class Cellule {
+class Cellule(v:String) {
   
 }
