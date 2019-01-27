@@ -23,7 +23,7 @@ val build_node : node_content -> node
 val add_node : nodeLabel -> node -> t -> t
 
 (** [change_node label node g] *)
-val change_node :  nodeLabel -> node -> t -> t
+val change_node : nodeLabel -> node -> t -> t
 
 (** [add_neighbour label neigh g] either adds a node with label
    [neigh], content [Undefined] and a neighbour [label] if no such
