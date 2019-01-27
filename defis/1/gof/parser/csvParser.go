@@ -1,5 +1,6 @@
 package parser
 
+
 //ParseCsv TO-DO
 func ParseCsv(csv string) string {
 	/*
@@ -9,4 +10,21 @@ func ParseCsv(csv string) string {
 			}
 	*/
 	return ""
+}
+
+func StringToLine(input string) {
+
+}
+
+func LineToString() string {
+
+	return ""
+}
+
+func CellToValue() {
+
+}
+
+func ValueToCell() {
+
 }
