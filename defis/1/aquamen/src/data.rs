@@ -1,12 +1,25 @@
 
-// FIXME remove import when defining
-//       Matrix type
-use std::marker::PhantomData;
-
 pub type Num = u8 ;
 
-pub struct Matrix<T> {
-    phatom: PhantomData<T>
+pub struct Matrix<T: Copy + Clone> {
+    inner: Vec<Vec<T>>
+}
+
+impl<T: Copy + Clone> Matrix<T> {
+    pub fn from_2d_vec(v: Vec<Vec<T>>) -> Matrix<T> {
+        Matrix {
+            inner: v
+        }
+    }
+    // Assume that the ordering of cell is conserved
+    // aka mat.get(p).loc == p
+    pub fn get(&self, c: Point) -> T {
+        self.inner[c.x as usize][c.y as usize].clone()
+    }
+
+    pub fn lines(&self) -> &Vec<Vec<T>> {
+        &self.inner
+    }
 }
 
 #[derive(Debug,Clone,PartialEq)]
