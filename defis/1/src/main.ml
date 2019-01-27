@@ -23,7 +23,8 @@ let main () =
       let data, graph = Sp.update data graph action in
       loop data graph
     in
-    try loop data graph with End_of_file -> () )
+    try loop data graph with End_of_file ->
+      close_in user)
   else (
     prerr_endline "Usage: ws <data.csv> <user.txt> <view0.csv> <changes.txt>";
     exit 1 )

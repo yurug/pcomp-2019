@@ -36,7 +36,9 @@ module Make (D : Data.DATA) = struct
         aux data formulas (c + 1)
       with End_of_file -> data, formulas
     in
-    aux (D.create 16 16) [] 0
+    let return = aux (D.create 16 16) [] 0  in
+    close_in ic;
+    return
 
   let parse_action line =
     let ic = Scanf.Scanning.from_string line in
