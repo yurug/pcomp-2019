@@ -60,7 +60,7 @@ module Make (D : Data.DATA) = struct
   let update data graph = function
     | Ast.Set (pos, content) ->
       let node = build_node content in
-      let graph = add_node graph pos node in
+      let graph = add_node pos node graph in
       let result = eval data graph content in
       let result = {Ast.value = result} in
       D.set pos result data

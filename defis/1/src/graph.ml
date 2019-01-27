@@ -50,7 +50,7 @@ let empty = Mpos.empty
 
 (* Functions *)
 
-let add_neighbour g label new_neighbour =
+let add_neighbour label new_neighbour g =
   let node_opt = Mpos.find_opt new_neighbour g in
   match node_opt with
   | None ->
@@ -61,22 +61,22 @@ let add_neighbour g label new_neighbour =
   | Some {content; neighbours} ->
     Mpos.add new_neighbour {content; neighbours = label ++ neighbours} g
 
-let add_neighbours g region label =
+let add_neighbours region label g =
   let s = region_to_set region in
-  Spos.fold (fun neigh g -> add_neighbour g label neigh) s g
+  Spos.fold (fun neigh g -> add_neighbour label neigh g) s g
 
-let add_neighbours_ g label {content; _} =
+let add_neighbours_ label {content; _} g =
   match content with
   | Val _ -> g
-  | Occ (region, _) -> add_neighbours g region label
+  | Occ (region, _) -> add_neighbours region label g
 
-let get_neighbours g label =
+let get_neighbours label g =
   let node_opt = Mpos.find_opt label g in
   match node_opt with
   | None -> raise NonExistingNode
   | Some node -> node.neighbours
 
-let add_node g label ({content; neighbours} as node) =
+let add_node label ({content; neighbours} as node) g =
   let existing_node_opt = Mpos.find_opt label g in
   let g =
     match existing_node_opt with
@@ -85,9 +85,9 @@ let add_node g label ({content; neighbours} as node) =
       Mpos.add label {content; neighbours = neighbours @@ old_neighbours} g
     | _ -> failwith "Graph.add_node : Ajout sur un noeud existant"
   in
-  add_neighbours_ g label node
+  add_neighbours_ label node g
 
-let change_node g label ({content; neighbours} as node) =
+let change_node label ({content; neighbours} as node) g =
   let existing_node_opt = Mpos.find_opt label g in
   let g =
     match existing_node_opt with
@@ -120,7 +120,7 @@ let change_node g label ({content; neighbours} as node) =
         ; neighbours = neighbours @@ remove_neighbours label old_neighbours }
         g
   in
-  add_neighbours_ g label node
+  add_neighbours_ label node g
 
 let print_neighbours neigh =
   Spos.iter

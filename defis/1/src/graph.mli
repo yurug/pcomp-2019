@@ -16,27 +16,27 @@ exception NonExistingNode
    neighbour. *)
 val build_node : node_content -> node
 
-(** [add_node g label node] adds the node [node] with the label
+(** [add_node label node g] adds the node [node] with the label
    [label] to the graph [g]. If the added node if a formula, adds also
    the corresponding dependencies.Fails if [node] is already a
    non-[Undefined] value *)
-val add_node : t -> nodeLabel -> node -> t
+val add_node : nodeLabel -> node -> t -> t
 
-(** [change_node g label node] *)
-val change_node : t -> nodeLabel -> node -> t
+(** [change_node label node g] *)
+val change_node :  nodeLabel -> node -> t -> t
 
-(** [add_neighbour g label neigh] either adds a node with label
+(** [add_neighbour label neigh g] either adds a node with label
    [neigh], content [Undefined] and a neighbour [label] if no such
    node exists or adds a neighbour [label] to the node [neigh] *)
-val add_neighbour : t -> nodeLabel -> nodeLabel -> t
+val add_neighbour : nodeLabel -> nodeLabel -> t -> t
 
-(** [add_neighbours g region edge] adds a edge [edge] to
+(** [add_neighbours region edge g] adds a edge [edge] to
    each node in the region [region] *)
-val add_neighbours : t -> nodeLabel * nodeLabel -> nodeLabel -> t
+val add_neighbours : nodeLabel * nodeLabel -> nodeLabel -> t -> t
 
-(** [get_neighbours g label] returns the neighbours of node labelled
+(** [get_neighbours label g] returns the neighbours of node labelled
    [label] in graph [g] or raises [NonExistingNode]. *)
-val get_neighbours : t -> nodeLabel -> neighbours
+val get_neighbours : nodeLabel -> t -> neighbours
 
 val fold_neighbours : (nodeLabel -> 'a -> 'a) -> neighbours -> 'a -> 'a
 val print_neighbours : neighbours -> unit

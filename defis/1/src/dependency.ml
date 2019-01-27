@@ -19,7 +19,7 @@ let build_node nb_depend neighbours color = {nb_depend; neighbours; color}
 
 let build_dependency_from (g : Graph.t) (label : Graph.nodeLabel) : gdepend =
   let neigh =
-    try Graph.get_neighbours g label with Graph.NonExistingNode ->
+    try Graph.get_neighbours label g with Graph.NonExistingNode ->
       failwith "Dependency.build_dependency_from : Non existing first node."
   in
   let gdepend = Mpos.add label (build_node 0 neigh Black) empty_gdepend in
@@ -28,7 +28,7 @@ let build_dependency_from (g : Graph.t) (label : Graph.nodeLabel) : gdepend =
     let prev_color, node =
       match node_opt with
       | None ->
-        let neigh = Graph.get_neighbours g label in
+        let neigh = Graph.get_neighbours label g in
         White, build_node 1 neigh Black
       | Some ({color; _} as node) ->
         color, {node with nb_depend = node.nb_depend + 1; color = Black}
