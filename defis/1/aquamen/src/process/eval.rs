@@ -8,6 +8,9 @@ use data::Function::*;
 // FIXME should return a list of dependencies
 // in case of if we can't completly compute
 // the cell (because we don't have the full sheet)
+// FIXME improve perfs
+// FIXME add some kind of Result so that we can print
+// an error
 fn eval_cell(data: &Data, sheet: &Matrix<Cell>) -> Num {
     match data {
         Val(i) => i.clone(),
@@ -27,6 +30,7 @@ fn eval_cell(data: &Data, sheet: &Matrix<Cell>) -> Num {
     }
 }
 
+// FIXME add a way to communicate to the caller (and the central authority)
 pub fn eval(input: &Matrix<Cell>) -> Matrix<Num> {
     let mut res = Vec::new();
     for line in input.lines() {
