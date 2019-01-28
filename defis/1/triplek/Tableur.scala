@@ -14,13 +14,17 @@ class CellInt (private var entier:Int) extends Cell {
   }
 }
 
-class CellFormula (private var r1:Int, private var r2:Int, private var c1:Int, private var c2:Int, private var v:Int) extends Cell {
+class CellFormula (private var r1:Int, private var c1:Int, private var r2:Int, private var c2:Int, private var v:Int) extends Cell {
   // def create(s: String): Cell = {
   //   var cleanedString: String = s.replaceAll("(|)|=|#|\\s", "")
   //   var ss: Array[String] = s.split(",")
   //   if(ss.length == 5) { return new CellFormula(ss(0).toInt, ss(1).toInt, ss(2).toInt, ss(3).toInt, ss(4).toInt) }
   //   return new ErrorCell
   // }
+
+  override def toString: String = {
+    return "=#(" + r1 + ", " + c1 + ", " + r2 + ", " + c2 + ", " + v + ")"
+  }
 }
 
 class ErrorCell extends Cell {
