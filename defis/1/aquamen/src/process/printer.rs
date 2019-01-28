@@ -1,5 +1,6 @@
 
-use data::{Matrix, Num};
+use data::{Matrix, Data};
+use data::Data::{Val, Wrong};
 
 // FIXME test!!!
 pub fn print(block: Matrix<Num>) {

@@ -5,7 +5,7 @@ mod printer;
 use self::printer::print;
 use self::eval::eval;
 use self::parser::parse_line;
-use data::{Cell, Matrix};
+use data::Matrix;
 
 // FIXME test!!!!
 
