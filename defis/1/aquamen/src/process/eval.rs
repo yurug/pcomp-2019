@@ -36,7 +36,8 @@ pub fn eval(input: &Matrix<Cell>) -> Matrix<Num> {
     for line in input.lines() {
         let mut lres: Vec<Num>  = Vec::with_capacity(line.len());
         for cell in line {
-            lres.push(eval_cell(&cell.content, input))
+            let r = eval_cell(&cell.content, input);
+            lres.push(r)
         }
         res.push(lres)
     }

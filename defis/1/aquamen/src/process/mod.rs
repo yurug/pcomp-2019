@@ -16,7 +16,7 @@ use data::{Cell, Matrix};
 pub fn process(block: String) {
     // FIXME setup the channel
     // FIXME setup a way to get data from central authority?
-    let sheet = Matrix::from_2d_vec(block.split(";").map(|l| parse_line(0, l)).collect());
+    let sheet = Matrix::from_2d_vec(block.split("\n").map(|l| parse_line(0, l)).collect());
     let res = eval(&sheet);
     print(res)
 }
