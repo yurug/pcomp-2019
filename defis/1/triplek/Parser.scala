@@ -4,7 +4,7 @@ class Parser {
     return data.split(";")
   }
 
-  def makeACell(s: String): Cell = {
+  def makeCellInt(s: String): Cell = {
     try {
       var i: Int = s.toInt
       if(i <= 255 && i >= 0) { return new CellInt(i) }
@@ -15,7 +15,7 @@ class Parser {
     }
   }
 
-  def makeBCell(s: String): Cell = {
+  def makeCellFormule(s: String): Cell = {
     if(s.endsWith(")")) {
       var cleanedString = s.subString(3, s.length() - 2)
       cleanedString = cleanedString.replaceAll(" ", "")
@@ -46,8 +46,8 @@ class Parser {
     data match {
       case Nil => { return acc }
       case h::t => {
-        if(s.startsWith("=#(")) { cell = makeBCell(s) }
-        else { cell = makeACell(s) }
+        if(s.startsWith("=#(")) { cell = makeCellFormule(s) }
+        else { cell = makeCellInt(s) }
         t match {
           case ErrorCell => { return tokenize t acc }
           case _ => { return tokenize t cell::acc }
