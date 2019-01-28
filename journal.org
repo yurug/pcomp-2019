@@ -38,7 +38,8 @@ Sous Emacs, utiliser [TAB] pour ouvrir ou fermer les différentes sections.
 - en programmation réactive ;
 - en théorie des types.
 ***** Langages
-- Rust, Julia, ReactiveML, Scala, C, Java, Idris, Haskell, OCaml.
+- Rust, Julia, ReactiveML, Scala, C, Java, Idris, Haskell, OCaml,
+  ReasonML, Purescript, Typescript, Go, Elixir, Python.
 *** Choses à faire
 **** DONE S'inscrire sur le GIT
      - State "DONE"       from "TODO"       [2019-01-07 Mon 12:17]
@@ -60,7 +61,22 @@ Sous Emacs, utiliser [TAB] pour ouvrir ou fermer les différentes sections.
 *** Début du défi 1
     - Affectation des contraintes de programmation
     - Début d'analyse de la spécification, objectif: chaque groupe propose une architecture.
-*** TODO Lire https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf
-*** TODO Lire http://oberon2005.oberoncore.ru/classics/dk1974b.pdf
-*** TODO Programmer une solution au défi 1
-*** TODO Faire un pull-request "soignée" pour présenter votre solution
+** <2019-01-21>
+*** Défi 1
+**** TODO Analyser le défi 1
+**** TODO Proposer et présenter une architecture pour résoudre le défi 1
+**** TODO Programmer une solution au défi 1
+**** TODO Faire une pull-request "soignée" pour présenter votre solution
+*** La crise du logiciel et la programmation structurée
+**** TODO Lire https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf
+**** TODO Lire http://oberon2005.oberoncore.ru/classics/dk1974b.pdf
+** <2019-01-28>
+*** Défi 1
+**** TODO Présentation de chaque PR
+**** TODO Comment faire une revue de code?
+**** TODO Revues de code
+**** TODO Retours sur la revue de code
+*** Histoire des langages de programmation
+**** TODO Discuter des deux articles à lire pour aujourd'hui
+
+
