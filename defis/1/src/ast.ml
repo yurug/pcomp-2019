@@ -17,10 +17,6 @@ and value =
 type cell = {value : value}
 type action = Set of pos * content
 
-(* FIXME: ugly hack, needs workaround *)
-type spreadsheet = cell list list
-
-(* [value cell] return the field value of type value from [cell]. *)
 let value {value} = value
 let string_of_value = function Int i -> string_of_int i | _ -> "P"
 let string_of_pos {r; c} = "(" ^ string_of_int r ^ "," ^ string_of_int c ^ ")"

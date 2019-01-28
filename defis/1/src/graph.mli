@@ -38,9 +38,17 @@ val add_neighbours : nodeLabel * nodeLabel -> nodeLabel -> t -> t
    [label] in graph [g] or raises [NonExistingNode]. *)
 val get_neighbours : nodeLabel -> t -> neighbours
 
+(** [get_neighbours_content label g] returns the neighbours and
+   content of node labelled [label] in graph [g] or raises
+   [NonExistingNode]. *)
 val get_neighbours_content : nodeLabel -> t -> neighbours*node_content
 
+(** [fold_neighbours f neighbours init] *)
 val fold_neighbours : (nodeLabel -> 'a -> 'a) -> neighbours -> 'a -> 'a
+
+(** Debug functions *)
 val print_neighbours : neighbours -> unit
 val print_graph : t -> unit
+
+
 (*val del_node : t -> nodeLabel ->  t*)
