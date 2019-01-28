@@ -18,7 +18,7 @@ object Parser {
   def tokenizeLineAux(splittedString: List[String], acc: List[Cell]): List[Cell] = {
     splittedString match {
       case Nil => { return acc }
-      case h::t => { return tokenizeLineAux(t, CellFactory.create(h)::acc) }
+      case h::t => { return tokenizeLineAux(t, acc :+ CellFactory.create(h)) }
     }
   }
 
