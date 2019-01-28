@@ -6,39 +6,34 @@ module D = DataArray
 (* Corresponding Spreadsheet *)
 module Sp = Spreadsheet.Make (D)
 
-let main () =
-  if Array.length Sys.argv <> 5
+let parse_input argv =
+  if Array.length argv <> 5
   then (
     prerr_endline "Usage: ws <data.csv> <user.txt> <view0.csv> <changes.txt>";
     exit 1 );
-  let data_filename, user_filename, view0_filename, changes_filename =
-    Sys.argv.(1), Sys.argv.(2), Sys.argv.(3), Sys.argv.(4)
-  in
-  let _ =
-    Format.eprintf
-      "%s %s %s %s@."
-      data_filename
-      user_filename
-      view0_filename
-      changes_filename
-  in
-  (* Initialisation *)
+  argv.(1), argv.(2), argv.(3), argv.(4)
+
+(*
+  let _ = Format.eprintf "%s %s %s %s@."
+      data_filename user_filename view0_filename changes_filename in
+  data_filename, user_filename, view0_filename, changes_filename*)
+
+let pre_evaluation data graph formulas = Sp.eval_init data graph formulas
+
+let initialisation data_filename =
   let data, formulas = Sp.parse_data data_filename in
   let graph = Sp.build_graph formulas in
-  let data = Sp.eval_init data graph formulas in
-  let () = Sp.output data view0_filename in
-  (* Loop user *)
-  let user = open_in user_filename in
-  Sp.output data view0_filename;
-  let rec loop data graph =
-    let line = input_line user in
-    let action = Sp.parse_action line in
-    let data, graph, changes = Sp.update data graph action in
-    Sp.output_changes changes changes_filename (String.trim line);
-    loop data graph
-  in
-  let _ = try loop data graph with End_of_file -> close_in user in
-  (* debug *)
+  let data = pre_evaluation data graph formulas in
+  data, Sp.build_graph formulas, formulas
+
+let write_view0 view0_filename data = Sp.output data view0_filename
+
+let apply_action user_file data graph =
+  let line = input_line user_file in
+  let action = Sp.parse_action line in
+  Sp.update data graph action, line
+
+let write_final_result view0_filename data (* debug function *) =
   let ll = String.split_on_char '/' view0_filename in
   match List.rev ll with
   | [] -> ()
@@ -46,5 +41,24 @@ let main () =
     let dir = List.rev dir in
     let view_final_filename = String.concat "/" dir ^ "/" ^ "view_final.csv" in
     Sp.output data view_final_filename
+
+let loop_user user_filename changes_filename data graph =
+  let user = open_in user_filename in
+  let rec loop data graph =
+    let (data, graph, changes), action_str = apply_action user data graph in
+    Sp.output_changes changes changes_filename (String.trim action_str);
+    loop data graph
+  in
+  try loop data graph with End_of_file -> close_in user
+
+let main () =
+  let data_filename, user_filename, view0_filename, changes_filename =
+    parse_input Sys.argv
+  in
+  let data, graph, _ = initialisation data_filename in
+  write_view0 view0_filename data;
+  loop_user user_filename changes_filename data graph;
+  (* debug *)
+  write_final_result view0_filename data
 
 let () = main ()

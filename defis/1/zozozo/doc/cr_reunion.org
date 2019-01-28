@@ -1,33 +1,25 @@
-* 17/01
-** Généralité
-*** Ocaml version : 4.06
-*** Compiler : dune (ocaml) / rmlbuild (rml)
-*** Communication : discord
-*** TODO DOCKER
-** TODOlist
-*** Antonin
-**** DONE : squelette Makefile
-**** DONE : réfléchir aux optimisations d'accès mémoire
-**** TODO : Module avec tableau abstrait en structure de données
-**** DONE : Petit parseur pour les expressions (CSV)
-*** Carine
-**** TODO : coding style + doc
-**** DONE : Ecriture fichier + main
-*** Kostia
-**** TODO : fonction update + eval
-*** Pierre
-**** TODO : Lecture fichier
-* 24/02
-** TODOlist
-*** Antonin
-**** TODO : script pour lancer les tests & tutoriel sur comment ajouter un test
-**** TODO : Ecriture/Lecture de fichier
-*** Carine
-**** DONE : coding style
-**** DONE : graph
-**** TODO : Dependency
-*** Kostia
-**** DONE : evaluation primitive
-*** Pierre
-**** DONE : graph
-**** TODO : Dependency
+* Todo list :
+Indiquer votre nom devant une tache quand vous la commencer, histoire
+qu'on ne se marche pas sur les pieds.
+
+Merci de passer la tâche en DONE quand finie.
+
+** TODO Relire tests pierre et vérifier que les résultats attendus sont justes
+** TODO Trouver une facon efficace de définir l'utilité de chaque test (lire comment)
+Idée : pouvoir déterminer quels tests lancés pour tester quelque chose
+(genre : cycle, gros fichier)
+
+Suggestion : par exemple, un fichier dans le dossier test avec des
+catégories et le numéro de chaque test rentrant dans cette catégorie
+
+** TODO Ajouter plus de tests
+** TODO Ecrire un générateur malin de test pour générer automatiquement des gros tableurs
+** TODO Carine : debugger les changements (changes.txt)
+** TODO Graph : commenter, nettoyer, raccourcir les fonctions
+** TODO Dependency : commenter, nettoyer, raccourcir les fonctions
+** TODO Data : commenter, nettoyer, raccourcir les fonctions
+** TODO Spreadsheet : commenter, nettoyer, raccourcir les fonctions
+** TODO AST : commenter, nettoyer, raccourcir les fonctions
+** TODO DataArray : Avoir une taille de tableau logique pour ne pas en afficher trop ou faire des folds sur trop
+** TODO Data : ajouter d'autres implémentations (Fonctionnelle pure, qui ne stocke rien en mémoire, etc).
+** TODO Refléchir à comment gérer des tableaux de grandes tailles : Quels modules vont demander du changement
