@@ -16,9 +16,9 @@ fn eval_cell(data: &Data, sheet: &Matrix<Cell>) -> Num {
         Val(i) => i.clone(),
         Fun(Count(b, e, v)) => {
             let mut acc = 0;
-            for x in b.x..e.x {
-                for y in b.y..e.y {
-                    if eval_cell(&sheet.get(Point{x: x, y: y}).content, sheet) == v.clone() {
+            for x in b.x..e.x+1 {
+                for y in b.y..e.y+1 {
+                    if eval_cell(&sheet.get(Point{x: x-1, y: y-1}).content, sheet) == v.clone() {
                         acc += 1;
                     }
                 }
