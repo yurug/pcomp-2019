@@ -1,5 +1,6 @@
 package donnees
-
+import java.io.File
+import java.io.PrintWriter
 import evaluateur._
 
 object DataParser{
@@ -40,8 +41,16 @@ object DataParser{
       i+=1
     }
   }
-  
-  
-    
-    
+   
+   def writeView0(cellules: Array[Array[Cellule]]):Unit ={
+     val writer = new PrintWriter(new File("view0.csv"))
+     for(l <- cellules){
+         for(c <- l){
+              writer.write(c.getVal+";")
+         }
+          writer.write("\n")
+      }
+   
+    writer.close()
+   }
 }

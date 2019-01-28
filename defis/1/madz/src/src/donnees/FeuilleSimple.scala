@@ -8,7 +8,7 @@ class FeuilleSimple(file:String) extends FeuilleCalque {
   */
   val feuille = Source.fromFile(file) 
   val lines = feuille.getLines()
-  val cellules = Array.ofDim[Cellule](lines.slice(0,1).toList.headOption.get.toInt,lines.size)
+  val cellules = Array.ofDim[Cellule](lines.next().split(";").size,lines.size)
   
   def loadCalc(): Unit = {
     var i=0
