@@ -51,7 +51,7 @@ object CellFactory {
         cleanedString = cleanedString.replaceAll("=", "")
         cleanedString = cleanedString.replaceAll("#", "")
         var ss: Array[String] = cleanedString.split(",")
-        if(ss.length == 5) { return new CellFormula(ss(0).toInt, ss(1).toInt, ss(2).toInt, ss(3).toInt, ss(4).toInt) }
+        if(ss.length == 5 && ss(0) <= ss(2) && ss(1) <= ss(3)) { return new CellFormula(ss(0).toInt, ss(1).toInt, ss(2).toInt, ss(3).toInt, ss(4).toInt) }
       }
       else if(s.matches("[0-9]+")) {
         var i: Int = s.toInt
