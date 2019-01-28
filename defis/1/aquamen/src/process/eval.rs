@@ -11,30 +11,34 @@ use data::Function::*;
 // FIXME improve perfs
 // FIXME add some kind of Result so that we can print
 // an error
-fn eval_cell(data: &Data, sheet: &Matrix<Cell>) -> Num {
+fn eval_cell(data: &Data, sheet: &Matrix<Cell>) -> Data {
     match data {
-        Val(i) => i.clone(),
+        Val(_i) => data.clone(),
         Fun(Count(b, e, v)) => {
             let mut acc = 0;
             for x in b.x..e.x+1 {
                 for y in b.y..e.y+1 {
-                    if eval_cell(&sheet.get(Point{x: x-1, y: y-1}).content, sheet) == v.clone() {
-                        acc += 1;
+                    match eval_cell(&sheet.get(Point{x: x-1, y: y-1}).content, sheet) {
+                        // FIXME find out why it's a ref and not a value
+                        Val(i) => if i == v.clone() {
+                            acc += 1;
+                        },
+                        _ => panic!("Failure while evaluating ")
                     }
                 }
             }
-            acc
+            Val(acc)
         }
-        _ => 0 // FIXME better errors!!!
+        _ => data.clone() // FIXME better errors!!!
 
     }
 }
 
 // FIXME add a way to communicate to the caller (and the central authority)
-pub fn eval(input: &Matrix<Cell>) -> Matrix<Num> {
+pub fn eval(input: &Matrix<Cell>) -> Matrix<Data> {
     let mut res = Vec::new();
     for line in input.lines() {
-        let mut lres: Vec<Num>  = Vec::with_capacity(line.len());
+        let mut lres: Vec<Data>  = Vec::with_capacity(line.len());
         for cell in line {
             let r = eval_cell(&cell.content, input);
             lres.push(r)
