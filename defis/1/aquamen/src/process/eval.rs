@@ -1,5 +1,5 @@
 
-use data::{Matrix, Cell, Num, Point, Data};
+use data::{Matrix, Cell, Point, Data};
 use data::Data::*;
 use data::Function::*;
 
