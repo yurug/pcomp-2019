@@ -1,31 +1,9 @@
-abstract class Cell (private var num:int ,private var letters:String ) {
+abstract class Cell (private var num:Int ,private var letters:String ) {}
 
-  
-}
+class CellInt (private var entier:Int ,private var num:Int ,private var letters:String ) extends Cell(num,letters){}
 
+class CellFormule (private var num:Int, private var letters:String, private var r1:Int, private var r2:Int, private var c1:Int, private var c2:Int, private var v:Int) extends Cell(num,letters) {}
 
+class ErrorCell (private var num:Int ,private var letters:String) extends Cell(num, letters) {}
 
-class CellInt (private var entier:int ,private var num:int ,private var letters:String ) extends cells(num,letters){
-
-  
-}
-
-
-class CellFormule (private var r1:int,private var r2:int, private var c1:int,  private var c2:int,private var v:int,private var num:int ,private var letters:String ) extends  cells(num,letters) {
-
-
-  
-}
-
-class ErroCell
-{
-
-
-}
-
-class Operation (private var cel:cells ) {
-
-
-
-
-}
+class Operation (private var cel: Cell ) {}

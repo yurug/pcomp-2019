@@ -48,10 +48,7 @@ class Parser {
       case h::t => {
         if(s.startsWith("=#(")) { cell = makeCellFormule(s) }
         else { cell = makeCellInt(s) }
-        t match {
-          case ErrorCell => { return tokenize t acc }
-          case _ => { return tokenize t cell::acc }
-        }
+        return tokenize t cell::acc
       }
     }
   }
