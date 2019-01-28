@@ -40,9 +40,7 @@ object Parser {
 
 // Read the whole file and returns the corresponding Cells
   def parse(fileName: String): List[List[Cell]] = {
-    val data: List[String] = readFile(fileName)
-    val splittedData: List[List[String]] = splitData(data)
-    return tokenize(splittedData)
+    return tokenize(splitData(readFile(fileName)))
   }
 
 }
