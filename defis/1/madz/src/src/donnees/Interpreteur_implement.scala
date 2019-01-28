@@ -1,8 +1,8 @@
-package donnees
 
+package donnees 
 class Interpreteur_implement(
 	private var sheet :FeuilleWithDependance){
-	private val sheet_iterator = sheet.iterator
+	//private val sheet_iterator = sheet.iterator
 
 	override def evalData (data: CaseData): Int =
 		data match  {
@@ -15,6 +15,8 @@ class Interpreteur_implement(
 					)
 				(dependance_case.map (count_1D_array _)).sum
 		}
+  }
+		
 
 	override def evalCase (i:Int, j:Int): Int = evalData (sheet.getData(Case (i,j)))
 

@@ -9,4 +9,5 @@ trait FeuilleCalque {
   def iterator : scala.collection.Iterator[CaseData]
   def getSize : (Int , Int)
   def getData(c: Case) : CaseData
+  
 }

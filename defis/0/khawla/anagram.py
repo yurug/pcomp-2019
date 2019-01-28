@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import sys
 
+
 def searchWords():
     for word in sys.argv[1:]:
         with open('mydict','r') as f:
@@ -11,3 +12,4 @@ def searchWords():
                     l.append(line)
             for m in sorted(l): print(m)
 searchWords()
+

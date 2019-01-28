@@ -1,5 +1,5 @@
 package donnees
 
-class Cellule(v:String) {
+class Cellule(v:CaseData) {
   def getVal = v
 }

@@ -1,3 +1,5 @@
+package donnees
+
 trait Interpreteur{
 	def evalData(data: CaseData) : Int
 	def evalCase (i:Int, j:Int): Int
