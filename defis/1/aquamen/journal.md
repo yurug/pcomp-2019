@@ -1,7 +1,7 @@
 ## Résolution de bugs
 
 * Gestion des espaces dans le parser : Hugo
-* Gestion des valeurs invalides dans l'interpréteur : Vincent
+* Gestion des valeurs invalides dans l'interpréteur : Vincent (fixed)
 
 ## Finir le défi
 
