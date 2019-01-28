@@ -1,61 +1,48 @@
-class Parser {
+import scala.io.Source
 
-  def splitData(data: String): String[] = {
-    return data.split(";")
+object Parser {
+
+// Returns the List of lines contained in fileName
+  def readFile(fileName: String): List[String] = {
+    return Source.fromFile(fileName).getLines.toList
   }
 
-  def makeCellInt(s: String): Cell = {
-    try {
-      var i: Int = s.toInt
-      if(i <= 255 && i >= 0) { return new CellInt(i) }
-      return new ErrorCell
-    }
-    catch {
-      case e: Exception => { return new ErrorCell }
-    }
+// Return a List in which each line contained in data turned into its splitted version
+// using ";" as a separator
+  def splitData(data: List[String]): List[List[String]] = {
+    var sd: List[List[String]] = Nil
+    for(line <- data) { sd = line.split(";").toList :: sd }
+    return sd
   }
 
-  def makeCellFormule(s: String): Cell = {
-    if(s.endsWith(")")) {
-      var cleanedString = s.subString(3, s.length() - 2)
-      cleanedString = cleanedString.replaceAll(" ", "")
-      var ss = s.split(",")
-      if(l.length == 5) {
-        var r1, c1, r2, c2, v, i: Int = 0
-        for(i <- 0 until 5) {
-          try {
-            i match {
-              case 0 => r1 = ss[i].toInt
-              case 1 => c1 = ss[i].toInt
-              case 2 => r2 = ss[i].toInt
-              case 3 => c2 = ss[i].toInt
-              case 4 => v = ss[i].toInt
-            }
-          }
-          catch {
-            case e: Exception => { return new ErrorCell }
-          }
-        }
-        return new CellFormule(r1, c1, r2, c2, v)
-      }
-    }
-    return new ErrorCell
-  }
-
-  def tokenize(data: List[String], acc: List[Cell]): List[Cell] = {
-    data match {
+  def tokenizeLineAux(splittedString: List[String], acc: List[Cell]): List[Cell] = {
+    splittedString match {
       case Nil => { return acc }
-      case h::t => {
-        if(s.startsWith("=#(")) { cell = makeCellFormule(s) }
-        else { cell = makeCellInt(s) }
-        return tokenize t cell::acc
-      }
+      case h::t => { return tokenizeLineAux(t, CellFactory.create(h)::acc) }
     }
   }
 
-  def parse(data: String) {
-    splitData: String[] =  splitData(data)
-    return tokenize data Nil
+// Returns the List of Cell corresponding to the given List of String
+  def tokenizeLine(splittedString: List[String]): List[Cell] = {
+    return tokenizeLineAux(splittedString, Nil)
+  }
+
+  def tokenizeAux(splittedData: List[List[String]], acc: List[List[Cell]]): List[List[Cell]] = {
+    splittedData match {
+      case Nil => { return acc }
+      case h::t => { return tokenizeAux(t, tokenizeLine(h)::acc) }
+    }
+  }
+
+  def tokenize(splittedData: List[List[String]]): List[List[Cell]] = {
+    return tokenizeAux(splittedData, Nil)
+  }
+
+// Read the whole file and returns the corresponding Cells
+  def parse(fileName: String): List[List[Cell]] = {
+    val data: List[String] = readFile(fileName)
+    val splittedData: List[List[String]] = splitData(data)
+    return tokenize(splittedData)
   }
 
 }
