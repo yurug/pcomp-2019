@@ -1,3 +1,5 @@
+package donnees
+
 abstract class CaseData
 case class Number(value: Int) extends CaseData
 case class Formule(case_leftTop:Case, 

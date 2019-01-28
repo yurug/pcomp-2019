@@ -1,12 +1,14 @@
+package donnees
+
 object DataParser{
   
-  private def parseData(data : String) = 
+  def parseData(data : String) = 
     try {
       Number (data.toInt)
     } catch {
-      case NumberFormatException => 
+      case e : NumberFormatException => 
       	val tmp = data.split("(")(1).split(")")(0)
-      	val int_data = tmp.split(",").map (toInt)
+      	val int_data = tmp.split(",").map (a => a.toInt)
       	val case1 = Case (int_data(0),int_data(1))
       	val case2 = Case (int_data(2),int_data(3))
       	val value = int_data(4)      	
