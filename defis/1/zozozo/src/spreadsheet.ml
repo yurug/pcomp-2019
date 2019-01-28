@@ -77,9 +77,9 @@ module Make (D : Data.DATA) = struct
     let file = open_out filename in
     Printf.fprintf file "after \"%s\":\n" cmd;
     List.iter
-      (fun (Ast.{r;c}, v) ->
+      (fun (Ast.({r; c}), v) ->
         let v = Ast.string_of_value v in
-        Printf.fprintf file "%d %d %s\n" r c v)
+        Printf.fprintf file "%d %d %s\n" r c v )
       changes;
     close_out file
 
@@ -94,33 +94,37 @@ module Make (D : Data.DATA) = struct
     | Ast.Val v -> v
     | Ast.Occ ((pos, pos'), v) -> Ast.Int (eval_occ data pos pos' v)
 
-  let rec loop_eval data graph dependency changes content pos  =
-     let v = eval data content in
-     let data = D.set pos Ast.{value=v} data in
-     let changes = (pos, v)::changes in
-     let computable, dependency = Dependency.get_new_computable_nodes pos dependency in
-     let dependency = Dependency.remove_computed_node pos dependency
-     in
-     List.fold_left
-       (fun (dat, depend, changes) (content, pos) ->
-          loop_eval dat graph depend changes content pos)
-       (data, dependency, changes)
-       computable
+  let rec loop_eval data graph dependency changes content pos =
+    let v = eval data content in
+    let data = D.set pos Ast.{value = v} data in
+    let changes = (pos, v) :: changes in
+    let computable, dependency =
+      Dependency.get_new_computable_nodes pos dependency
+    in
+    let dependency = Dependency.remove_computed_node pos dependency in
+    List.fold_left
+      (fun (dat, depend, changes) (content, pos) ->
+        loop_eval dat graph depend changes content pos )
+      (data, dependency, changes)
+      computable
 
   let update data graph = function
     | Ast.Set (pos, content) ->
       let graph = change_node pos (build_node content) graph in
       let dependency = Dependency.build_dependency_from graph pos in
       let data, dependency, changes =
-        if Dependency.is_computable pos dependency then
-          loop_eval data graph dependency [] content pos
-        else data, dependency, [] in
+        if Dependency.is_computable pos dependency
+        then loop_eval data graph dependency [] content pos
+        else data, dependency, []
+      in
       (* Put non-computable node to Undefined in data*)
-      let data, changes = List.fold_left
+      let data, changes =
+        List.fold_left
           (fun (data, changes) pos ->
-             D.set pos Ast.{value=Undefined} data, (pos, Ast.Undefined)::changes)
-        (data, changes)
-        (Dependency.get_non_computable_nodes dependency)
+            ( D.set pos Ast.{value = Undefined} data
+            , (pos, Ast.Undefined) :: changes ) )
+          (data, changes)
+          (Dependency.get_non_computable_nodes dependency)
       in
       data, graph, changes
 
@@ -130,14 +134,16 @@ module Make (D : Data.DATA) = struct
     let data, dependency, changes =
       List.fold_left
         (fun (dat, depend, ch) (content, pos) ->
-           loop_eval dat graph depend ch content pos )
+          loop_eval dat graph depend ch content pos )
         (data, dependency, [])
         computable
     in
-      (* Put non-computable node to Undefined in data*)
-    let data, _ = List.fold_left
+    (* Put non-computable node to Undefined in data*)
+    let data, _ =
+      List.fold_left
         (fun (data, changes) pos ->
-           D.set pos Ast.{value=Undefined} data, (pos, Ast.Undefined)::changes)
+          ( D.set pos Ast.{value = Undefined} data
+          , (pos, Ast.Undefined) :: changes ) )
         (data, changes)
         (Dependency.get_non_computable_nodes dependency)
     in

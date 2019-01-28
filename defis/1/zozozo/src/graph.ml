@@ -128,8 +128,6 @@ let change_node label ({content; neighbours} as node) g =
   in
   add_neighbours_ label node g
 
-
-
 (* Debug function *)
 let print_neighbours neigh =
   Spos.iter
@@ -153,7 +151,6 @@ let print_graph g =
       print_neighbours neighbours )
     bind;
   print_endline ""
-
 
 (* [del_node g label] devrait sortir les cases à recalculer *)
 (*let del_node g label =
