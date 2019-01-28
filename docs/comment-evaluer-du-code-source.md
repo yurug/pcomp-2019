@@ -34,6 +34,8 @@ de critères pour évaluer un logiciel.
 
 ## Complexité
 
+## Simplicité
+
 ## Performance
 
 ## Robustesse
