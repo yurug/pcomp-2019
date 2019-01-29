@@ -29,9 +29,26 @@ func ParseSheet(sheet string, c chan eval.Cell) (string, error) {
 			return ""
 			}
 	*/
-	return ""
+	return "", nil
 }
 
+func isNumber(cell []byte) (bool, error) {
+	cellString := string(cell[:])
+	cellInt, err := strconv.Atoi(cellString)
+	if err != nil {
+		var validFormula = regexp.MustCompile(`=#[(]\d+, \d+, \d+, \d+, \d+[)]`)
+		//tbd
+		if validFormula.Match(cell) {
+
+			return true, nil
+		}
+		//case formula
+		return true, nil
+	}
+	return true, nil
+}
+
+/*
 func StringToLine(input string) {
 
 }
@@ -48,3 +65,4 @@ func CellToValue() {
 func ValueToCell() {
 
 }
+*/
