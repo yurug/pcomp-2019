@@ -3,8 +3,8 @@ package db
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"os"
-	"strings"
 )
 
 // Controller is a struct used to access the database and the file associated to it
@@ -24,52 +24,54 @@ func NewController(path string) (*Controller, error) {
 }
 
 //GetLine returns the next line read in the associated file, or an error if EOF
-func (ctlr *Controller) GetLine() (string, error) {
+func (ctlr *Controller) NextLine() ([]byte, error) {
 	rd := bufio.NewReader(ctlr.file)
-	line, err := rd.ReadString('\n')
+	line, err := rd.ReadBytes('\n')
 	if err != nil {
-		return "", fmt.Errorf("Error in GetLine() of %s : %v", ctlr.file.Name(), err)
+		return nil, fmt.Errorf("Error in GetLine() of %s : %v", ctlr.file.Name(), err)
 	}
 	return line, err
 }
 
 //GetLineByID returns the line at position n
 //Need to discuss about it
-func (ctlr *Controller) GetLineByID(numLine int) string {
+func (c *Controller) LineByID(numLine int) string {
 	return "s"
 }
 
-//GetCell returns the cell in the file associated to the (row, coloumn) tuple in arguments
-func (ctlr *Controller) GetCell(r int, c int) (string, error) {
-	rd := bufio.NewReader(ctlr.file)
-	for i := 0; i < r; i++ {
-		_, err := rd.ReadString('\n')
+/*
+//GetCell returns the cell in the file associated to the (row, column) tuple in arguments
+func (c *Controller) NextCell(row int, column int) ([]byte, error) {
+	rd := bufio.NewReader(c.file)
+	for i := 0; i < row; i++ {
+		_, err := rd.ReadBytes('\n')
 		if err != nil {
-			return "", fmt.Errorf("Error in GetCell(%v, %v) of %s : %v", r, c, ctlr.file.Name(), err)
+			return nil, fmt.Errorf("Error in GetCell(%v, %v) of %s : %v", row, column, c.file.Name(), err)
 		}
 	}
 
-	line, err := rd.ReadString('\n')
+	line, err := rd.ReadBytes('\n')
 	if err != nil {
-		return "", fmt.Errorf("Error in GetCell(%v, %v) of %s : %v", r, c, ctlr.file.Name(), err)
+		return nil, fmt.Errorf("Error in GetCell(%v, %v) of %s : %v", row, column, c.file.Name(), err)
 	}
 	slice := strings.Split(line, ";")
-	return slice[c], nil
+	return slice[column], nil
 }
 
 //WriteLine return an error if it fails to write the string into the file
 //Need to discuss about it, maybe not needed into Controller
-func (ctlr *Controller) WriteLine(numLine int, line string) error {
-	wr := bufio.NewWriter(ctlr.file)
+func (c *Controller) WriteLine(numLine int, line string) error {
+	wr := bufio.NewWriter(c.file)
 	_, err := wr.WriteString(line)
 	if err != nil {
-		return fmt.Errorf("Error in WriteLine of [%s] into %s: %v", line, ctlr.file.Name(), err)
+		return fmt.Errorf("Error in WriteLine of [%s] into %s: %v", line, c.file.Name(), err)
 	}
 	return nil
 }
 
 //WriteCell works like WriteLine
 //Need to discuss about it, maybe not needed into Controller
-func (ctlr *Controller) WriteCell(r int, c int, v int) error {
+func (c *Controller) WriteCell(row int, column int, v int) error {
 	return nil
 }
+*/
