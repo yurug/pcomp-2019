@@ -23,6 +23,10 @@ func NewController(path string) (*Controller, error) {
 	}, nil
 }
 
+func (c *Controller) ReadAll() ([]byte, error) {
+	return ioutil.ReadAll(c.file)
+}
+
 //GetLine returns the next line read in the associated file, or an error if EOF
 func (ctlr *Controller) NextLine() ([]byte, error) {
 	rd := bufio.NewReader(ctlr.file)
