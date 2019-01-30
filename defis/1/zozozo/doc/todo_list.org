@@ -4,8 +4,8 @@ qu'on ne se marche pas sur les pieds.
 
 Merci de passer la tâche en DONE quand finie.
 
-** TODO Relire tests pierre et vérifier que les résultats attendus sont justes
-** TODO Trouver une facon efficace de définir l'utilité de chaque test (lire comment)
+** DONE Relire tests pierre et vérifier que les résultats attendus sont justes
+** TODO Trouver une facon efficace de définir l'utilité de chaque test (lire commentaire en dessous)
 Idée : pouvoir déterminer quels tests lancés pour tester quelque chose
 (genre : cycle, gros fichier)
 
@@ -14,7 +14,7 @@ catégories et le numéro de chaque test rentrant dans cette catégorie
 
 ** TODO Ajouter plus de tests
 ** TODO Ecrire un générateur malin de test pour générer automatiquement des gros tableurs
-** TODO Carine : debugger les changements (changes.txt)
+** DONE Carine : debugger les changements (changes.txt)
 ** TODO Graph : commenter, nettoyer, raccourcir les fonctions
 ** TODO Dependency : commenter, nettoyer, raccourcir les fonctions
 ** TODO Data : commenter, nettoyer, raccourcir les fonctions
@@ -23,3 +23,22 @@ catégories et le numéro de chaque test rentrant dans cette catégorie
 ** TODO DataArray : Avoir une taille de tableau logique pour ne pas en afficher trop ou faire des folds sur trop
 ** TODO Data : ajouter d'autres implémentations (Fonctionnelle pure, qui ne stocke rien en mémoire, etc).
 ** TODO Refléchir à comment gérer des tableaux de grandes tailles : Quels modules vont demander du changement
+** TODO Faire marcher "make tests"
+** TODO Ajouter diff à test.sh et affichage résultats avec option verbose ou pas
+** TODO compléter le README
+
+* Question
+Si une case recalculée donne le même résultat que sa valeur précédent
+ou que on change une case pour la même valeur, doit -on enregistrer le
+changement ?
+
+Carine : Je dirais que non vu que l'idée est de connaitre la liste des
+différences entre le fichier view0 et le résultat après chaque modif
+utilisateur
+
+
+
+* Résultats Tests (à déplacer)
+** 1 -8 ok
+** 9 un changement de trop inscrit (case recalculée mais non modifiée)
+** 10 -12 ok
