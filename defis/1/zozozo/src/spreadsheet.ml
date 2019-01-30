@@ -94,17 +94,6 @@ module Make (D : Data.DATA) = struct
     in
     Ast.Set (pos, content)
 
-  let build_graph formulas =
-    let rec build_acc g formulas =
-      match formulas with
-      | [] -> g
-      | (_, Ast.Val _) :: _ ->
-        failwith "Spreadsheet.build_graph: Val in formula."
-      | Ast.(pos, (Occ _ as content)) :: r ->
-        build_acc (add_node pos (build_node content) g) r
-    in
-    build_acc empty formulas
-
   let output data view0 =
     let file = open_out view0 in
     D.iter'
@@ -127,6 +116,17 @@ module Make (D : Data.DATA) = struct
           changes )
       all_changes;
     close_out file
+
+  let build_graph formulas =
+    let rec build_acc g formulas =
+      match formulas with
+      | [] -> g
+      | (_, Ast.Val _) :: _ ->
+        failwith "Spreadsheet.build_graph: Val in formula."
+      | Ast.(pos, (Occ _ as content)) :: r ->
+        build_acc (add_node pos (build_node content) g) r
+    in
+    build_acc empty formulas
 
   let eval_occ data p p' v =
     D.fold_rect

@@ -28,11 +28,6 @@ let initialisation data_filename =
 
 let write_view0 view0_filename data = Sp.output data view0_filename
 
-let apply_action user_file data graph =
-  let line = input_line user_file in
-  let action = Sp.parse_action line in
-  Sp.update data graph action, line
-
 let write_final_result view0_filename data (* debug function *) =
   let ll = String.split_on_char '/' view0_filename in
   match List.rev ll with
@@ -42,12 +37,17 @@ let write_final_result view0_filename data (* debug function *) =
     let view_final_filename = String.concat "/" dir ^ "/" ^ "view_final.csv" in
     Sp.output data view_final_filename
 
+let get_action user_file =
+  let line = String.trim (input_line user_file) in
+  Sp.parse_action line, line
+
 let loop_user user_filename changes_filename data graph =
   let user_file = open_in user_filename in
   let rec loop data graph all_changes =
-    match apply_action user_file data graph with
-    | (data, graph, changes), action_str ->
-      loop data graph ((action_str, changes) :: all_changes)
+    match get_action user_file with
+    | act, act_str ->
+      let data, graph, changes = Sp.update data graph act in
+      loop data graph ((act_str, changes) :: all_changes)
     | exception End_of_file ->
       close_in user_file;
       List.rev all_changes
