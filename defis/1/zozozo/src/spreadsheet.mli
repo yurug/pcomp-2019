@@ -18,7 +18,7 @@ module Make (D : Data.DATA) : sig
   val output : data -> string -> unit
 
   val output_changes :
-    (Graph.nodeLabel * Ast.value) list -> string -> string -> unit
+    (string * (Graph.nodeLabel * Ast.value) list) list -> string -> unit
 
   (** [update data graph action] applies the action [action] to [data]
      and updates [graph] accordingly.*)

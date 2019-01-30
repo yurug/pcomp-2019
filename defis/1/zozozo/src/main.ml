@@ -43,13 +43,17 @@ let write_final_result view0_filename data (* debug function *) =
     Sp.output data view_final_filename
 
 let loop_user user_filename changes_filename data graph =
-  let user = open_in user_filename in
-  let rec loop data graph =
-    let (data, graph, changes), action_str = apply_action user data graph in
-    Sp.output_changes changes changes_filename (String.trim action_str);
-    loop data graph
+  let user_file = open_in user_filename in
+  let rec loop data graph all_changes =
+    match apply_action user_file data graph with
+    | (data, graph, changes), action_str ->
+      loop data graph ((action_str, changes) :: all_changes)
+    | exception End_of_file ->
+      close_in user_file;
+      List.rev all_changes
   in
-  try loop data graph with End_of_file -> close_in user
+  let all_changes = loop data graph [] in
+  Sp.output_changes all_changes changes_filename
 
 let main () =
   let data_filename, user_filename, view0_filename, changes_filename =

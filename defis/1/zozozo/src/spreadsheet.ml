@@ -40,17 +40,59 @@ module Make (D : Data.DATA) = struct
     close_in ic;
     return
 
-  let parse_action line =
-    let ic = Scanf.Scanning.from_string line in
-    let r, c, cell = Scanf.bscanf ic "%d %d %s" (fun r c cell -> r, c, cell) in
-    let content =
-      try
-        let value = read_value cell in
-        Ast.Val value
-      with Scanf.Scan_failure _ ->
-        (try read_formula cell with Scanf.Scan_failure _ -> fail r c)
+  let try_int_of_string err s =
+    try int_of_string s with Failure _ -> failwith err
+
+  let parse_pos err r c =
+    try Ast.{r = int_of_string r; c = int_of_string c} with Failure _ ->
+      failwith err
+
+  let parse_value err vstr =
+    match vstr with
+    | "P" -> Ast.Undefined
+    | v -> Ast.Int (try_int_of_string err v)
+
+  let parse_formula err h c1 r2 c2 v =
+    let rmin =
+      if String.sub h 0 3 = "=#("
+      then try_int_of_string err (String.sub h 3 (String.length h - 3))
+      else failwith err
     in
-    Ast.Set ({r; c}, content)
+    let cmin, rmax, cmax =
+      ( try_int_of_string err c1
+      , try_int_of_string err r2
+      , try_int_of_string err c2 )
+    in
+    let v =
+      try String.sub v 0 (String.length v - 1) with Invalid_argument _ ->
+        failwith err
+    in
+    let v = parse_value err v in
+    Ast.Occ (({r = rmin; c = cmin}, {r = rmax; c = cmax}), v)
+
+  let parse_action line =
+    let bad_format_err = "Bad format in user.txt file" in
+    let split = String.split_on_char ' ' line in
+    let pos, str_content =
+      match split with
+      | r :: c :: cell -> parse_pos bad_format_err r c, cell
+      | _ -> failwith bad_format_err
+    in
+    let str_content =
+      String.concat "" str_content
+      |> String.split_on_char ','
+      |> List.map String.trim
+    in
+    let content =
+      match str_content with
+      | [v] -> Ast.Val (parse_value bad_format_err v)
+      | [h; c1; r2; c2; v] when String.length h >= 4 ->
+        (* TODO : add tolerance here on formula format (no spaces
+             accepted right now between =# and ( and ( and first int) *)
+        parse_formula bad_format_err h c1 r2 c2 v
+      | _ -> failwith bad_format_err
+    in
+    Ast.Set (pos, content)
 
   let build_graph formulas =
     let rec build_acc g formulas =
@@ -73,14 +115,17 @@ module Make (D : Data.DATA) = struct
       data;
     close_out file
 
-  let output_changes changes filename cmd =
+  let output_changes all_changes filename =
     let file = open_out filename in
-    Printf.fprintf file "after \"%s\":\n" cmd;
     List.iter
-      (fun (Ast.({r; c}), v) ->
-        let v = Ast.string_of_value v in
-        Printf.fprintf file "%d %d %s\n" r c v )
-      changes;
+      (fun (cmd, changes) ->
+        Printf.fprintf file "after \"%s\":\n" cmd;
+        List.iter
+          (fun (Ast.({r; c}), v) ->
+            let v = Ast.string_of_value v in
+            Printf.fprintf file "%d %d %s\n" r c v )
+          changes )
+      all_changes;
     close_out file
 
   let eval_occ data p p' v =
