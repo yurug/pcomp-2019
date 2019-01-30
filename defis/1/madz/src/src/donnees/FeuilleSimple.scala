@@ -12,7 +12,7 @@ class FeuilleSimple(feuille:BufferedSource) extends FeuilleCalque {
    for(l <- feuille.getLines()){
       println(l)
       for(c <- l.split(";")){
-        cellules(i)(j) = new Cellule( DataParser.parseData(c))
+        cellules(i)(j) = new Cellule( Some (DataParser.parseData(c)))
         j+=1
       }
       i+=1;j=0
@@ -24,12 +24,12 @@ class FeuilleSimple(feuille:BufferedSource) extends FeuilleCalque {
   }
 
   def writeCell(c:Case, v:CaseData): Unit = {
-    cellules(c.i)(c.j) = new Cellule(v)
+    cellules(c.i)(c.j) = new Cellule(Some (v))
   }
 
-  final def getData(c: Case) : CaseData = cellules(c.i)(c.j).getVal
+  final def getData(c: Case) = cellules(c.i)(c.j).getVal
   
-  final def getRegion(case_leftTop:Case, case_bottomRight:Case): Array[Array[CaseData]] ={
+  final def getRegion(case_leftTop:Case, case_bottomRight:Case) ={
       val row = cellules.slice(case_leftTop.i ,case_bottomRight.i)
       row.map (column => {
               val interval_selected = column.slice(case_leftTop.j ,case_bottomRight.j)
@@ -44,7 +44,7 @@ class FeuilleSimple(feuille:BufferedSource) extends FeuilleCalque {
   }
   
   //il y a une erreur que j ai pas compris zen?
-  final def iterator: Iterator[donnees.CaseData] = {
+  final def iterator = {
      /* val ite = new Array(0).iterator
       for (i <- 0 until (cellules(0).length - 1))
         ite ++ cellules(i).iterator

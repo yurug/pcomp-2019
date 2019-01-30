@@ -22,7 +22,7 @@ object DataParser{
     }
   }
   
-  def formuleToString(cellules: Array[Array[Cellule]]):Unit={
+/*  def formuleToString(cellules: Array[Array[Cellule]]):Unit={
     var i=0; var j=0
     for(l <- cellules){
       for(c <- l){
@@ -38,7 +38,7 @@ object DataParser{
       i+=1;j=0
     }
   }
-  
+  */
    
    def writeView0(cellules: Array[Array[Cellule]]):Unit ={
      val writer = new PrintWriter(new File("view0.csv"))
