@@ -1,4 +1,5 @@
 package donnees
+
 abstract class CaseData
 
 case class Number(value: Int) extends CaseData
