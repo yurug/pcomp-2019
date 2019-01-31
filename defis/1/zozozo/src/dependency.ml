@@ -19,13 +19,16 @@ exception Cycle
 let build_node nb_depend content neighbours color =
   {nb_depend; content; neighbours; color}
 
+let add_node label node gdepend = Mpos.add label node gdepend
+let traversal f neigh gdepend = Graph.fold_neighbours f neigh gdepend
+
 let build_dependency_from_
     (g : Graph.t) (label : Graph.nodeLabel) (gdepend : gdepend) =
   let neigh, content =
     try Graph.get_neighbours_content label g with Graph.NonExistingNode ->
       failwith "Dependency.build_dependency_from_ : Non existing first node."
   in
-  let gdepend = Mpos.add label (build_node 0 content neigh Black) gdepend in
+  let gdepend = add_node label (build_node 0 content neigh Black) gdepend in
   let rec build label gdepend =
     let node_opt = Mpos.find_opt label gdepend in
     let prev_color, node =
@@ -36,12 +39,12 @@ let build_dependency_from_
       | Some ({color; _} as node) ->
         color, {node with nb_depend = node.nb_depend + 1; color = Black}
     in
-    let gdepend = Mpos.add label node gdepend in
+    let gdepend = add_node label node gdepend in
     match prev_color with
     | Black -> gdepend
-    | White -> traversal gdepend node.neighbours
-  and traversal gdepend neigh = Graph.fold_neighbours build neigh gdepend in
-  traversal gdepend neigh
+    | White -> traversal build node.neighbours gdepend
+  in
+  traversal build neigh gdepend
 
 let build_dependency_from (g : Graph.t) (label : Graph.nodeLabel) : gdepend =
   build_dependency_from_ g label empty_gdepend

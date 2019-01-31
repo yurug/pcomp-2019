@@ -93,6 +93,23 @@ let add_node label ({content; neighbours} as node) g =
   in
   add_neighbours_ label node g
 
+let remove_formula_neighbours label region graph =
+  fold_neighbours
+    (fun lab gg ->
+      match Mpos.find_opt lab gg with
+      | None ->
+        failwith "Graph.change_node : Non dependency when we should have one."
+      | Some nl ->
+        let new_neigh = remove_neighbours label nl.neighbours in
+        if new_neigh = empty_neighbours
+        then
+          match nl.content with
+          | Val _ -> Mpos.remove lab gg
+          | _ -> Mpos.add lab {nl with neighbours = new_neigh} gg
+        else Mpos.add lab {nl with neighbours = new_neigh} gg )
+    (region_to_set region)
+    graph
+
 let change_node label ({content; neighbours} as node) g =
   let existing_node_opt = Mpos.find_opt label g in
   let g =
@@ -102,24 +119,7 @@ let change_node label ({content; neighbours} as node) g =
       Mpos.add label {content; neighbours = neighbours @@ old_neighbours} g
     | Some {content = Occ (region, _); neighbours = old_neighbours} ->
       (* Aller voir tous les noeuds dans [region] et retirer dependance à label*)
-      let g =
-        fold_neighbours
-          (fun lab gg ->
-            match Mpos.find_opt lab gg with
-            | None ->
-              failwith
-                "Graph.change_node : Non dependencies when we should have one."
-            | Some nl ->
-              let new_neigh = remove_neighbours label nl.neighbours in
-              if new_neigh = empty_neighbours
-              then
-                match nl.content with
-                | Val _ -> Mpos.remove lab gg
-                | _ -> Mpos.add lab {nl with neighbours = new_neigh} gg
-              else Mpos.add lab {nl with neighbours = new_neigh} gg )
-          (region_to_set region)
-          g
-      in
+      let g = remove_formula_neighbours label region g in
       Mpos.add
         label
         { content
