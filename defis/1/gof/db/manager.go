@@ -11,7 +11,8 @@ const LINE_DELIMITER = '\n'
 
 // Controller is a struct used to access the database and the file associated to it
 type Controller struct {
-	file *os.File
+	file    *os.File
+	scanner *bufio.Scanner
 }
 
 //NewController takes into input a path to the file and returns a *Controller
@@ -21,7 +22,8 @@ func NewController(path string) (*Controller, error) {
 		return nil, fmt.Errorf("error")
 	}
 	return &Controller{
-		file: f,
+		file:    f,
+		scanner: bufio.NewScanner(f),
 	}, nil
 }
 
@@ -31,12 +33,19 @@ func (c *Controller) ReadAll() ([]byte, error) {
 
 //GetLine returns the next line read in the associated file, or an error if EOF
 func (c *Controller) NextLine() ([]byte, error) {
-	rd := bufio.NewReader(c.file)
-	line, err := rd.ReadBytes(LINE_DELIMITER)
-	if err != nil {
-		return nil, fmt.Errorf("Error in GetLine() of %s : %v", c.file.Name(), err)
+	ok := c.scanner.Scan()
+	if !ok {
+		return nil, fmt.Errorf("Error in GetLine() of %s", c.file.Name())
 	}
-	return line, err
+	return c.scanner.Bytes(), nil
+	/*
+		rd := bufio.NewReader(c.file)
+		line, err := rd.ReadBytes(LINE_DELIMITER)
+		if err != nil {
+			return nil, fmt.Errorf("Error in GetLine() of %s : %v", c.file.Name(), err)
+		}
+		return line, err
+	*/
 }
 
 //GetLineByID returns the line at position n
