@@ -38,3 +38,16 @@ func userPutFormul(r1 int, c1 int, r2 int, c2 int, v int,
 	values[x][y] = formula
 
 }
+
+
+//fonction qui inverse la case de depart et la case d'arrive,
+func reformateFormule(f *Formula){
+	if(f.Start.X > f.End.X){
+		tmp :=f.Start.X
+		f.Start.X = f.End.X
+		f.End.X = tmp
+		tmp =f.Start.Y
+		f.Start.Y = f.End.Y
+		f.End.Y = tmp
+	}
+}
