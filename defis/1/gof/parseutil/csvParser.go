@@ -10,8 +10,12 @@ import (
 	"github.com/yurug/pcomp-2019/defis/1/gof/eval"
 )
 
-//ParseCsv TO-DO
-func ParseSheet(sheet string, c chan eval.Cell) (string, error) {
+const KIND_NUMBER = "NUMBER"
+const KIND_FORMULA = "FORMULA"
+const KIND_UNKNOWN = "UNKOWN"
+
+func ParseSheet(sheet string, c chan eval.Cell) error {
+	defer close(c)
 	controller, err := db.NewController(sheet)
 	if err != nil {
 		return "", fmt.Errorf("Error while calling new controller for ParseSheet: %v", err)
@@ -47,36 +51,14 @@ func ParseSheet(sheet string, c chan eval.Cell) (string, error) {
 	return "", nil
 }
 
-func isNumber(cell string) (bool, error) {
+func checkType(cell string) string {
 	_, err := strconv.Atoi(cell)
 	if err != nil {
 		var validFormula = regexp.MustCompile(`=#[(]\d+, \d+, \d+, \d+, \d+[)]`)
-		//tbd
 		if validFormula.MatchString(cell) {
-
-			return true, nil
+			return KIND_FORMULA
 		}
-		//case formula
-		return true, nil
+		return KIND_UNKNOWN
 	}
-	return true, nil
+	return KIND_NUMBER
 }
-
-/*
-func StringToLine(input string) {
-
-}
-
-func LineToString() string {
-
-	return ""
-}
-
-func CellToValue() {
-
-}
-
-func ValueToCell() {
-
-}
-*/
