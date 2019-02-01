@@ -1,9 +1,9 @@
 module Make (D : Data.DATA) : sig
   type data
 
-  (** [parse_data data.csv] parses the original data and returns the
+  (** [init data.csv] parses the original data and returns the
      spreadsheet. *)
-  val parse_data : string -> data * (Ast.pos * Graph.node_content) list
+  val init : string -> data * (Ast.pos * Graph.node_content) list
 
   (** [build_graph formulas] creates a dependency graph from a list of
      [formulas]. *)

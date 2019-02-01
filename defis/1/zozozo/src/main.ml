@@ -21,7 +21,7 @@ let parse_input argv =
 let pre_evaluation data graph formulas = Sp.eval_init data graph formulas
 
 let initialisation data_filename =
-  let data, formulas = Sp.parse_data data_filename in
+  let data, formulas = Sp.init data_filename in
   let graph = Sp.build_graph formulas in
   let data = pre_evaluation data graph formulas in
   data, Sp.build_graph formulas, formulas
