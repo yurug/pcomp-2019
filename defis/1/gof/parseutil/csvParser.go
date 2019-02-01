@@ -13,42 +13,46 @@ import (
 const KIND_NUMBER = "NUMBER"
 const KIND_FORMULA = "FORMULA"
 const KIND_UNKNOWN = "UNKOWN"
+const SIZE_FORMULA = 5
 
 func ParseSheet(sheet string, c chan eval.Cell) error {
 	defer close(c)
 	controller, err := db.NewController(sheet)
 	if err != nil {
-		return "", fmt.Errorf("Error while calling new controller for ParseSheet: %v", err)
+		return fmt.Errorf("Error while calling new controller for ParseSheet: %v", err)
 	}
 
 	rowID := 0
-	for err == nil {
+	for {
 		line, err := controller.NextLine()
 		if err != nil {
-			continue
-			// TO CHANGE
+			return err
 		}
 		cells := strings.Split(string(line[:]), ";")
 		for columnID, cell := range cells {
-			ok, err := isNumber(cell)
-			if err != nil {
-				c <- eval.NewUnknown(rowID, columnID)
-				continue
-			}
-			if ok {
+			switch checkType(cell) {
+			case KIND_NUMBER:
 				v, _ := strconv.Atoi(cell)
-				number, err := eval.NewNumber(rowID, columnID, v)
-				if err != nil {
-
-				}
+				number, _ := eval.NewNumber(rowID, columnID, v)
 				c <- number
-				continue
+			case KIND_FORMULA:
+				values := regexp.MustCompile(`\d+`).FindAllString(cell, -1)
+				if len(values) != SIZE_FORMULA {
+					c <- eval.NewUnknown(rowID, columnID)
+					continue
+				}
+				valuesInt := make([]int, SIZE_FORMULA)
+				for i, v := range values {
+					valuesInt[i], _ = strconv.Atoi(v)
+					//No error because of the regex
+				}
+				c <- eval.NewFormula(valuesInt[0], valuesInt[1], valuesInt[2], valuesInt[3], valuesInt[4], rowID, columnID)
+			case KIND_UNKNOWN:
+				c <- eval.NewUnknown(rowID, columnID)
 			}
-			//formula treatment
 		}
 
 	}
-	return "", nil
 }
 
 func checkType(cell string) string {
