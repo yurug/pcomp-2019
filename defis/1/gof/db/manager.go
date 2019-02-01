@@ -7,6 +7,8 @@ import (
 	"os"
 )
 
+const LINE_DELIMITER = '\n'
+
 // Controller is a struct used to access the database and the file associated to it
 type Controller struct {
 	file *os.File
@@ -28,11 +30,11 @@ func (c *Controller) ReadAll() ([]byte, error) {
 }
 
 //GetLine returns the next line read in the associated file, or an error if EOF
-func (ctlr *Controller) NextLine() ([]byte, error) {
-	rd := bufio.NewReader(ctlr.file)
-	line, err := rd.ReadBytes('\n')
+func (c *Controller) NextLine() ([]byte, error) {
+	rd := bufio.NewReader(c.file)
+	line, err := rd.ReadBytes(LINE_DELIMITER)
 	if err != nil {
-		return nil, fmt.Errorf("Error in GetLine() of %s : %v", ctlr.file.Name(), err)
+		return nil, fmt.Errorf("Error in GetLine() of %s : %v", c.file.Name(), err)
 	}
 	return line, err
 }
