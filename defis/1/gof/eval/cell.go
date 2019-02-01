@@ -2,6 +2,8 @@ package eval
 
 import "fmt"
 
+const BAD_FORMAT = "P"
+
 type Cell interface {
 	Coordinate() Coordinate
 	Parents() []Cell
@@ -58,4 +60,27 @@ func (f *Formula) Coordinate() Coordinate {
 
 func (f *Formula) Parents() []Cell {
 	return f.parents
+}
+
+type Unknown struct {
+	position Coordinate
+	parents  []Cell
+}
+
+func NewUnknown(x int, y int) *Unknown {
+	return &Unknown{
+		position: Coordinate{x, y},
+	}
+}
+
+func (u *Unknown) Coordinate() Coordinate {
+	return u.position
+}
+
+func (u *Unknown) Parents() []Cell {
+	return u.parents
+}
+
+func (u *Unknown) Value() string {
+	return BAD_FORMAT
 }
