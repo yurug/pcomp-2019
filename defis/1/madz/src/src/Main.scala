@@ -10,12 +10,12 @@ object Main {
         return 0
     }
     val feuille = Source.fromFile(args(0)) 
-    val f= new FeuilleSimple(feuille)
+    val f= new SimpleFeuilleWithDependance(feuille)
     f.loadCalc()
-    println(f.cellules(0)(0))
-    
-    DataParser.formuleToString(f.cellules)
-    DataParser.writeView0(f.cellules) 
+    println(f.getCellules(0)(0))
+    val interpreter = new Interpreteur_implement(f)
+    interpreter.evalSheet
+//    DataParser.writeView0(f.cellules) 
     return 1
   }   
 }

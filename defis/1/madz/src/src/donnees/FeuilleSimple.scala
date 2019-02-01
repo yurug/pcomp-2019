@@ -3,9 +3,8 @@ import scala.io._
 
 class FeuilleSimple(feuille:BufferedSource) extends FeuilleCalque {
   
-  //comment initialiser le tableau??? 
-  final var cellules = Array.ofDim[Cellule](2,4)
-  
+  final protected var cellules = Array.ofDim[Cellule](2,4)
+  def getCellules = cellules
   def loadCalc(): Unit = {
     var i=0;var j=0
     println("ok")
@@ -43,7 +42,6 @@ class FeuilleSimple(feuille:BufferedSource) extends FeuilleCalque {
       (i,j)
   }
   
-  //il y a une erreur que j ai pas compris zen?
   final def iterator = {
      /* val ite = new Array(0).iterator
       for (i <- 0 until (cellules(0).length - 1))
