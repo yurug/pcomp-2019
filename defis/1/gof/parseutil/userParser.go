@@ -1,4 +1,4 @@
-package parser
+package parserutil
 
 //ParseUserRequest TO-DO
 func ParseUserRequest(usrReq string) string {
