@@ -19,8 +19,10 @@ func countOccurence(n int, values []int) int {
 	}
 	return count
 }
-func userPutValue(val int, x int, y int, values [][]Cell)(error){
 
+//on suppose qu'on a tt les cellules chargées en mémoires
+//fonction fait par l'utilisateur pour modifier une cellule par un int
+func userPutValue(val int, x int, y int, values [][]Cell)(error){
 	number, err := NewNumber(x,y,val)
 	if(err != nil){
 		return err
@@ -29,6 +31,7 @@ func userPutValue(val int, x int, y int, values [][]Cell)(error){
 	return err
 }
 
+//fonction fait par l'utilisateur pour modifier une cellule par une formule
 func userPutFormul(r1 int, c1 int, r2 int, c2 int, v int,
 	x int, y int, values [][]Cell){
 	formula := NewFormula(r1,c1,r2,c2,v,x,y)
