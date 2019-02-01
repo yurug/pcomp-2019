@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/yurug/pcomp-2019/defis/1/gof/db"
 	"github.com/yurug/pcomp-2019/defis/1/gof/eval"
@@ -16,29 +17,42 @@ func ParseSheet(sheet string, c chan eval.Cell) (string, error) {
 		return "", fmt.Errorf("Error while calling new controller for ParseSheet: %v", err)
 	}
 
-	err = nil
+	rowID := 0
 	for err == nil {
 		line, err := controller.NextLine()
+		if err != nil {
+			continue
+			// TO CHANGE
+		}
+		cells := strings.Split(string(line[:]), ";")
+		for columnID, cell := range cells {
+			ok, err := isNumber(cell)
+			if err != nil {
+				c <- eval.NewUnknown(rowID, columnID)
+				continue
+			}
+			if ok {
+				v, _ := strconv.Atoi(cell)
+				number, err := eval.NewNumber(rowID, columnID, v)
+				if err != nil {
 
-		c <- eval.NewNumber(5, 5, 5)
+				}
+				c <- number
+				continue
+			}
+			//formula treatment
+		}
 
 	}
-	/*
-		controller, err := db.NewController(csv)
-		if err != nil {
-			return ""
-			}
-	*/
 	return "", nil
 }
 
-func isNumber(cell []byte) (bool, error) {
-	cellString := string(cell[:])
-	cellInt, err := strconv.Atoi(cellString)
+func isNumber(cell string) (bool, error) {
+	_, err := strconv.Atoi(cell)
 	if err != nil {
 		var validFormula = regexp.MustCompile(`=#[(]\d+, \d+, \d+, \d+, \d+[)]`)
 		//tbd
-		if validFormula.Match(cell) {
+		if validFormula.MatchString(cell) {
 
 			return true, nil
 		}
