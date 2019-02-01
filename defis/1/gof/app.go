@@ -21,7 +21,7 @@ func main() {
 		case *eval.Unknown:
 			fmt.Printf("Cell of type Unknown and value: %v\n", cell.Value())
 		case *eval.Formula:
-			fmt.Printf("Cell of type Formula: %v\n", "Not yet")
+			fmt.Printf("Cell of type Formula: %v / %v / %v\n", cell.Start, cell.End, cell.ToEval)
 		}
 	}
 }
