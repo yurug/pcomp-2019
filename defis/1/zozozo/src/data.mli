@@ -6,15 +6,8 @@ module type DATA = sig
   (** Abstract data type.  *)
   type t
 
-  (** [create rows cols] creates an underlying representation of the
-     spreadsheet of [rows] times [cols] cells. *)
-  val create : int -> int -> t
-
-  (** [resize rows cols t] either truncates or expands the underlying
-     reprensentation of [t] to a spreadsheet of [rows] times [cols]
-     cells. Values may be lost if the spreadsheet is truncated in any
-     dimension. Otherwise, values are preserved. *)
-  val resize : int -> int -> t -> t
+  (** [init data_filename] initialize [t] and return the list of [formulas]. *)
+  val init : string -> t * (pos * content) list
 
   (** [get pos t] returns the cell contained in [t] at position
      [pos]. An out-of-bounds access returns a cell with value
@@ -35,10 +28,7 @@ module type DATA = sig
   val map_recti : (pos -> cell -> cell) -> pos * pos -> t -> t
   val fold_rect : ('a -> cell -> 'a) -> 'a -> pos * pos -> t -> 'a
   val fold_recti : ('a -> pos -> cell -> 'a) -> 'a -> pos * pos -> t -> 'a
-  val iter : (cell -> unit) -> t -> unit
-  val iter' : (cell -> unit) -> (unit -> unit) -> t -> unit
-  val iter_column : (cell -> unit) -> int -> t -> unit
-  val iter_row : (cell -> unit) -> int -> t -> unit
+  val output_init : t -> string -> unit
 end
 
 module DataArray : DATA

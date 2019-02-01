@@ -3,42 +3,7 @@ open Graph
 module Make (D : Data.DATA) = struct
   type data = D.t
 
-  let read_value cell =
-    let value = Scanf.sscanf (String.trim cell) "%d" (fun d -> d) in
-    Ast.Int value
-
-  let read_formula cell =
-    Scanf.sscanf cell "=#(%d, %d, %d, %d, %d)" (fun r1 c1 r2 c2 v ->
-        Ast.Occ (({r = r1; c = c1}, {r = r2; c = c2}), Int v) )
-
-  let fail r c =
-    failwith ("Could not read cell " ^ string_of_int r ^ ":" ^ string_of_int c)
-
-  let parse_data data_filename =
-    let ic = open_in data_filename in
-    let rec aux data formulas r =
-      try
-        let line = input_line ic in
-        let cells = String.split_on_char ';' line in
-        let read_cell (data, formulas, r, c) cell =
-          try
-            let value = read_value cell in
-            D.set {r; c} {value} data, formulas, r, c + 1
-          with Scanf.Scan_failure _ ->
-            (try
-               let formula = read_formula cell in
-               data, (Ast.{r; c}, formula) :: formulas, r, c + 1
-             with Scanf.Scan_failure _ -> fail r c)
-        in
-        let data, formulas, _, _ =
-          List.fold_left read_cell (data, formulas, r, 0) cells
-        in
-        aux data formulas (r + 1)
-      with End_of_file -> data, formulas
-    in
-    let return = aux (D.create 16 16) [] 0 in
-    close_in ic;
-    return
+  let init data_filename = D.init data_filename
 
   let try_int_of_string err s =
     try int_of_string s with Failure _ -> failwith err
@@ -94,15 +59,7 @@ module Make (D : Data.DATA) = struct
     in
     Ast.Set (pos, content)
 
-  let output data view0 =
-    let file = open_out view0 in
-    D.iter'
-      (fun c ->
-        let s = Ast.string_of_value (Ast.value c) in
-        Printf.fprintf file "%s;" s )
-      (fun () -> Printf.fprintf file "\n")
-      data;
-    close_out file
+  let output data view0 = D.output_init data view0
 
   let output_changes all_changes filename =
     let file = open_out filename in
