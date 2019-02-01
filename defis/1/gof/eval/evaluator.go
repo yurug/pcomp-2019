@@ -19,3 +19,19 @@ func countOccurence(n int, values []int) int {
 	}
 	return count
 }
+func userPutValue(val int, x int, y int, values [][]Cell)(error){
+
+	number, err := NewNumber(x,y,val)
+	if(err != nil){
+		return err
+	}
+	values[x][y] = number
+	return err
+}
+
+func userPutFormul(r1 int, c1 int, r2 int, c2 int, v int,
+	x int, y int, values [][]Cell){
+	formula := NewFormula(r1,c1,r2,c2,v,x,y)
+	values[x][y] = formula
+
+}
