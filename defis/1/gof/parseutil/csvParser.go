@@ -15,6 +15,9 @@ const KIND_FORMULA = "FORMULA"
 const KIND_UNKNOWN = "UNKOWN"
 const SIZE_FORMULA = 5
 
+//ParsSheet takes a file's path and a channel. It extracts all the Cells from the file and send them
+//Into the channel to another go-routine. It returns error if the controller fails to init
+//Or if NextLine() read all the file
 func ParseSheet(sheet string, c chan eval.Cell) error {
 	defer close(c)
 	controller, err := db.NewController(sheet)
@@ -41,11 +44,8 @@ func ParseSheet(sheet string, c chan eval.Cell) error {
 					c <- eval.NewUnknown(rowID, columnID)
 					continue
 				}
-				valuesInt := make([]int, SIZE_FORMULA)
-				for i, v := range values {
-					valuesInt[i], _ = strconv.Atoi(v)
-					//No error because of the regex
-				}
+				valuesInt, _ := atoiSlice(values)
+				//No error thanks to regex
 				c <- eval.NewFormula(valuesInt[0], valuesInt[1], valuesInt[2], valuesInt[3], valuesInt[4], rowID, columnID)
 			case KIND_UNKNOWN:
 				c <- eval.NewUnknown(rowID, columnID)
@@ -53,6 +53,18 @@ func ParseSheet(sheet string, c chan eval.Cell) error {
 		}
 
 	}
+}
+
+func atoiSlice(arr []string) ([]int, error) {
+	results := make([]int, len(arr))
+	var err error
+	for i, v := range arr {
+		results[i], err = strconv.Atoi(v)
+		if err != nil {
+			return nil, fmt.Errorf("error occured in atoiSlice: %v", err)
+		}
+	}
+	return results, nil
 }
 
 func checkType(cell string) string {
