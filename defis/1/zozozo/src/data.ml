@@ -150,7 +150,9 @@ module DataArray : DATA = struct
       for j = 0 to cols do
         let c = get (Ast.pos i j) data in
         let s = Ast.string_of_value (Ast.value c) in
-        Printf.fprintf file "%s;" s
+        if j != cols
+        then Printf.fprintf file "%s;" s
+        else Printf.fprintf file "%s" s
       done;
       Printf.fprintf file "\n"
     done;
