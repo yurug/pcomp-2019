@@ -15,7 +15,7 @@ const SEP_COUNT: char = ',';
 
 parser! {
     fn num[I]()(I) -> Num where [I: Stream<Item = char>] {
-        from_str(many1::<String, _>(digit()))
+        spaces().with(from_str(many1::<String, _>(digit())))
     }
 }
 
@@ -54,11 +54,11 @@ parser! {
 
 parser! {
     fn data[I]()(I) -> Data where [I: Stream<Item = char>] {
-        choice!(
+        spaces().with(choice!(
             attempt(val()),
             attempt(count()),
             wrong()
-        )
+        ))
     }
 }
 
@@ -75,7 +75,7 @@ pub fn parse_line(line: u64, s: &str) -> Vec<Cell> {
     let res = data_line().easy_parse(s);
     let (v,s) = match res {
         Ok((v, s)) => (v,s),
-        _ => panic!("What a dirty parser !"),
+        Err(e) => panic!("{}",e),
     };
     let mut cell_vec = Vec::new();
     for i in 0..(v.len()) {
@@ -101,7 +101,7 @@ mod tests {
     use super::*;
 
     const T1 : (&str,Data) = ("12",Val(12));
-    const T2 : (&str,Data) = ("=#(1250,6000,7851,92573,125)",
+    const T2 : (&str,Data) = ("=#(1250,6000,7851,92573, 125)",
                               Fun(Count
                                  (Point{x:1250,y:6000},
                                   Point{x:7851,y:92573},
@@ -135,8 +135,22 @@ mod tests {
     #[test]
     fn test_list() {
         assert_eq!(
-            parse_line(0,&format!("{}{}{}{}{}{}",
-                                 T1.0,CSEP,T2.0,T3.0,CSEP,T1.0)),
+            parse_line(0,&format!("{}{}{}{}{}{}{}",
+                                 T1.0,CSEP,T2.0,CSEP,T3.0,CSEP,T1.0)),
+            vec![
+                Cell{content:T1.1,loc:Point{x:0,y:0}},
+                Cell{content:T2.1,loc:Point{x:1,y:0}},
+                Cell{content:T3.1,loc:Point{x:2,y:0}},
+                Cell{content:T1.1,loc:Point{x:3,y:0}}
+            ]
+        );
+    }
+
+    #[test]
+    fn test_spaces_robustness() {
+        assert_eq!(
+            parse_line(0,&format!("{}{} {}{} {}{} {}",
+                                 T1.0,CSEP,T2.0,CSEP,T3.0,CSEP,T1.0)),
             vec![
                 Cell{content:T1.1,loc:Point{x:0,y:0}},
                 Cell{content:T2.1,loc:Point{x:1,y:0}},
