@@ -29,7 +29,26 @@ func (e *Evaluator) initMatrix(lines chan []Cell) {
 	}
 }
 
-func (e *Evaluator) process() {
+func (e *Evaluator) Matrix() matrix {
+	return e.m
+}
+
+func (e *Evaluator) serialize() {
+	for _, line := range e.m {
+		for i, cell := range line {
+			if i == len(line)-1 {
+				e.target.WriteString(fmt.Sprintf("%v", cell.Value()))
+			} else {
+				e.target.WriteString(fmt.Sprintf("%v;", cell.Value()))
+			}
+		}
+		e.target.WriteString("\n")
+	}
+	return
+}
+
+func (e *Evaluator) Process(ch chan []Cell) {
+	e.initMatrix(ch)
 	for r, line := range e.m {
 		for c, cell := range line {
 			switch v := cell.(type) {
@@ -53,6 +72,7 @@ func (e *Evaluator) process() {
 			}
 		}
 	}
+	e.serialize()
 }
 
 func (e *Evaluator) eval(c Cell, param int, occ int, visited map[string]bool) (int, error) {
@@ -68,7 +88,7 @@ func (e *Evaluator) eval(c Cell, param int, occ int, visited map[string]bool) (i
 	case *Unknown:
 		return 0, nil
 	case *Number:
-		if v.Value == param {
+		if v.value == param {
 			return 1, nil
 		}
 		return 0, nil
@@ -84,16 +104,6 @@ func (e *Evaluator) eval(c Cell, param int, occ int, visited map[string]bool) (i
 		}
 	}
 	return occ, nil
-}
-
-func countOccurence(n int, values []int) int {
-	count := 0
-	for _, v := range values {
-		if n == v {
-			count++
-		}
-	}
-	return count
 }
 
 //on suppose qu'on a tt les cellules chargées en mémoires
