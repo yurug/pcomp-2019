@@ -33,10 +33,10 @@ abstract class Change(val p: Position, var v: Int) {
   }
 
   def init: Unit = {
-    v = valueWithInitialA
     hasChanged = false
     correct = true
   }
+
 }
 
 
@@ -66,6 +66,11 @@ extends Change(pos, value) {
       else return
       applyChange(this::viewed)
     }
+  }
+
+  override def init: Unit = {
+    v = valueWithInitialA
+    super.init
   }
 
 }
