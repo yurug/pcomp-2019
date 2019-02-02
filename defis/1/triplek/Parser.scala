@@ -15,26 +15,24 @@ object Parser {
     return sd
   }
 
-  private def tokenizeLineAux(splittedString: List[String], acc: List[Cell]): List[Cell] = {
-    splittedString match {
-      case Nil => { return acc }
-      case h::t => { return tokenizeLineAux(t, acc :+ CellFactory.create(h)) }
-    }
-  }
-
 // Returns the List of Cell corresponding to the given List of String
   private def tokenizeLine(splittedString: List[String]): List[Cell] = {
+    def tokenizeLineAux(splittedString: List[String], acc: List[Cell]): List[Cell] = {
+      splittedString match {
+        case Nil => { return acc }
+        case h::t => { return tokenizeLineAux(t, acc :+ CellFactory.create(h)) }
+      }
+    }
     return tokenizeLineAux(splittedString, Nil)
   }
 
-  private def tokenizeAux(splittedData: List[List[String]], acc: List[List[Cell]]): List[List[Cell]] = {
-    splittedData match {
-      case Nil => { return acc }
-      case h::t => { return tokenizeAux(t, tokenizeLine(h)::acc) }
-    }
-  }
-
   private def tokenize(splittedData: List[List[String]]): List[List[Cell]] = {
+    def tokenizeAux(splittedData: List[List[String]], acc: List[List[Cell]]): List[List[Cell]] = {
+      splittedData match {
+        case Nil => { return acc }
+        case h::t => { return tokenizeAux(t, tokenizeLine(h)::acc) }
+      }
+    }
     return tokenizeAux(splittedData, Nil)
   }
 
