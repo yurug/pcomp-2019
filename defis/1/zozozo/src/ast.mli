@@ -16,6 +16,9 @@ type action = Set of pos * content
 module Mpos : Map.S with type key = pos
 module Spos : Set.S with type elt = pos
 
+(** [create_cell v] return a [cell] with the [value]*)
+val create_cell : value -> cell
+
 (** [value cell] return the field value of type value from [cell]. *)
 val value : cell -> value
 
