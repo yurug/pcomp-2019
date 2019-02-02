@@ -132,19 +132,21 @@ module DataArray : DATA = struct
 
   (* A optimiser *)
   let output_init data view0 =
-    let rows, cols =
-      match Mpos.max_binding_opt data.change with
-      | None -> data.rows, data.cols
-      | Some (b, _) -> b.r, b.c
-    in
     let binding = Mpos.bindings data.change in
-    let rec column l cols =
+    let rec column l rows cols =
       match l with
-      | [] -> cols
-      | h :: t ->
-        if (fst h).c > cols then column t (fst h).c else column t cols
+      | [] -> rows, cols
+      | (pos,v) :: t ->
+         begin
+           match Ast.value v with
+           | Undefined -> column t rows cols
+           | _ ->
+              let cols = if pos.c > cols then pos.c else cols in
+              let rows = if pos.r > rows then pos.r else rows in
+              column t rows cols
+         end
     in
-    let cols = column binding cols in
+    let rows, cols = column binding 0 0 in
     let file = open_out view0 in
     for i = 0 to rows do
       for j = 0 to cols do
