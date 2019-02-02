@@ -12,10 +12,14 @@ To evaluate a list of changes, we just have to compute for each change the set o
 
 Hence, there are one principal class `Change` which represent a change (a value, a positiion, its old value (to know if the value changed, a flag to know if this change gives a correct value, and the list of changes that it affects). This class is extended by `AChange` and `BChange`, which represents respectively a change of type A and a change of type B. There is also an object `Change` containing some usefull methods on changes, a class `Position`, and a class `Block`.
 
-And we have the following objects:
+And we have the following objects to that.
 
 - `CellParser` to parse a cell and obtain a change,
 - `UserFileParser` to parse a file with user commands and obtain the changes associated to,
 - `CSVParser` to parse a CSV file and obtain the changes associated to its formulae,
 - `CSVPreProcessor` to compute the initial value of the changes.
-- ...
+- `Dependencies` to compute the dependencies of a list of changes.
+- `Evaluator` to evaluate a list of changes.
+- `Modifier` to apply a new change (given a list of already applied changes).
+
+We also have printer objects, `CommandEffectsPrinter` and `CSVPrinter`, and reource management object (to close automatically the resource), `Reader` and `Writer`.
