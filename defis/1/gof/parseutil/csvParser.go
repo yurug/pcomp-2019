@@ -15,7 +15,7 @@ const KIND_FORMULA = "FORMULA"
 const KIND_UNKNOWN = "UNKOWN"
 const SIZE_FORMULA = 5
 
-//ParsSheet takes a file's path and a channel. It extracts all the Cells from the file and send them
+//ParseSheet takes a file's path and a channel. It extracts all the Cells from the file and send them
 //Into the channel to another go-routine. It returns error if the controller fails to init
 //Or if NextLine() read all the file
 func ParseSheet(sheet string, c chan []eval.Cell) error {

@@ -52,9 +52,38 @@ func (e *Evaluator) process() {
 
 			}
 		}
-		return countOccurence(f.input[4], f.values)
-	*/
-	return 0
+	}
+}
+
+func (e *Evaluator) eval(c Cell, param int, occ int, visited map[string]bool) (int, error) {
+	//check if presence of a cyclic graph
+	coord := c.Coordinate()
+	if visited[fmt.Sprintf("%v;%v", coord.X, coord.Y)] {
+		return -1, fmt.Errorf("Error occured in method eval: cyclic graph detected")
+	}
+	//add the current cell to the visited cells
+	visited[fmt.Sprintf("%v;%v", coord.X, coord.Y)] = true
+
+	switch v := c.(type) {
+	case *Unknown:
+		return 0, nil
+	case *Number:
+		if v.Value == param {
+			return 1, nil
+		}
+		return 0, nil
+	case *Formula: //Call recursively e.val() to count the occurence of the parameter
+		for i := v.Start.X; i <= v.End.X; i++ {
+			for j := v.Start.Y; j <= v.End.Y; j++ {
+				val, err := e.eval(e.m[i][j], param, occ, visited)
+				if err != nil {
+					return -1, err
+				}
+				occ += val
+			}
+		}
+	}
+	return occ, nil
 }
 
 func countOccurence(n int, values []int) int {
@@ -69,9 +98,9 @@ func countOccurence(n int, values []int) int {
 
 //on suppose qu'on a tt les cellules chargées en mémoires
 //fonction fait par l'utilisateur pour modifier une cellule par un int
-func userPutValue(val int, x int, y int, values [][]Cell)(error){
-	number, err := NewNumber(x,y,val)
-	if(err != nil){
+func userPutValue(val int, x int, y int, values [][]Cell) error {
+	number, err := NewNumber(x, y, val)
+	if err != nil {
 		return err
 	}
 	values[x][y] = number
@@ -80,20 +109,19 @@ func userPutValue(val int, x int, y int, values [][]Cell)(error){
 
 //fonction fait par l'utilisateur pour modifier une cellule par une formule
 func userPutFormul(r1 int, c1 int, r2 int, c2 int, v int,
-	x int, y int, values [][]Cell){
-	formula := NewFormula(r1,c1,r2,c2,v,x,y)
+	x int, y int, values [][]Cell) {
+	formula := NewFormula(r1, c1, r2, c2, v, x, y)
 	values[x][y] = formula
 
 }
 
-
 //fonction qui inverse la case de depart et la case d'arrive,
-func reformateFormule(f *Formula){
-	if(f.Start.X > f.End.X){
-		tmp :=f.Start.X
+func reformateFormule(f *Formula) {
+	if f.Start.X > f.End.X {
+		tmp := f.Start.X
 		f.Start.X = f.End.X
 		f.End.X = tmp
-		tmp =f.Start.Y
+		tmp = f.Start.Y
 		f.Start.Y = f.End.Y
 		f.End.Y = tmp
 	}
