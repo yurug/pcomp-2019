@@ -27,7 +27,7 @@ catégories et le numéro de chaque test rentrant dans cette catégorie
 ** TODO Ajouter diff à test.sh et affichage résultats avec option verbose ou pas
 ** TODO [DataArray] Avoir une taille de tableau logique pour ne pas en afficher trop ou faire des folds sur trop
 * Carine
-** TODO [Dependency] : commenter, nettoyer, raccourcir les fonctions
+** DONE [Dependency] : commenter, nettoyer, raccourcir les fonctions
 * Kostia
 ** TODO Ecrire un générateur de test pour générer automatiquement des gros tableurs (int entre 0 et 255)
 ** TODO [Spreadsheet] Séparer fonction IO du reste et uniformiser les parseurs

@@ -6,6 +6,9 @@ build:
 clean:
 	dune clean
 
+clean_tests :
+	rm tests/*/changes.txt tests/*/view0.csv tests/*/view_final.csv
+
 test:
 	dune runtest tests
 
