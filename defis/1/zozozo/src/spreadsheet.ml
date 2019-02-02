@@ -15,6 +15,7 @@ module Make (D : Data.DATA) = struct
   let parse_value err vstr =
     match vstr with
     | "P" -> Ast.Undefined
+    | "E" -> Ast.Empty
     | v -> Ast.Int (try_int_of_string err v)
 
   let parse_formula err h c1 r2 c2 v =

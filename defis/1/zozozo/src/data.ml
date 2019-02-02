@@ -22,7 +22,7 @@ module DataArray : DATA = struct
     ; change : cell Mpos.t }
 
   let create rows cols =
-    { data = Array.make_matrix rows cols {value = Undefined}
+    { data = Array.make_matrix rows cols {value = Empty}
     ; rows
     ; cols
     ; change = Mpos.empty }
@@ -38,7 +38,7 @@ module DataArray : DATA = struct
 
   let get pos t =
     match Mpos.find_opt pos t.change with
-    | None -> (try t.data.(pos.r).(pos.c) with _ -> create_cell Undefined)
+    | None -> (try t.data.(pos.r).(pos.c) with _ -> create_cell Empty)
     | Some v -> v
 
   let set_init pos v t =
@@ -138,7 +138,7 @@ module DataArray : DATA = struct
       | [] -> rows, cols
       | (pos, v) :: t ->
         (match Ast.value v with
-        | Undefined -> max_size t rows cols
+        | Empty -> max_size t rows cols
         | _ ->
           let cols = if pos.c > cols then pos.c else cols in
           let rows = if pos.r > rows then pos.r else rows in
@@ -151,14 +151,18 @@ module DataArray : DATA = struct
       then max_size_bis 0 (j + 1) rows cols
       else
         match Ast.value data.data.(i).(j) with
-        | Undefined -> max_size_bis (i + 1) j rows cols
+        | Empty -> max_size_bis (i + 1) j rows cols
         | _ ->
           let cols = if j > cols then j else cols in
           let rows = if i > rows then i else rows in
           max_size_bis (i + 1) j rows cols
     in
     let rows, cols = max_size binding 0 0 in
-    let rows, cols = max_size_bis rows cols rows cols in
+    let rows, cols =
+      if rows < data.rows || cols < data.cols
+      then max_size_bis rows cols rows cols
+      else rows, cols
+    in
     let file = open_out view0 in
     for i = 0 to rows do
       for j = 0 to cols do

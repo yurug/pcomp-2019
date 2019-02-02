@@ -56,7 +56,7 @@ let add_neighbour label new_neighbour g =
   | None ->
     Mpos.add
       new_neighbour
-      {content = Val Undefined; neighbours = label ++ empty_neighbours}
+      {content = Val Empty; neighbours = label ++ empty_neighbours}
       g
   | Some {content; neighbours} ->
     Mpos.add new_neighbour {content; neighbours = label ++ neighbours} g
@@ -87,7 +87,7 @@ let add_node label ({content; neighbours} as node) g =
   let g =
     match existing_node_opt with
     | None -> Mpos.add label node g
-    | Some {content = Val Undefined; neighbours = old_neighbours} ->
+    | Some {content = Val Empty; neighbours = old_neighbours} ->
       Mpos.add label {content; neighbours = neighbours @@ old_neighbours} g
     | _ -> failwith "Graph.add_node : Ajout sur un noeud existant"
   in

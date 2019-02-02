@@ -7,6 +7,7 @@ type content =
   | Val of value
 
 and value =
+  | Empty
   | Undefined
   | Int of int
 
