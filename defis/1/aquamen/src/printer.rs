@@ -11,7 +11,7 @@ pub fn print_spreadsheet(block: &Matrix<Cell>, filename: &str) {
     let mut file = File::create(filename).expect(
         &format!("Error creating file {}", filename)
     );
-
+    
     for line in block.lines() {
         writeln!(&mut file, "{}", line.into_iter().map(|cell| {
             to_string(&cell.content)
