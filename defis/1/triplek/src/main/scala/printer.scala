@@ -2,7 +2,6 @@ package printer
 
 import change._
 import cell_parser._
-import java.io._
 import utils._
 
 object CommandEffectsPrinter {
@@ -18,7 +17,7 @@ object CommandEffectsPrinter {
     }
   }
 
-  def printEffect(bw: BufferedWriter, c: Change, l: List[Change]) = {
+  def printEffect(bw: java.io.BufferedWriter, c: Change, l: List[Change]) = {
     bw.write(s"""after "${c.p.x} ${c.p.y} """)
     bw.write(changeDescription(c))
     bw.write("\n")
@@ -34,7 +33,7 @@ object CommandEffectsPrinter {
 object CSVPrinter {
 
   private def printLine(
-      bw: BufferedWriter,
+      bw: java.io.BufferedWriter,
       line: String, x: Int,
       l: List[Change]): List[Change] = {
     var rest: List[Change] = l
