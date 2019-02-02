@@ -38,7 +38,7 @@ module DataArray : DATA = struct
 
   let get pos t =
     match Mpos.find_opt pos t.change with
-    | None -> t.data.(pos.r).(pos.c)
+    | None -> (try t.data.(pos.r).(pos.c) with _ -> create_cell Undefined)
     | Some v -> v
 
   let set_init pos v t =
@@ -63,7 +63,7 @@ module DataArray : DATA = struct
       then if pos.c > br.c then t else aux (Ast.pos tl.r (pos.c + 1)) t
       else
         let t = f pos t in
-        aux {pos with c = pos.c + 1} t
+        aux {pos with r = pos.r + 1} t
     in
     aux tl t
 
@@ -74,18 +74,16 @@ module DataArray : DATA = struct
       t
 
   let apply f pos t =
-    match Mpos.find_opt pos t.change with
-    | None ->
-      failwith "Dans Data.map/fold_*, les cases de la region doivent exister"
-    | Some c -> f c
+    let c = get pos t in
+    f c
 
   let map_rect f (tl, br) t =
-    let f pos c = {t with change = Mpos.add pos (f c) t.change} in
-    traverse (fun pos t -> apply (f pos) pos t) (tl, br) t
+    let f pos t c = {t with change = Mpos.add pos (f c) t.change} in
+    traverse (fun pos t -> apply (f pos t) pos t) (tl, br) t
 
   let map_recti f (tl, br) t =
-    let f pos c = {t with change = Mpos.add pos (f pos c) t.change} in
-    traverse (fun pos t -> apply (f pos) pos t) (tl, br) t
+    let f pos t c = {t with change = Mpos.add pos (f pos c) t.change} in
+    traverse (fun pos t -> apply (f pos t) pos t) (tl, br) t
 
   let fold_rect f a (tl, br) t =
     traverse (fun pos a -> apply (f a) pos t) (tl, br) a
