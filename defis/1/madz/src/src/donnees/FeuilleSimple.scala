@@ -4,7 +4,9 @@ import scala.io._
 class FeuilleSimple(feuille:BufferedSource) extends FeuilleCalque {
   
   final protected var cellules = Array.ofDim[Cellule](2,4)
+  
   def getCellules = cellules
+  
   def loadCalc(): Unit = {
     var i=0;var j=0
     println("ok")

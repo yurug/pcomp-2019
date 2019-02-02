@@ -45,6 +45,9 @@ class Interpreteur_implement(
 				case None => None
 				case Some (data) => evalData (data)	
 				}
+	
 	def eval_next_expr() = evalData (sheet_iterator.next)
+	
+	
 
 }

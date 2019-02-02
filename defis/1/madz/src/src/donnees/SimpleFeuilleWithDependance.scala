@@ -19,14 +19,14 @@ class SimpleFeuilleWithDependance(feuille:BufferedSource) extends FeuilleSimple(
   override def loadCalc(): Unit = {
     var i=0;var j=0
     println("ok")
-   for(l <- feuille.getLines()){
+    for(l <- feuille.getLines()){
       println(l)
       for(c <- l.split(";")){
         val data = DataParser.parseData(c)
          data match {
           case Formule (a1,a2,a3) =>  Formule (a1,a2,a3)::all_formule
         }
-        cellules(i)(j) = new Cellule( Some (data))
+        cellules(i)(j) = new Cellule(Some (data))
         j+=1
       }
       i+=1;j=0

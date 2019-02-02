@@ -4,10 +4,9 @@ import java.io.PrintWriter
 import scala.io._
 
 object Main {
-  def main(args: Array[String]): Int= {
+  def main(args: Array[String]): Unit= {
     if (args.length <4) {
         println("4 agrs minimum")
-        return 0
     }
     val feuille = Source.fromFile(args(0)) 
     val f= new SimpleFeuilleWithDependance(feuille)
@@ -15,7 +14,8 @@ object Main {
     println(f.getCellules(0)(0))
     val interpreter = new Interpreteur_implement(f)
     interpreter.evalSheet
+    val user = Source.fromFile(args(1))
+    val gr = new GestionRequete(user)
 //    DataParser.writeView0(f.cellules) 
-    return 1
   }   
 }
