@@ -3,7 +3,6 @@ package utils
 import scala.math.Ordering.Implicits._
 import scala.language.{reflectiveCalls}
 import change._
-import java.io._
 
 class Position(val x: Int, val y: Int) {
   override def toString = s"(${x}, ${y})"
@@ -34,16 +33,16 @@ object Resource {
   }
 }
 
-object MyReader {
+object Reader {
   def using[B](fileName: String)(f: io.BufferedSource => B): B = {
     Resource.using(io.Source.fromFile(fileName))(f(_))
   }
 }
 
-object MyWriter {
-  def using[B](fileName: String)(f: BufferedWriter => B): B = {
-    val outputFile = new File(fileName)
-    val bw = new BufferedWriter(new FileWriter(outputFile))
+object Writer {
+  def using[B](fileName: String)(f: java.io.BufferedWriter => B): B = {
+    val outputFile = new java.io.File(fileName)
+    val bw = new java.io.BufferedWriter(new java.io.FileWriter(outputFile))
     Resource.using(bw)(f(_))
   }
 }
