@@ -1,9 +1,56 @@
 package eval
 
-func Eval(f Formula) int {
-	/*
-		if len(f.values) == 0 {
-			return 0
+import (
+	"fmt"
+	"os"
+)
+
+type matrix [][]Cell
+
+type Evaluator struct {
+	m      matrix
+	target *os.File
+}
+
+func NewEvaluator(targetPath string) (*Evaluator, error) {
+	f, err := os.Create(targetPath)
+	if err != nil {
+		return nil, err
+	}
+	return &Evaluator{
+		m:      make(matrix, 0),
+		target: f,
+	}, nil
+}
+
+func (e *Evaluator) initMatrix(lines chan []Cell) {
+	for line := range lines {
+		e.m = append(e.m, line)
+	}
+}
+
+func (e *Evaluator) process() {
+	for r, line := range e.m {
+		for c, cell := range line {
+			switch v := cell.(type) {
+			default:
+				continue
+			case *Formula:
+				var num Cell
+				visited := make(map[string]bool)
+				valueAfterEval, err := e.eval(Cell(v), v.ToEval, 0, visited)
+				if err != nil {
+					num = NewUnknown(r, c)
+					e.m[r][c] = num
+					continue
+				}
+				num, err = NewNumber(r, c, valueAfterEval)
+				if err != nil {
+					num = NewUnknown(r, c)
+				}
+				e.m[r][c] = num
+
+			}
 		}
 		return countOccurence(f.input[4], f.values)
 	*/
