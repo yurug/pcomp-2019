@@ -62,6 +62,13 @@ func (f *Formula) Parents() []Cell {
 	return f.parents
 }
 
+func (f *Formula) isChild(c Cell) bool {
+	return f.End.X >= c.Coordinate().X && // r2 > x
+		c.Coordinate().X >= f.Start.X && // x > r1
+		f.End.Y >= c.Coordinate().Y && // c2 > x
+		c.Coordinate().Y >= f.Start.Y // x > c1
+}
+
 type Unknown struct {
 	position Coordinate
 	parents  []Cell
