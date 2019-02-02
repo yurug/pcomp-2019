@@ -18,7 +18,7 @@ const SIZE_FORMULA = 5
 //ParsSheet takes a file's path and a channel. It extracts all the Cells from the file and send them
 //Into the channel to another go-routine. It returns error if the controller fails to init
 //Or if NextLine() read all the file
-func ParseSheet(sheet string, c chan eval.Cell) error {
+func ParseSheet(sheet string, c chan []eval.Cell) error {
 	defer close(c)
 	controller, err := db.New(sheet)
 	if err != nil {
@@ -32,27 +32,34 @@ func ParseSheet(sheet string, c chan eval.Cell) error {
 			return err
 		}
 		cells := strings.Split(string(line[:]), ";")
-		for columnID, cell := range cells {
-			switch checkType(cell) {
-			case KIND_NUMBER:
-				v, _ := strconv.Atoi(cell)
-				number, _ := eval.NewNumber(rowID, columnID, v)
-				c <- number
-			case KIND_FORMULA:
-				values := regexp.MustCompile(`\d+`).FindAllString(cell, -1)
-				if len(values) != SIZE_FORMULA {
-					c <- eval.NewUnknown(rowID, columnID)
-					continue
-				}
-				valuesInt, _ := atoiSlice(values)
-				//No error thanks to regex
-				c <- eval.NewFormula(valuesInt[0], valuesInt[1], valuesInt[2], valuesInt[3], valuesInt[4], rowID, columnID)
-			case KIND_UNKNOWN:
-				c <- eval.NewUnknown(rowID, columnID)
-			}
-		}
+		c <- constructLine(cells, rowID)
+		rowID++
 
 	}
+}
+
+func constructLine(cells []string, rowID int) []eval.Cell {
+	formatedCells := make([]eval.Cell, len(cells))
+
+	for columnID, cell := range cells {
+		switch checkType(cell) {
+		case KIND_NUMBER:
+			v, _ := strconv.Atoi(cell)
+			number, _ := eval.NewNumber(rowID, columnID, v)
+			formatedCells[columnID] = number
+		case KIND_FORMULA:
+			values := regexp.MustCompile(`\d+`).FindAllString(cell, -1)
+			if len(values) != SIZE_FORMULA {
+				formatedCells[columnID] = eval.NewUnknown(rowID, columnID)
+				continue
+			}
+			valuesInt, _ := atoiSlice(values)
+			formatedCells[columnID] = eval.NewFormula(valuesInt[0], valuesInt[1], valuesInt[2], valuesInt[3], valuesInt[4], rowID, columnID)
+		case KIND_UNKNOWN:
+			formatedCells[columnID] = eval.NewUnknown(rowID, columnID)
+		}
+	}
+	return formatedCells
 }
 
 func atoiSlice(arr []string) ([]int, error) {
