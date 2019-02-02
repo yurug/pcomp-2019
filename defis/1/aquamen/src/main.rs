@@ -2,17 +2,17 @@
 extern crate combine;
 
 mod data;
-// mod parser;
-mod process;
 mod sched;
+mod parser;
+mod interpreter;
+mod printer;
 
 use std::env;
-use std::fs;
+
+use sched::schedule;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let filename = &args[1];
-    let contents = fs::read_to_string(filename)
-        .expect("Something went wrong reading the file");
-    sched::schedule(contents)
+
+    schedule(&args[1], &args[2], &args[3], &args[4]);
 }
