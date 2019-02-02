@@ -5,16 +5,18 @@ import dependencies._
 import scala.util.{Try}
 
 object Evaluator {
+
   def evaluateChanges(l: List[Change]) = {
     l.foreach(_.init)
     l.foreach(_.evaluate)
     l.foreach { c =>
-      c.hasChanged = (c.correct != c.oldCorrect) ||
-                     (c.correct && (c.oldValue != c.v))
+      c.hasChanged =
+        (c.correct != c.oldCorrect) || (c.correct && (c.oldValue != c.v))
       c.oldCorrect = c.correct
       c.oldValue = c.v
     }
   }
+
 }
 
 object Modifier {
@@ -28,7 +30,9 @@ object Modifier {
 
   private def addChange(c: Change, l: List[Change]): List[Change] = {
     l.find { c1 => c1.p.x == c.p.x && c1.p.y == c.p.y } match {
-      case None       => c::l
+      case None =>
+        c.oldValue = c.valueWithInitialA
+        c::l
       case Some(oldC) => {
         c.oldValue = oldC.v
         c.oldCorrect = c.correct
@@ -44,4 +48,5 @@ object Modifier {
     Evaluator.evaluateChanges(newApplied)
     return newApplied
   }
+
 }
