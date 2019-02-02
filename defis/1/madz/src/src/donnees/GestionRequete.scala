@@ -5,7 +5,7 @@ import scala.io._
 import scala.collection.mutable.ListBuffer
 
 
-class GestionRequete(f:BufferedSource) {
+class GestionRequete(f:BufferedSource, i:Interpreteur_implement) {
   
   def chargeRequete(): ListBuffer[Requete] = {
     val listReq = ListBuffer[Requete]()
@@ -17,7 +17,17 @@ class GestionRequete(f:BufferedSource) {
     listReq
   }
   
-  def eval_requete(r:Requete) = {
-	  
+  def eval_requete(r:Requete) :(Case, Option[Int])= {
+    (r.getCase,i.evalData(r.getData))
 	}
+  
+  def eval_list_req : ListBuffer[(Case,Option[Int])] = {
+    val listEvalReq = ListBuffer[(Case,Option[Int])]()
+    val list_req = chargeRequete()
+    for(r<- list_req) listEvalReq += eval_requete(r)
+    listEvalReq
+  }
+  
+  def maj_feuille = {
+  }
 }

@@ -15,7 +15,7 @@ object Main {
     val interpreter = new Interpreteur_implement(f)
     interpreter.evalSheet
     val user = Source.fromFile(args(1))
-    val gr = new GestionRequete(user)
+    val gr = new GestionRequete(user,interpreter)
 //    DataParser.writeView0(f.cellules) 
   }   
 }
