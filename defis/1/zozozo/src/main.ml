@@ -50,10 +50,11 @@ let loop_user user_filename changes_filename data graph =
       loop data graph ((act_str, changes) :: all_changes)
     | exception End_of_file ->
       close_in user_file;
-      List.rev all_changes
+      List.rev all_changes, data
   in
-  let all_changes = loop data graph [] in
-  Sp.output_changes all_changes changes_filename
+  let all_changes, data = loop data graph [] in
+  Sp.output_changes all_changes changes_filename;
+  data
 
 let main () =
   let data_filename, user_filename, view0_filename, changes_filename =
@@ -61,7 +62,7 @@ let main () =
   in
   let data, graph, _ = initialisation data_filename in
   write_view0 view0_filename data;
-  loop_user user_filename changes_filename data graph;
+  let data = loop_user user_filename changes_filename data graph in
   (* debug *)
   write_final_result view0_filename data
 
