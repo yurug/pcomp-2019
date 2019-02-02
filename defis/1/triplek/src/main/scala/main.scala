@@ -7,18 +7,18 @@ import printer._
 import dependencies._
 import evaluator._
 import csv_parser._
-import java.io._
 
 object Main {
 
   def applyUserCommands(
-      bw: BufferedWriter,
+      bw: java.io.BufferedWriter,
       applied: List[Change],
       toApply: List[Change]): Unit = toApply match {
     case Nil => ()
     case c::t =>
       val newApplied: List[Change] = Modifier.applyNewChange(c, applied)
       CommandEffectsPrinter.printEffect(bw, c, newApplied)
+      newApplied.foreach {c => println(c.p)}
       applyUserCommands(bw, newApplied, t)
   }
 
@@ -28,22 +28,22 @@ object Main {
       return
     }
 
-    val ucs: List[Change] = MyReader.using(args(1)) { UserFileParser.parse(_) }
+    val ucs: List[Change] = Reader.using(args(1)) { UserFileParser.parse(_) }
     val (uacs, ubcs): (List[AChange], List[BChange]) = Change.split(ucs)
-    val fbcs: List[BChange] = MyReader.using(args(0)) { CSVParser.parse(_) }
-    MyReader.using(args(0)) {
+    val fbcs: List[BChange] = Reader.using(args(0)) { CSVParser.parse(_) }
+    Reader.using(args(0)) {
       CSVPreProcessor.countInitialValues(_, fbcs ::: ubcs, uacs)
     }
 
     Dependencies.compute(fbcs)
     Evaluator.evaluateChanges(fbcs)
 
-    MyReader.using(args(0)) { input =>
-      MyWriter.using(args(2)) { output =>
+    Reader.using(args(0)) { input =>
+      Writer.using(args(2)) { output =>
         CSVPrinter.printCSVWithChanges(input, output, fbcs)
       }
     }
 
-    MyWriter.using(args(3)) { applyUserCommands(_, fbcs, ucs) }
+    Writer.using(args(3)) { applyUserCommands(_, fbcs, ucs) }
   }
 }
