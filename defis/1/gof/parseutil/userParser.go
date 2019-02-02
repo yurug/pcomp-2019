@@ -1,11 +1,12 @@
 package parserutil
 
 import (
-	"awesomeProject/db"
-	"awesomeProject/eval"
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/yurug/pcomp-2019/defis/1/gof/db"
+	"github.com/yurug/pcomp-2019/defis/1/gof/eval"
 )
 
 type UserCommands struct {
