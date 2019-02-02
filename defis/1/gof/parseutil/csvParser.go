@@ -20,7 +20,7 @@ const SIZE_FORMULA = 5
 //Or if NextLine() read all the file
 func ParseSheet(sheet string, c chan eval.Cell) error {
 	defer close(c)
-	controller, err := db.NewController(sheet)
+	controller, err := db.New(sheet)
 	if err != nil {
 		return fmt.Errorf("Error while calling new controller for ParseSheet: %v", err)
 	}

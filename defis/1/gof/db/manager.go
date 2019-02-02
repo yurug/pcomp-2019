@@ -5,6 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sync"
+)
+
+var (
+	once sync.Once
+
+	instance Controller
 )
 
 const LINE_DELIMITER = '\n'
@@ -15,16 +22,21 @@ type Controller struct {
 	scanner *bufio.Scanner
 }
 
-//NewController takes into input a path to the file and returns a *Controller
-func NewController(path string) (*Controller, error) {
+//New singleton concept as we want only one controller over the database
+func New(path string) (Controller, error) {
 	f, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("error")
+		return instance, err
 	}
-	return &Controller{
-		file:    f,
-		scanner: bufio.NewScanner(f),
-	}, nil
+
+	once.Do(func() {
+		instance = Controller{
+			file:    f,
+			scanner: bufio.NewScanner(f),
+		}
+	})
+
+	return instance, nil
 }
 
 //ReadAll call ioutil.ReadAll on the file
