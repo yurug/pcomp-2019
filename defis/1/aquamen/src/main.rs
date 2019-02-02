@@ -6,7 +6,6 @@ mod sched;
 mod parser;
 mod interpreter;
 mod printer;
-mod process;
 
 use std::env;
 

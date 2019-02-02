@@ -1,23 +1,24 @@
 
-use data::{Matrix, Cell, Point, Requirements};
-use data::Requirements::Empty;
+use data::{Matrix, Cell, Point};
 use data::Data::*;
 use data::Function::*;
 
 // FIXME test!!!!
 
+// FIXME should return a list of dependencies
+// in case of if we can't completly compute
+// the cell (because we don't have the full sheet)
 // FIXME improve perfs
-/// Requirements is the list of cell that can't be evaluated
-/// because we're missing other cells. Will be used later
-/// when we need to split the sheet in sub-sheet
-fn eval_cell(cell: &Cell, sheet: &Matrix<Cell>) -> (Cell, Requirements) {
+// FIXME add some kind of Result so that we can print
+// an error
+fn eval_cell(cell: &Cell, sheet: &Matrix<Cell>) -> Cell {
     match cell.content {
-        Val(_i) => (cell.clone(), Empty),
+        Val(_i) => cell.clone(),
         Fun(Count(b, e, v)) => {
             let mut acc = 0;
             for x in b.x..e.x+1 {
                 for y in b.y..e.y+1 {
-                    match eval_cell(&sheet.get(Point{x: x, y: y}), sheet).0.content {
+                    match eval_cell(&sheet.get(Point{x: x-1, y: y-1}), sheet).content {
                         // FIXME find out why it's a ref and not a value
                         Val(i) => if i == v.clone() {
                             acc += 1;
@@ -26,9 +27,9 @@ fn eval_cell(cell: &Cell, sheet: &Matrix<Cell>) -> (Cell, Requirements) {
                     }
                 }
             }
-            (Cell{content: Val(acc), loc: cell.loc}, Empty)
+            Cell{content: Val(acc), loc: cell.loc}
         }
-        Wrong => (cell.clone(), Empty)
+        _ => cell.clone() // FIXME better errors!!!
 
     }
 }
@@ -39,7 +40,7 @@ pub fn eval(input: &Matrix<Cell>) -> Matrix<Cell> {
     for line in input.lines() {
         let mut lres: Vec<Cell>  = Vec::with_capacity(line.len());
         for cell in line {
-            let (r, _) = eval_cell(&cell, input);
+            let r = eval_cell(&cell, input);
             lres.push(r)
         }
         res.push(lres)
@@ -48,5 +49,5 @@ pub fn eval(input: &Matrix<Cell>) -> Matrix<Cell> {
 }
 
 pub fn eval_changes(changes: &Vec<Cell>, spreadsheet: &Matrix<Cell>) -> Vec<Cell> {
-    changes.into_iter().map(|c| eval_cell(&c, spreadsheet).0).collect()
+    changes.into_iter().map(|c| eval_cell(&c, spreadsheet)).collect()
 }
