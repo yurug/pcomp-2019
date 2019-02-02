@@ -1,12 +1,16 @@
 package eval
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 const BAD_FORMAT = "P"
 
 type Cell interface {
 	Coordinate() Coordinate
 	Parents() []Cell
+	Value() string
 }
 
 type Coordinate struct {
@@ -15,7 +19,7 @@ type Coordinate struct {
 
 type Number struct {
 	position Coordinate
-	Value    int
+	value    int
 	parents  []Cell
 }
 
@@ -25,7 +29,7 @@ func NewNumber(x int, y int, v int) (*Number, error) {
 	}
 	return &Number{
 		position: Coordinate{x, y},
-		Value:    v,
+		value:    v,
 	}, nil
 }
 
@@ -35,6 +39,10 @@ func (n *Number) Coordinate() Coordinate {
 
 func (n *Number) Parents() []Cell {
 	return n.parents
+}
+
+func (n *Number) Value() string {
+	return strconv.Itoa(n.value)
 }
 
 type Formula struct {
@@ -60,6 +68,10 @@ func (f *Formula) Coordinate() Coordinate {
 
 func (f *Formula) Parents() []Cell {
 	return f.parents
+}
+
+func (f *Formula) Value() string {
+	return "F"
 }
 
 func (f *Formula) isChild(c Cell) bool {
