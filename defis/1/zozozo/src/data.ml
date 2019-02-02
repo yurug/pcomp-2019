@@ -136,15 +136,13 @@ module DataArray : DATA = struct
     let rec column l rows cols =
       match l with
       | [] -> rows, cols
-      | (pos,v) :: t ->
-         begin
-           match Ast.value v with
-           | Undefined -> column t rows cols
-           | _ ->
-              let cols = if pos.c > cols then pos.c else cols in
-              let rows = if pos.r > rows then pos.r else rows in
-              column t rows cols
-         end
+      | (pos, v) :: t ->
+        (match Ast.value v with
+        | Undefined -> column t rows cols
+        | _ ->
+          let cols = if pos.c > cols then pos.c else cols in
+          let rows = if pos.r > rows then pos.r else rows in
+          column t rows cols)
     in
     let rows, cols = column binding 0 0 in
     let file = open_out view0 in
