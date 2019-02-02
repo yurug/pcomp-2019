@@ -8,17 +8,34 @@ import (
 	"github.com/yurug/pcomp-2019/defis/1/gof/parseutil"
 )
 
+//"./ws data.csv user.txt view0.csv changes.txt"
 func main() {
-	filename := os.Args[1]
+	args := os.Args[1:]
+	if len(args) < 4 {
+		fmt.Printf("Not enough arguments\n")
+		return
+	}
+	csv := args[0]
+	//user := args[1]
+	view := args[2]
+	//changes := args[3]
 	ch := make(chan []eval.Cell)
-	go parserutil.ParseSheet(filename, ch)
+	e, err := eval.NewEvaluator(view)
+	if err != nil {
+		fmt.Printf("Error with evaluator: %v\n", err)
+	}
+	go parserutil.ParseSheet(csv, ch)
+	e.Process(ch)
+}
+
+func test(ch chan []eval.Cell) {
 	for line := range ch {
 		for _, v := range line {
 			switch cell := v.(type) {
 			default:
 				fmt.Printf("unexpected type %T", cell)
 			case *eval.Number:
-				fmt.Printf("Cell of type Number and value: %v\n", cell.Value)
+				fmt.Printf("Cell of type Number and value: %v\n", cell.Value())
 			case *eval.Unknown:
 				fmt.Printf("Cell of type Unknown and value: %v\n", cell.Value())
 			case *eval.Formula:
