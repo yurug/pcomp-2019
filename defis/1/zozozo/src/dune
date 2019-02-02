@@ -5,7 +5,7 @@
 (library
   (name	lib)
   (wrapped false)
-  (modules data ast graph dependency spreadsheet))
+  (modules data ast graph formulaOrder spreadsheet))
 
 ; Disable warning as errors
 (env

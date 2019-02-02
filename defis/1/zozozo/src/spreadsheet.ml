@@ -96,28 +96,28 @@ module Make (D : Data.DATA) = struct
     | Ast.Val v -> v
     | Ast.Occ ((pos, pos'), v) -> Ast.Int (eval_occ data pos pos' v)
 
-  let rec loop_eval data graph dependency changes content pos =
+  let rec loop_eval data graph order changes content pos =
     let v = eval data content in
     let data = D.set pos Ast.{value = v} data in
     let changes = (pos, v) :: changes in
-    let computable, dependency =
-      Dependency.get_new_computable_nodes pos dependency
+    let computable, order =
+      FormulaOrder.get_new_computable_formulas pos order
     in
-    let dependency = Dependency.remove_computed_node pos dependency in
+    let order = FormulaOrder.remove_computed_formula pos order in
     List.fold_left
       (fun (dat, depend, changes) (content, pos) ->
         loop_eval dat graph depend changes content pos )
-      (data, dependency, changes)
+      (data, order, changes)
       computable
 
   let update data graph = function
     | Ast.Set (pos, content) ->
       let graph = change_node pos (build_node content) graph in
-      let dependency = Dependency.build_dependency_from graph pos in
-      let data, dependency, changes =
-        if Dependency.is_computable pos dependency
-        then loop_eval data graph dependency [] content pos
-        else data, dependency, []
+      let order = FormulaOrder.build_order_from graph pos in
+      let data, order, changes =
+        if FormulaOrder.is_computable pos order
+        then loop_eval data graph order [] content pos
+        else data, order, []
       in
       (* Put non-computable node to Undefined in data*)
       let data, changes =
@@ -126,18 +126,18 @@ module Make (D : Data.DATA) = struct
             ( D.set pos Ast.{value = Undefined} data
             , (pos, Ast.Undefined) :: changes ) )
           (data, changes)
-          (Dependency.get_non_computable_nodes dependency)
+          (FormulaOrder.get_non_computable_formulas order)
       in
       data, graph, changes
 
   let eval_init data graph formulas =
-    let dependency = Dependency.build_dependency_from_all graph formulas in
-    let computable = Dependency.get_computable_nodes dependency in
-    let data, dependency, changes =
+    let order = FormulaOrder.build_order_from_all graph formulas in
+    let computable = FormulaOrder.get_computable_formulas order in
+    let data, order, changes =
       List.fold_left
         (fun (dat, depend, ch) (content, pos) ->
           loop_eval dat graph depend ch content pos )
-        (data, dependency, [])
+        (data, order, [])
         computable
     in
     (* Put non-computable node to Undefined in data*)
@@ -147,7 +147,7 @@ module Make (D : Data.DATA) = struct
           ( D.set pos Ast.{value = Undefined} data
           , (pos, Ast.Undefined) :: changes ) )
         (data, changes)
-        (Dependency.get_non_computable_nodes dependency)
+        (FormulaOrder.get_non_computable_formulas order)
     in
     data
 end
