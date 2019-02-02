@@ -91,14 +91,6 @@ module DataArray : DATA = struct
   let fold_recti f a (tl, br) t =
     traverse (fun pos a -> apply (f a pos) pos t) (tl, br) a
 
-  let iter' f f' t =
-    for i = 0 to t.rows - 1 do
-      for j = 0 to t.cols - 1 do
-        f t.data.(i).(j)
-      done;
-      f' ()
-    done
-
   let read_value cell =
     let value = Scanf.sscanf (String.trim cell) "%d" (fun d -> d) in
     Ast.Int value
@@ -138,13 +130,29 @@ module DataArray : DATA = struct
 
   let init data_filename = parse_data data_filename
 
+  (* A optimiser *)
   let output_init data view0 =
+    let rows, cols =
+      match Mpos.max_binding_opt data.change with
+      | None -> data.rows, data.cols
+      | Some (b, _) -> b.r, b.c
+    in
+    let binding = Mpos.bindings data.change in
+    let rec column l cols =
+      match l with
+      | [] -> cols
+      | h :: t ->
+        if (fst h).c > cols then column t (fst h).c else column t cols
+    in
+    let cols = column binding cols in
     let file = open_out view0 in
-    iter'
-      (fun c ->
+    for i = 0 to rows do
+      for j = 0 to cols do
+        let c = get (Ast.pos i j) data in
         let s = Ast.string_of_value (Ast.value c) in
-        Printf.fprintf file "%s;" s )
-      (fun () -> Printf.fprintf file "\n")
-      data;
+        Printf.fprintf file "%s;" s
+      done;
+      Printf.fprintf file "\n"
+    done;
     close_out file
 end
