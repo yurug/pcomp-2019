@@ -3,4 +3,4 @@
 # IFS=$'\n\t'
 
 # cargo run ${@}
-echo ${data} ${user} ${view} ${changes}
+echo ${@}# ${data} ${user} ${view} ${changes}
