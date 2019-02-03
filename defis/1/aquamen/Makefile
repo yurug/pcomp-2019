@@ -7,7 +7,10 @@ else
 	FLAGS += --release
 endif
 
-all:
+all: docker
+	cp ws.sh ws
+
+build:
 	cargo build $(FLAGS)
 
 test:
