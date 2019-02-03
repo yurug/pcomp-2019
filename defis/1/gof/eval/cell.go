@@ -9,7 +9,7 @@ const BAD_FORMAT = "P"
 
 type Cell interface {
 	Coordinate() Coordinate
-	Parents() []Cell
+	Parents() []Coordinate
 	Value() string
 }
 
@@ -20,7 +20,7 @@ type Coordinate struct {
 type Number struct {
 	position Coordinate
 	value    int
-	parents  []Cell
+	parents  []Coordinate
 }
 
 func NewNumber(x int, y int, v int) (*Number, error) {
@@ -37,7 +37,7 @@ func (n *Number) Coordinate() Coordinate {
 	return n.position
 }
 
-func (n *Number) Parents() []Cell {
+func (n *Number) Parents() []Coordinate {
 	return n.parents
 }
 
@@ -50,7 +50,7 @@ type Formula struct {
 	Start    Coordinate
 	End      Coordinate
 	ToEval   int
-	parents  []Cell
+	parents  []Coordinate
 }
 
 func NewFormula(r1 int, c1 int, r2 int, c2 int, v int, x int, y int) *Formula {
@@ -66,7 +66,7 @@ func (f *Formula) Coordinate() Coordinate {
 	return f.position
 }
 
-func (f *Formula) Parents() []Cell {
+func (f *Formula) Parents() []Coordinate {
 	return f.parents
 }
 
@@ -83,7 +83,7 @@ func (f *Formula) isChild(c Cell) bool {
 
 type Unknown struct {
 	position Coordinate
-	parents  []Cell
+	parents  []Coordinate
 }
 
 func NewUnknown(x int, y int) *Unknown {
@@ -96,7 +96,7 @@ func (u *Unknown) Coordinate() Coordinate {
 	return u.position
 }
 
-func (u *Unknown) Parents() []Cell {
+func (u *Unknown) Parents() []Coordinate {
 	return u.parents
 }
 
