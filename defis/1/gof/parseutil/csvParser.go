@@ -14,6 +14,7 @@ const KIND_NUMBER = "NUMBER"
 const KIND_FORMULA = "FORMULA"
 const KIND_UNKNOWN = "UNKOWN"
 const SIZE_FORMULA = 5
+const EXPRESSION_FORMULA = `=#[(]\d+, \d+, \d+, \d+, \d+[)]`
 
 //ParseSheet takes a file's path and a channel. It extracts all the Cells from the file and send them
 //Into the channel to another go-routine. It returns error if the controller fails to init
@@ -77,7 +78,7 @@ func atoiSlice(arr []string) ([]int, error) {
 func checkType(cell string) string {
 	_, err := strconv.Atoi(cell)
 	if err != nil {
-		var validFormula = regexp.MustCompile(`=#[(]\d+, \d+, \d+, \d+, \d+[)]`)
+		var validFormula = regexp.MustCompile(EXPRESSION_FORMULA)
 		if validFormula.MatchString(cell) {
 			return KIND_FORMULA
 		}
