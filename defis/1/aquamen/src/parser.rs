@@ -71,6 +71,16 @@ parser! {
     }
 }
 
+parser! {
+    fn change[I]()(I) -> Cell where [I: Stream<Item = char>] {
+        (coord(),
+         coord(),
+         data())
+            .map(|t| Cell{loc:Point{x:t.1,y:t.0},
+                            content:t.2})
+    }
+}
+
 pub fn parse_line(line: u64, s: &str) -> Vec<Cell> {
     let res = data_line().easy_parse(s);
     let (v,s) = match res {
@@ -95,6 +105,14 @@ pub fn parse_line(line: u64, s: &str) -> Vec<Cell> {
     cell_vec
 }
 
+pub fn parse_change(s : &str) -> Cell {
+    let res = change().easy_parse(s) ;
+    match res {
+        Ok((v, _)) => v,
+        Err(e) => panic!("{}",e),
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -107,6 +125,14 @@ mod tests {
                                   Point{x:7851,y:92573},
                                   125)));
     const T3 : (&str,Data) = ("aaa",Wrong);
+    const T4 : (&str,Cell) = ("489 1000 5",Cell{content:Val(5),
+                                                loc:Point{x:1000,y:489}});
+    const T5 : (&str,Cell) = ("489 1000 =#(1250,6000,7851,92573, 125)",
+                              Cell{content:Fun(Count
+                                               (Point{x:1250,y:6000},
+                                                Point{x:7851,y:92573},
+                                                125)),
+                                   loc:Point{x:1000,y:489}});
     
     #[test]
     fn test_simple_val() {
@@ -169,5 +195,15 @@ mod tests {
                 Cell{content:T3.1,loc:Point{x:1,y:0}}
             ]
         );
+    }
+
+    #[test]
+    fn test_simple_change() {
+        assert_eq!(parse_change(T4.0),T4.1);
+    }
+
+    #[test]
+    fn test_count_change() {
+        assert_eq!(parse_change(T5.0),T5.1);
     }
 }
