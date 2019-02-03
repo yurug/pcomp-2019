@@ -22,7 +22,9 @@ abstract class Change(val p: Position, var v: Int) {
   }
 
   def applyChange(viewed: List[Change]) = {
-    affecteds.foreach(_.propagate(this, viewed))
+    if(oldValue != v) {
+      affecteds.foreach(_.propagate(this, viewed))
+    }
   }
 
   def propagateError: Unit = {
