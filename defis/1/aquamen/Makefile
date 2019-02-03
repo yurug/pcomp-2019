@@ -1,9 +1,11 @@
 
 TARGET        := aquamen
 FLAGS         :=
+CLEAN         :=
 
 ifeq ($(DEBUG), 1)
 	FLAGS +=
+	CLEAN	:= --no-cache
 else
 	FLAGS += --release
 endif
@@ -21,7 +23,7 @@ run:
 	cargo run
 
 docker:
-	docker build -t ${TARGET} .
+	docker build ${CLEAN} -t ${TARGET} .
 
 perf:
 	echo TODO
