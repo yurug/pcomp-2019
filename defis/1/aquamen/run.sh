@@ -2,5 +2,4 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# cargo run ${@}
-echo ./target/release/aquamen ${@}
+./target/release/aquamen ${@}
