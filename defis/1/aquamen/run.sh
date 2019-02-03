@@ -3,4 +3,4 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # cargo run ${@}
-echo ${@}
+echo ${data} ${user} ${view} ${changes}
