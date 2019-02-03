@@ -65,7 +65,6 @@ extends Change(pos, value) {
     else {
       if(counted == c.v) v = v + 1
       else if(counted == c.oldValue) v = v - 1
-      else return
       applyChange(this::viewed)
     }
   }
