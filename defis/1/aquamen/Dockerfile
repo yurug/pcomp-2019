@@ -1,13 +1,16 @@
-FROM debian:9
+FROM archlinux/base
 
-RUN apt-get update \
-    && apt-get install -y \
-        cargo
+RUN pacman -Syyu --noconfirm
+RUN pacman -S gcc --noconfirm
+RUN pacman -S rust --noconfirm
+RUN pacman -S git --noconfirm
+RUN pacman -S make --noconfirm
 
-COPY src /home/docker
-COPY Cargo.toml /home/docker
-
-RUN {cd /home/docker; cargo build --release}
-
-ENTRYPOINT /home/docker/target/release/aquamen
 WORKDIR /home/docker
+RUN git clone https://github.com/yurug/pcomp-2019.git
+WORKDIR /home/docker/pcomp-2019/
+RUN git checkout aquamen/master
+RUN git pull
+WORKDIR /home/docker/pcomp-2019/defis/1/aquamen
+RUN DEBUG=0 make build
+
