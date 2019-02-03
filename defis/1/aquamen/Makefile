@@ -20,10 +20,8 @@ test:
 	cargo test
 
 run:
-	cargo run
+	cargo run $(DATA) $(USER) $(VIEW) $(CHANGE)
 
 docker:
 	docker build ${CLEAN} -t ${TARGET} .
 
-perf:
-	echo TODO
