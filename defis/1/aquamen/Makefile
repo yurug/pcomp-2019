@@ -23,5 +23,14 @@ run:
 	cargo run $(DATA) $(USER) $(VIEW) $(CHANGE)
 
 docker:
-	docker build ${CLEAN} -t ${TARGET} .
+	docker build $(CLEAN) -t $(TARGET) .
+
+perf: # FIXME check /usr/bin/time format string
+	@time --format="%J   %U  user %S system %P cpu %*E total \n\
+	avg shared (code):         %X KB \n\
+	avg unshared (data/stack): %D KB \n\
+	total (sum):               %K KB \n\
+	max memory:                %M MB \n\
+	page faults from disk:     %F \n\
+	other page faults:         %R" cargo run $(DATA) $(USER) $(VIEW) $(CHANGE)
 
