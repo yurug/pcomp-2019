@@ -28,7 +28,7 @@ fn eval_cell(cell: &Cell, sheet: &Matrix<Cell>) -> (Cell, Requirements) {
             }
             (Cell{content: Val(acc), loc: cell.loc}, Empty)
         }
-        _ => (cell.clone(), Empty)
+        Wrong => (cell.clone(), Empty)
 
     }
 }
