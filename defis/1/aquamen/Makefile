@@ -1,5 +1,6 @@
 
-FLAGS         := 
+TARGET        := aquamen
+FLAGS         :=
 
 ifeq ($(DEBUG), 1)
 	FLAGS +=
@@ -18,3 +19,9 @@ test:
 
 run:
 	cargo run
+
+docker:
+	docker build -t ${TARGET} .
+
+perf:
+	echo TODO
