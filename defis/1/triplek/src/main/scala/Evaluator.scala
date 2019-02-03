@@ -31,11 +31,10 @@ object Modifier {
   private def addChange(c: Change, l: List[Change]): List[Change] = {
     l.find { c1 => c1.p.x == c.p.x && c1.p.y == c.p.y } match {
       case None =>
-        c.oldValue = c.valueWithInitialA
         c::l
       case Some(oldC) => {
         c.oldValue = oldC.v
-        c.oldCorrect = c.correct
+        c.oldCorrect = oldC.correct
         removeChange(oldC, c::l)
       }
     }
