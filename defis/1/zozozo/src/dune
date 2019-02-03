@@ -5,7 +5,8 @@
 (library
   (name	lib)
   (wrapped false)
-  (modules data ast graph formulaOrder spreadsheet))
+  (modules data ast graph formulaOrder spreadsheet)
+  (libraries unix))
 
 ; Disable warning as errors
 (env
