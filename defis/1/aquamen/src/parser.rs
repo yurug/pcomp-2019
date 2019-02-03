@@ -65,7 +65,7 @@ parser! {
 parser! {
     fn data_line[I]()(I) -> Vec<Data> where [I: Stream<Item = char>] {
         many(choice!(
-            attempt(data().skip(token(CSEP))),
+            attempt(data().skip(spaces().with(token(CSEP)))),
             data())
         )
     }
@@ -149,7 +149,7 @@ mod tests {
     #[test]
     fn test_spaces_robustness() {
         assert_eq!(
-            parse_line(0,&format!("{}{} {}{} {}{} {}",
+            parse_line(0,&format!("{} {} {}{} {}{} {}",
                                  T1.0,CSEP,T2.0,CSEP,T3.0,CSEP,T1.0)),
             vec![
                 Cell{content:T1.1,loc:Point{x:0,y:0}},
