@@ -18,7 +18,7 @@ abstract class Change(val p: Position, var v: Int) {
   def propagate(c: Change, viewed: List[Change]): Unit = ()
 
   def evaluate = {
-    applyChange(List())
+    applyChange(List(this))
   }
 
   def applyChange(viewed: List[Change]) = {
