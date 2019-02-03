@@ -43,8 +43,10 @@ object CSVPrinter {
       while(!rest.isEmpty && rest.head.p.x <= x && rest.head.p.y < y)
         rest = rest.tail
 
-      if(!rest.isEmpty && rest.head.p.x == x && rest.head.p.y == y)
+      if(!rest.isEmpty && rest.head.p.x == x && rest.head.p.y == y) {
         bw.write(rest.head.toString)
+        rest = rest.tail
+      }
       else
         bw.write(CellParser.parse(x, y, cell).toString)
     }
