@@ -11,32 +11,32 @@ use data::Cell;
 
 // FIXME test!!!!
 
-pub fn schedule(in1: &str, in2: &str, out1: &str, out2: &str) {
+pub fn schedule(sheet_path: &str, user_mod_path: &str, view0_path: &str, changes_path: &str) {
 
     // Step 1
 
-    let buffer = fs::read_to_string(in1)
+    let buffer = fs::read_to_string(sheet_path)
         .expect("Something went wrong reading the file");
 
     let spreadsheet = build_spreadsheet(buffer);
 
     let spreadsheet = eval(&spreadsheet);
 
-    print_spreadsheet(&spreadsheet, out1);
+    print_spreadsheet(&spreadsheet, view0_path);
 
 
     //Step 2
 
-    let buffer = fs::read_to_string(in2)
+    let buffer = fs::read_to_string(user_mod_path)
         .expect("Something went wrong reading the file");
-    
+
     let changes = build_changes(buffer);
 
     let mut changes = eval_changes(&changes, &spreadsheet);
 
     changes.sort_by(|c1, c2| cell_cmp(&c1, &c2));
 
-    print_changes(changes, out2);
+    print_changes(changes, changes_path);
 }
 
 // FIXME for now we are going to assume that we
