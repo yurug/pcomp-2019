@@ -22,6 +22,15 @@ impl<T: Copy + Clone> Matrix<T> {
     }
 }
 
+/// For now we don't need requirements
+/// so the type is a "singleton" type
+/// to avoid to deal with passing Vec around.
+/// The type will be changed when we do need
+/// to split sheets
+// pub type Requirements = Vec<Cell>;
+pub enum Requirements { Empty }
+
+
 #[derive(Debug,Clone,Copy,PartialEq)]
 pub struct Point {
     pub x: u64,
