@@ -18,7 +18,8 @@ fn eval_cell(cell: &Cell, sheet: &Matrix<Cell>) -> Cell {
             let mut acc = 0;
             for x in b.x..e.x+1 {
                 for y in b.y..e.y+1 {
-                    match eval_cell(&sheet.get(Point{x: x-1, y: y-1}), sheet).content {
+                    // Assume that indices are 0-based (not 1-based)
+                    match eval_cell(&sheet.get(Point{x: x, y: y}), sheet).content {
                         // FIXME find out why it's a ref and not a value
                         Val(i) => if i == v.clone() {
                             acc += 1;
