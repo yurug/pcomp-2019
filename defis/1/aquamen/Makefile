@@ -16,7 +16,7 @@ else
 endif
 
 all: docker
-	cp run.sh ws
+	cp ws.sh ws
 
 build:
 	cargo build $(FLAGS)
