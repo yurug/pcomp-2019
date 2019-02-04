@@ -6,6 +6,8 @@ use data::Requirements::Empty;
 use data::Data::*;
 use data::Function::*;
 
+use bench::bench;
+
 // FIXME test!!!!
 
 // FIXME should return a list of dependencies
@@ -16,9 +18,11 @@ use data::Function::*;
 // an error
 fn eval_cell(cell: &Cell,
              sheet: &Matrix<Cell>,
-             viewed: &mut HashSet<Point>) -> (Cell, Requirements) {
+             viewed: &mut HashSet<Point>,
+             bench: bench::Sender) -> (Cell, Requirements) {
     match cell.content {
         Val(_i) => {
+            let _ = bench.send(1);
             if !viewed.contains(&cell.loc) {
                 (cell.clone(), Empty)
             } else {
@@ -26,12 +30,13 @@ fn eval_cell(cell: &Cell,
             }
         },
         Fun(Count(b, e, v)) => {
+            let _ = bench.send(1);
             if !viewed.contains(&cell.loc) {
                 viewed.insert(cell.loc);
                 let mut acc = 0;
                 for x in b.x..e.x+1 {
                     for y in b.y..e.y+1 {
-                        match eval_cell(&sheet.get(Point{x: x, y: y}), sheet, viewed).0.content {
+                        match eval_cell(&sheet.get(Point{x: x, y: y}), sheet, viewed, bench.clone()).0.content {
                             // FIXME find out why it's a ref and not a value
                             Val(i) => if i == v.clone() {
                                 acc += 1;
@@ -45,18 +50,21 @@ fn eval_cell(cell: &Cell,
                 (Cell{content: Wrong, loc: cell.loc}, Empty)
             }
         }
-        _ => (cell.clone(), Empty) // FIXME better errors!!!
+        _ => {
+            let _ = bench.send(1);
+            (cell.clone(), Empty)
+        }
 
     }
 }
 
 // FIXME add a way to communicate to the caller (and the central authority)
-pub fn eval(input: &Matrix<Cell>) -> Matrix<Cell> {
+pub fn eval(input: &Matrix<Cell>, bench: bench::Sender) -> Matrix<Cell> {
     let mut res = Vec::new();
     for line in input.lines() {
         let mut lres: Vec<Cell>  = Vec::with_capacity(line.len());
         for cell in line {
-            let (r, _) = eval_cell(&cell, input, &mut HashSet::new());
+            let (r, _) = eval_cell(&cell, input, &mut HashSet::new(), bench.clone());
             lres.push(r)
         }
         res.push(lres)
@@ -64,6 +72,6 @@ pub fn eval(input: &Matrix<Cell>) -> Matrix<Cell> {
     Matrix::from_2d_vec(res)
 }
 
-pub fn eval_changes(changes: &Vec<Cell>, spreadsheet: &Matrix<Cell>) -> Vec<Cell> {
-    changes.into_iter().map(|c| eval_cell(&c, spreadsheet, &mut HashSet::new()).0).collect()
+pub fn eval_changes(changes: &Vec<Cell>, spreadsheet: &Matrix<Cell>, bench: bench::Sender) -> Vec<Cell> {
+    changes.into_iter().map(|c| eval_cell(&c, spreadsheet, &mut HashSet::new(), bench.clone()).0).collect()
 }

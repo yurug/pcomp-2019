@@ -4,9 +4,15 @@ use std::fs;
 
 use process::process;
 
+use bench::bench;
+
 // FIXME test!!!!
 
-pub fn schedule(sheet_path: &str, user_mod_path: &str, view0_path: &str, changes_path: &str) {
+pub fn schedule(sheet_path: &str,
+                user_mod_path: &str,
+                view0_path: &str,
+                changes_path: &str,
+                bench: bench::Sender) {
 
     // Step 1
 
@@ -16,5 +22,5 @@ pub fn schedule(sheet_path: &str, user_mod_path: &str, view0_path: &str, changes
         .expect("Something went wrong reading the file");
 
     let (sender, _recv) = channel();
-    process(sheet, changes, view0_path, changes_path, sender);
+    process(sheet, changes, view0_path, changes_path, sender, bench);
 }

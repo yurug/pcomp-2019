@@ -9,6 +9,8 @@ use printer::*;
 use data::Matrix;
 use data::Cell;
 
+use bench::bench;
+
 type Requirement = Cell;
 
 // FIXME add queue from scheduler to the process for cells
@@ -17,15 +19,16 @@ pub fn process(spreadsheet_str: String,
                user_mod: String,
                view0_path: &str,
                changes_path:&str,
-               _channel: Sender<Requirement>) {
+               _channel: Sender<Requirement>,
+               bench: bench::Sender) {
 
     let sheet = build_spreadsheet(spreadsheet_str);
-    let view0 = eval(&sheet);
+    let view0 = eval(&sheet, bench.clone());
     print_spreadsheet(&view0, view0_path);
 
     //Step 2
     let changes = build_changes(user_mod);
-    let mut changes = eval_changes(&changes, &sheet);
+    let mut changes = eval_changes(&changes, &sheet, bench.clone());
     changes.sort_by(|c1, c2| cell_cmp(&c1, &c2));
     print_changes(changes, changes_path);
 }
