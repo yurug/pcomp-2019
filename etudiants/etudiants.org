@@ -4,20 +4,21 @@
 * Mohammed Ansari
 * Carine Morel
 * Pierre Nigron
-* Antonin Decimo
-  - Présenter l'architecture
-* zhenlei HU
-  - Présenter l'architecture
-* Julien ROLLAND
-  - Présentation de son évaluation du défi 0
-* Vincent BONNEVALLE
-  - Présenter son code sur le défi 0
+* Antonin Decimo [1/1]
+** DONE Présenter l'architecture
+* zhenlei HU [1/1]
+** DONE Présenter l'architecture
+* Julien ROLLAND [1/1]
+** DONE Présentation de son évaluation du défi 0
+* Vincent BONNEVALLE [1/1]
+** DONE Présenter son code sur le défi 0
 * hamza achahour
-* Hugo Pompougnac
-  - Présenter l'architecture
-* Samy Metadjer
-  - Présenter l'architecture
+* Hugo Pompougnac [1/1]
+** DONE Présenter l'architecture
+* Samy Metadjer [1/1]
+** DONE Présenter l'architecture
 * Paul ZHENG
 * Amine Lounaci
-* Yoan GERAN
-  - Présenter l'architecture
+** DONE Présenter le papier de Dijsktra sur le GOTO
+* Yoan GERAN [1/1]
+** DONE Présenter l'architecture
