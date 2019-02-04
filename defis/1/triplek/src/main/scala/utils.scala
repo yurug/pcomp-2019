@@ -27,20 +27,20 @@ class Block(val topLeft: Position, val bottomRight: Position) {
 
 
 object Resource {
-  def using[A <: { def close(): Unit }, B](resource: A)(f: A => B): B = {
+  def applyFunction[A <: { def close(): Unit }, B](resource: A)(f: A => B): B = {
     try f(resource)
     finally resource.close()
   }
 }
 
 object Reader {
-  def using[B](fileName: String)(f: io.BufferedSource => B): B = {
-    Resource.using(io.Source.fromFile(fileName))(f(_))
+  def interpret[B](fileName: String)(f: io.BufferedSource => B): B = {
+    Resource.applyFunction(io.Source.fromFile(fileName))(f(_))
   }
 }
 
 object Writer {
-  def using[B](fileName: String)(f: java.io.BufferedWriter => B): B = {
+  def write[B](fileName: String)(f: java.io.BufferedWriter => B): B = {
     val outputFile = new java.io.File(fileName)
     val bw = new java.io.BufferedWriter(new java.io.FileWriter(outputFile))
     Resource.using(bw)(f(_))
