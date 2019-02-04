@@ -28,22 +28,22 @@ object Main {
       return
     }
 
-    val ucs: List[Change] = Reader.using(args(1)) { UserFileParser.parse(_) }
+    val ucs: List[Change] = Reader.interpret(args(1)) { UserFileParser.parse(_) }
     val (uacs, ubcs): (List[AChange], List[BChange]) = Change.split(ucs)
-    val fbcs: List[BChange] = Reader.using(args(0)) { CSVParser.parse(_) }
-    Reader.using(args(0)) {
+    val fbcs: List[BChange] = Reader.interpret(args(0)) { CSVParser.parse(_) }
+    Reader.interpret(args(0)) {
       CSVPreProcessor.countInitialValues(_, fbcs ::: ubcs, uacs)
     }
 
     Dependencies.compute(fbcs)
     Evaluator.evaluateChanges(fbcs)
 
-    Reader.using(args(0)) { input =>
-      Writer.using(args(2)) { output =>
+    Reader.interpret(args(0)) { input =>
+      Writer.write(args(2)) { output =>
         CSVPrinter.printCSVWithChanges(input, output, fbcs)
       }
     }
 
-    Writer.using(args(3)) { applyUserCommands(_, fbcs, ucs) }
+    Writer.write(args(3)) { applyUserCommands(_, fbcs, ucs) }
   }
 }
