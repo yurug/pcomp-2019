@@ -11,7 +11,6 @@ endif
 
 ifeq ($(DEBUG), 1)
 	FLAGS +=
-	CLEAN	:= --no-cache
 else
 	FLAGS += --release
 endif
