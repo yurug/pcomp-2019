@@ -1,8 +1,8 @@
 package donnees 
 
-class Interpreteur_implement(
-    sheet :FeuilleWithDependance){
+class Interpreteur_implement{
   
+  /*
 	private val sheet_iterator = sheet.iterator
 
 	/* if evaluation succes, return a int, else return None */
@@ -48,6 +48,6 @@ class Interpreteur_implement(
 	
 	def eval_next_expr() = evalData (sheet_iterator.next)
 	
-	
+	*/
 
 }
