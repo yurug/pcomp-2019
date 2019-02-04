@@ -1,3 +1,4 @@
+use std::hash::{Hash, Hasher};
 
 pub type Num = u8 ;
 
@@ -42,6 +43,14 @@ pub struct Cell {
     pub content: Data,
     pub loc: Point
 }
+
+impl Hash for Point {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.x.hash(state);
+        self.y.hash(state);
+    }
+}
+impl Eq for Point {}
 
 #[derive(Debug,Clone,PartialEq,Copy)]
 pub enum Data {
