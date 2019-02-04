@@ -31,7 +31,8 @@ docker:
 	docker build $(CLEAN) -t $(TARGET) .
 
 perf: # FIXME check /usr/bin/time format string
-	time -v cargo run $(DATA) $(USER) $(VIEW) $(CHANGE)
+	@echo "File size: " `du -sch $(DATA)`
+	@time -v cargo run $(DATA) $(USER) $(VIEW) $(CHANGE)
 
 mrproper:
 	cargo clean
