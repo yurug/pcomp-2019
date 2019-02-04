@@ -78,5 +78,15 @@ Sous Emacs, utiliser [TAB] pour ouvrir ou fermer les différentes sections.
 **** TODO Retours sur la revue de code
 *** Histoire des langages de programmation
 **** TODO Discuter des deux articles à lire pour aujourd'hui
-
-
+** <2019-02-04>
+*** TODO Fixer les dates des présentations-cours
+*** Défi 1
+    - Validation fonctionnelle
+    - Intégration des pull-requests
+*** Défi 2
+    - Performances
+    - Des questions de bas-niveau
+*** Histoire des langages de programmation
+    - Analyse de l'article de Knuth
+    - Cours : programmation procédurale
+    - Cours : programmation fonctionnellle
