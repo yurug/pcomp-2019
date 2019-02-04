@@ -3,6 +3,12 @@ TARGET        := aquamen
 FLAGS         :=
 CLEAN         :=
 
+ifeq ($(NOCACHE), 1)
+	CLEAN	:= --no-cache
+else
+	CLEAN	:=
+endif
+
 ifeq ($(DEBUG), 1)
 	FLAGS +=
 	CLEAN	:= --no-cache
