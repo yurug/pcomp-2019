@@ -47,5 +47,7 @@ fn build_spreadsheet(buffer: String) -> Matrix<Cell> {
 }
 
 fn build_changes(buffer: String) -> Vec<Cell> {
-    buffer.split("\n").map(|l| parse_change(l)).collect()
+    let mut v: Vec<&str> = buffer.split("\n").collect();
+    v.pop();
+    v.into_iter().map(|l| parse_change(l)).collect()
 }
