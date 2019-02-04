@@ -32,7 +32,7 @@ docker:
 
 perf: # FIXME check /usr/bin/time format string
 	@echo "File size: " `du -sch $(DATA)`
-	@time -v cargo run $(DATA) $(USER) $(VIEW) $(CHANGE)
+	@time -v cargo run --release $(DATA) $(USER) $(VIEW) $(CHANGE)
 
 mrproper:
 	cargo clean
