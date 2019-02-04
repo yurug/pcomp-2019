@@ -11,7 +11,7 @@ else
 endif
 
 all: docker
-	cp ws.sh ws
+	cp run.sh ws
 
 build:
 	cargo build $(FLAGS)
@@ -34,3 +34,6 @@ perf: # FIXME check /usr/bin/time format string
 	page faults from disk:     %F \n\
 	other page faults:         %R" cargo run $(DATA) $(USER) $(VIEW) $(CHANGE)
 
+mrproper:
+	cargo clean
+	$(RM) ws
