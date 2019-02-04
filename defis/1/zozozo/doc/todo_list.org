@@ -4,16 +4,14 @@ qu'on ne se marche pas sur les pieds.
 
 Merci de passer la tâche en DONE quand finie.
 
-** DONE Relire tests pierre et vérifier que les résultats attendus sont justes
-** DONE debugger les changements (changes.txt)
-** DONE Graph : commenter, nettoyer, raccourcir les fonctions
-** TODO Data : commenter, nettoyer, raccourcir les fonctions
 ** TODO Spreadsheet : commenter, nettoyer, raccourcir les fonctions
 ** TODO AST : commenter, nettoyer, raccourcir les fonctions
-** TODO Data : ajouter d'autres implémentations (Fonctionnelle pure, qui ne stocke rien en mémoire, etc).
 ** TODO Refléchir à comment gérer des tableaux de grandes tailles : Quels modules vont demander du changement
 ** TODO compléter le README
 ** TODO Ajouter plus de tests
+** TODO Message d'erreurs quand problème à la lecture du fichier
+** TODO Optimisation position avec un unique int et Patricia trees
+** TODO
 
 * Antonin
 ** TODO Faire marcher "make tests"
@@ -27,15 +25,11 @@ catégories et le numéro de chaque test rentrant dans cette catégorie
 ** TODO Ajouter diff à test.sh et affichage résultats avec option verbose ou pas
 ** TODO [DataArray] Avoir une taille de tableau logique pour ne pas en afficher trop ou faire des folds sur trop
 * Carine
-** DONE [Dependency] : commenter, nettoyer, raccourcir les fonctions
 * Kostia
-** TODO Ecrire un générateur de test pour générer automatiquement des gros tableurs (int entre 0 et 255)
 ** TODO [Spreadsheet] Séparer fonction IO du reste et uniformiser les parseurs
   sur parseur avoir une option "formule only"
 
 * Pierre
-** TODO [Data] Implémenter une version purement fonctionnelle
-
 
 * Question
 Si une case recalculée donne le même résultat que sa valeur précédent
@@ -52,3 +46,15 @@ utilisateur
 ** 1 -8 ok
 ** 9 un changement de trop inscrit (case recalculée mais non modifiée)
 ** 10 -12 ok
+
+
+* DONE
+** DONE [Data] Implémenter une version purement fonctionnelle
+
+** DONE [Dependency] : commenter, nettoyer, raccourcir les fonctions
+** DONE Relire tests pierre et vérifier que les résultats attendus sont justes
+** DONE debugger les changements (changes.txt)
+** DONE Graph : commenter, nettoyer, raccourcir les fonctions
+** DONE Data : commenter, nettoyer, raccourcir les fonctions
+** DONE Data : ajouter d'autres implémentations (Fonctionnelle pure, qui ne stocke rien en mémoire, etc).
+** DONE Ecrire un générateur de test pour générer automatiquement des gros tableurs (int entre 0 et 255)
