@@ -12,5 +12,5 @@ WORKDIR /home/docker/pcomp-2019/
 RUN git checkout aquamen/master
 RUN git pull
 WORKDIR /home/docker/pcomp-2019/defis/1/aquamen
-RUN DEBUG=0 make build
+RUN BENCH=0 DEBUG=0 make build
 

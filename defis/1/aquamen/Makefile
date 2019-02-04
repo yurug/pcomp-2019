@@ -1,39 +1,61 @@
 
 TARGET        := aquamen
+CARGO         := cargo
 FLAGS         :=
+FEATURES      :=
 CLEAN         :=
+TIME          := time -v
+TEST          := $(CARGO) test
+CC            := $(CARGO) build
+RUN           := $(CARGO) run
+CLEANER       := $(CARGO) clean
+CP            := $(CP)
+EXEC          := ws
+
+#==================================
+# Don't edit below this line
+#==================================
+
+ifeq ($(BENCH), 1)
+	FEATURES    += --features bench
+else
+	FEATURES		+=
+endif
 
 ifeq ($(NOCACHE), 1)
-	CLEAN	:= --no-cache
+	CLEAN	      := --no-cache
 else
-	CLEAN	:=
+	CLEAN	      :=
 endif
 
 ifeq ($(DEBUG), 1)
-	FLAGS +=
+	FLAGS      +=
 else
-	FLAGS += --release
+	FLAGS      += --release
 endif
 
+FLAGS       += $(FEATURES)
+
 all: docker
-	cp ws.sh ws
+	$(CP) ws.sh $(EXEC)
 
 build:
-	cargo build $(FLAGS)
+	$(CC) $(FLAGS)
 
 test:
-	cargo test
+	$(TEST)
 
 run:
-	cargo run $(DATA) $(USER) $(VIEW) $(CHANGE)
+	$(RUN) $(FLAGS) $(DATA) $(USER) $(VIEW) $(CHANGE)
 
 docker:
 	docker build $(CLEAN) -t $(TARGET) .
 
 perf: # FIXME check /usr/bin/time format string
 	@echo "File size: " `du -sch $(DATA)`
-	@time -v cargo run --release $(DATA) $(USER) $(VIEW) $(CHANGE)
+	@$(TIME) $(RUN) $(FALGS) $(DATA) $(USER) $(VIEW) $(CHANGE)
 
 mrproper:
-	cargo clean
-	$(RM) ws
+	$(CLEANER)
+	docker rm $(TARGET)
+	$(RM) $(EXEC)
