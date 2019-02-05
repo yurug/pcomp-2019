@@ -11,10 +11,22 @@ object CSVParser {
     * @param x The x position of the change.
     * @return A list of BChange corresponding to the formulae in `str`.
     */
-  private def searchFormulaeInLine(str: String, x: Int): List[BChange] = {
-    str.split(";").zipWithIndex.map { case (cell, y) =>
-      CellParser.parse(x, y, cell)
-    }.collect { case bc: BChange => bc }.toList
+  private def searchFormulaeInLine(cells: Array[String], x: Int, y: Int, l: List[BChange]): List[BChange] = {
+    if(y >= cells.size) {
+      return l
+    }
+    CellParser.parse(x, y, cells(y)) match {
+      case bc: BChange => searchFormulaeInLine(cells, x, y + 1, bc::l) 
+      case _: AChange => searchFormulaeInLine(cells, x, y + 1, l)
+    }
+  }
+
+  private def process(lines: Iterator[String], x: Int, returned: List[BChange]): List[BChange] = {
+    if(lines.isEmpty) {
+      return returned
+    }
+    val line: String = lines.next
+    process(lines, x + 1, searchFormulaeInLine(line.split(";"), x, 0, returned))
   }
 
   /** Parse a CSV file.
@@ -23,9 +35,8 @@ object CSVParser {
     * @return A list of BChange corresponding to the formulae in file.
     */
   def parse(file: scala.io.BufferedSource): List[BChange] = {
-    file.getLines.zipWithIndex.map { case (line, x) =>
-      searchFormulaeInLine(line, x)
-    }.foldLeft(List[BChange]())(_ ::: _)
+    var lines = file.getLines
+    process(lines, 0, List())
   }
 
 }
