@@ -43,6 +43,6 @@ object Writer {
   def write[B](fileName: String)(f: java.io.BufferedWriter => B): B = {
     val outputFile = new java.io.File(fileName)
     val bw = new java.io.BufferedWriter(new java.io.FileWriter(outputFile))
-    Resource.using(bw)(f(_))
+    Resource.applyFunction(bw)(f(_))
   }
 }
