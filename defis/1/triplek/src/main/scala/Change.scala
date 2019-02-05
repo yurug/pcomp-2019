@@ -1,6 +1,9 @@
 package change
 
+import scala.collection.mutable.HashMap
+
 import utils._
+
 
 abstract class Change(val p: Position, var v: Int) {
 
@@ -15,33 +18,43 @@ abstract class Change(val p: Position, var v: Int) {
 
   override def toString: String = if(correct) s"${v}" else "P"
   def depends_on(c: Change): Boolean = false
-  def propagate(c: Change, viewed: List[Change]): Unit = ()
+  def propagate(c: Change, viewed: HashMap[Change, Boolean]): Unit = ()
 
   def evaluate = {
-    applyChange(List(this))
+    var viewed: HashMap[Change, Boolean] =
+      new HashMap[Change, Boolean]()  { override def default(key:Change) = false }
+
+    viewed(this) = true
+    affecteds.foreach { c => c.propagate(this, viewed) }
   }
 
-  def applyChange(viewed: List[Change]) = {
-    affecteds.foreach(_.propagate(this, viewed))
-  }
-
-  def propagateError: Unit = {
-    if(!correct) return
-    correct = false
-    has_changed = true
-    affecteds.foreach (_.propagateError)
+  def propagateError(viewed: HashMap[Change, Boolean]): Unit = {
+    if(!viewed(this)) {
+      if(correct) {
+        correct = false
+        has_changed = true
+      }
+      viewed(this) = true
+      affecteds.foreach { c =>
+        c.propagateError(viewed)
+      }
+    }
   }
 
   def init: Unit = {
     hasChanged = false
     correct = true
+    v = valueWithInitialA
   }
 
 }
 
 
 class AChange(pos: Position, value: Int) extends Change(pos, value) {
-  def this(x: Int, y: Int, v: Int) = this(new Position(x, y), v)
+  def this(x: Int, y: Int, v: Int) = {
+    this(new Position(x, y), v)
+    valueWithInitialA = v
+  }
 }
 
 
@@ -56,30 +69,37 @@ extends Change(pos, value) {
     b.contains(c.p)
   }
 
-  override def propagate(c: Change, viewed: List[Change]): Unit = {
-    if(viewed.contains(this)) {
-      propagateError
+  override def propagate(c: Change, viewed: HashMap[Change, Boolean]): Unit = {
+    if(viewed(this)) {
+      if(correct) {
+        hasChanged = true
+        correct = false
+      }
+      var errPropagated: HashMap[Change, Boolean] =
+        new HashMap[Change,Boolean]()  { override def default(key:Change) = false }
+      errPropagated(this) = true
+
+      affecteds.foreach { c1 => c1.propagateError(errPropagated) }
     }
     else {
+      viewed(this) = true
       if(c.oldValue != c.v) {
         if(counted == c.v) v = v + 1
         else if(counted == c.oldValue) v = v - 1
       }
-      applyChange(this::viewed)
+      affecteds.foreach { c1 =>
+        if(c1.correct) {
+          c1.propagate(this, viewed)
+        }
+      }
     }
   }
-
-  override def init: Unit = {
-    v = valueWithInitialA
-    super.init
-  }
-
 }
 
 object Change {
-  def sortByBlockPosition(l: List[BChange]): List[BChange] = {
+  def sortByBlockPosition(l: Array[BChange]): Array[BChange] = {
     l.sortBy { c =>
-      (c.b.topLeft.x, c.b.topLeft.y, c.b.bottomRight.x, c.b.bottomRight.y)
+      (c.b.bottomRight.x, c.b.bottomRight.y, c.b.topLeft.x, c.b.topLeft.y)
     }
   }
 
