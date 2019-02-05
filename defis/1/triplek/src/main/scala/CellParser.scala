@@ -2,6 +2,7 @@ package cell_parser
 
 import utils._
 import change._
+import scala.util.{Try, Success, Failure}
 
 /** Exception for impossible parsing (not valid value, bad formatting, etc.) */
 final case class InvalidCellContentException(
@@ -58,15 +59,16 @@ object CellParser {
     * @return The change build with the string and the position.
     */
   @throws(classOf[InvalidCellContentException])
-  def parse(x: Int, y:Int, cell: String): Change = {
-    cell match {
-      case aCell(v) => createA(x, y, v.toInt)
-      case bCell(r1, c1, r2, c2, vc) =>
-        createB(x, y, r1.toInt, c1.toInt, r2.toInt, c2.toInt, vc.toInt)
-      case _ =>
-        throw new InvalidCellContentException(
-          s"Cannot parse ${cell} at position (${x}, ${y}.")
-    }
+  def parse(x: Int, y:Int, cell: String): Change = Try(cell.toInt) match {
+    case Success(v) => createA(x, y, v.toInt)
+    case Failure(_) =>
+      cell match {
+        case bCell(r1, c1, r2, c2, vc) =>
+          createB(x, y, r1.toInt, c1.toInt, r2.toInt, c2.toInt, vc.toInt)
+        case _ =>
+          throw new InvalidCellContentException(
+            s"Cannot parse ${cell} at position (${x}, ${y}.")
+      }
   }
 
 }
