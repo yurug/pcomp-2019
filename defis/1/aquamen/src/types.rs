@@ -10,6 +10,15 @@ pub type Num = u8;
 pub type Index = u128;
 
 
+/**
+ * Note de Hugo : Je pense qu'il ne faut pas regrouper les types représentant
+ * les données parsées et les types représentant les données structurées
+ * dans le même fichier/module. En compilation, ce serait comme définir
+ * l'environnement dans le même fichier/module que l'AST source. Il faut
+ * garder un fichier data.rs (qu'on importe ici et dans le parser)
+ * et avoir en plus ce fichier nommé spreadsheet.rs.
+**/
+
 ///===============================///
 ///============ Point ============///
 ///===============================///
@@ -98,6 +107,13 @@ pub struct Spreadsheet {
 }
 
 impl Spreadsheet {
+    
+    /**
+     * Note de Hugo : je ne teste que ce sous-ensemble de fonctions pour
+     * conserver une interface minimale.
+     * ======================================================================
+     */
+
     pub fn new(n: Index) -> Self {
         Spreadsheet {
             inner: Vec::new(),
@@ -106,21 +122,19 @@ impl Spreadsheet {
             changes: HashSet::new()
         }
     }
-
-    pub fn add_line(&mut self, cells: Vec<Cell>) {
-        cells.iter().for_each(|c| self.bind(&c));
-        let data = cells.iter().map(|c| c.content).collect();
-        self.inner.push(data);
-    }    
-
+    
+    pub fn add_cell(&mut self, cell : Cell) {}
+    
     pub fn eval(&mut self) -> &Vec<Vec<Data>> {
         self._eval();
         &self.inner
     }
 
-    pub fn update(&mut self, d: Data, p: Point) {
-        // Modifies the cell data and adds the cell and his children to the changes
-    }
+    /**
+     * Note de Hugo : il faudrait aussi avoir eval_one : int -> int -> Cell
+     * car quand on manipulera de gros tableurs, on ne pourra pas sortir
+     * une énorme matrice à la fin de l'opération.
+     */
     
     pub fn changes(&mut self) -> Vec<Cell> {
         let mut changes = Vec::new();
@@ -135,6 +149,23 @@ impl Spreadsheet {
         
         changes
     }
+    
+    /**
+     * ======================================================================
+     */
+     
+    pub fn add_line(&mut self, cells: Vec<Cell>) {
+        cells.iter().for_each(|c| self.bind(&c));
+        let data = cells.iter().map(|c| c.content).collect();
+        self.inner.push(data);
+    }
+    
+    pub fn update(&mut self, d: Data, p: Point) {
+        // Modifies the cell data and adds the cell and his children to the
+        // changes
+    }
+    
+    
 
     ///======== PRIVATE SCOPE ========///
 
@@ -191,3 +222,120 @@ impl Spreadsheet {
 }
 
 fn main() {}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_simple_val() {
+        let d = Val(5) ;
+        let input = Cell{content:d,loc:Point{x:0,y:0}} ;
+        let output = vec![!vec[d]] ;
+        let g = Spreadsheet::new(1) ;
+        g::add_cell(input) ;
+        assert_eq!(g::eval(),output) ;
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_ill_locations() {
+        let d = Val(5) ;
+        let input = Cell{content:d,loc:Point{x:8,y:1}} ;
+        let g = Spreadsheet::new(1) ;
+        g::add_cell(input) ;
+        g::eval()
+    }
+
+    #[test]
+    fn test_simple_error() {
+        let d = Wrong ;
+        let input = Cell{content:d,loc:Point{x:0,y:0}} ;
+        let output = vec![!vec[d]] ;
+        let g = Spreadsheet::new(1) ;
+        g::add_cell(input) ;
+        assert_eq!(g::eval(),output) ;
+    }
+
+    #[test]
+    fn test_simple_location_handling() {
+        let output = vec![
+            vec![Cell{content:Val(5),loc:Point{x:0,y:0}},
+                 Cell{content:Val(8),loc:Point{x:1,y:0}}],
+            vec![Cell{content:Val(2),loc:Point{x:0,y:1}},
+                 Cell{content:Val(9),loc:Point{x:1,y:1}}]
+        ] ;
+        let g = Spreadsheet::new(2) ;
+        for lines in output.iter() {
+            for c in lines.iter() {
+                g::add_cell(input) ;
+            }
+        }
+        assert_eq!(g::eval(),output) ;
+    }
+
+    #[test]
+    fn test_tricky_location_handling() {
+        let output = vec![
+            vec![Cell{content:Val(5),loc:Point{x:0,y:0}},
+                 Cell{content:Val(8),loc:Point{x:1,y:0}}],
+            vec![Cell{content:Val(2),loc:Point{x:0,y:1}},
+                 Cell{content:Val(9),loc:Point{x:1,y:1}}]
+        ] ;
+        let g = Spreadsheet::new(2) ;
+        for lines in (output.rev().iter()) {
+            for c in (lines.rev().iter()) {
+                g::add_cell(input) ;
+            }
+        }
+        assert_eq!(g::eval(),output) ;
+    }
+
+    #[test]
+    fn test_simple_count() {
+        let pattern = Val(5) ;
+        let res = Val(2) ;
+        let r = (Point{x:0,y:0},Point{x:2,y:0});
+        let output = vec![
+            vec![Cell{content:pattern,loc:Point{x:0,y:0}},
+                 Cell{content:Val(8),loc:Point{x:1,y:0}},
+                 Cell{content:pattern,loc:Point{x:2,y:0}}],
+            vec![Cell{content:Val(2),loc:Point{x:0,y:1}},
+                 Cell{content:Val(2),loc:Point{x:1,y:1}},
+                 Cell{content:Fun(Count(r.0,r.1,pattern)),loc:Point{x:2,y:1}}]
+        ] ;
+        let g = Spreadsheet::new(3) ;
+        for lines in output.iter() {
+            for c in lines.iter() {
+                g::add_cell(input) ;
+            }
+        }
+        output[1][2] = res ;
+        assert_eq!(g::eval(),output) ;
+    }
+
+    #[test]
+    fn test_wrong_propagation_count() {
+        let pattern = Val(5) ;
+        let res = Wrong ;
+        let r = (Point{x:0,y:0},Point{x:2,y:0});
+        let output = vec![
+            vec![Cell{content:pattern,loc:Point{x:0,y:0}},
+                 Cell{content:Wrong,loc:Point{x:1,y:0}},
+                 Cell{content:pattern,loc:Point{x:2,y:0}}],
+            vec![Cell{content:Val(2),loc:Point{x:0,y:1}},
+                 Cell{content:Val(2),loc:Point{x:1,y:1}},
+                 Cell{content:Fun(Count(r.0,r.1,pattern)),loc:Point{x:2,y:1}}]
+        ] ;
+        let g = Spreadsheet::new(3) ;
+        for lines in output.iter() {
+            for c in lines.iter() {
+                g::add_cell(input) ;
+            }
+        }
+        output[1][2] = res ;
+        assert_eq!(g::eval(),output) ;
+    }
+    
+}
