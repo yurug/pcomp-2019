@@ -18,7 +18,6 @@ object Main {
     case c::t =>
       val newApplied: List[Change] = Modifier.applyNewChange(c, applied)
       CommandEffectsPrinter.printEffect(bw, c, newApplied)
-      newApplied.foreach {c => println(c.p)}
       applyUserCommands(bw, newApplied, t)
   }
 
