@@ -1,7 +1,6 @@
 package printer
 
 import change._
-import cell_parser._
 import utils._
 
 object CommandEffectsPrinter {
@@ -37,7 +36,8 @@ object CSVPrinter {
       line: String, x: Int,
       l: List[Change]): List[Change] = {
     var rest: List[Change] = l
-    line.split(";").zipWithIndex.foreach { case (cell, y) =>
+    var y: Int = 0
+    line.split(";").foreach { case cell  =>
       if(y != 0) bw.write(";")
 
       while(!rest.isEmpty && rest.head.p.x <= x && rest.head.p.y < y)
@@ -48,7 +48,8 @@ object CSVPrinter {
         rest = rest.tail
       }
       else
-        bw.write(CellParser.parse(x, y, cell).toString)
+        bw.write(cell.toInt.toString)
+      y += 1
     }
     bw.write("\n")
     rest
@@ -59,8 +60,10 @@ object CSVPrinter {
       output: java.io.BufferedWriter,
       cs: List[Change]) = {
     var rest: List[Change] = cs.sortBy(c => (c.p.x, c.p.y))
-    file.getLines.zipWithIndex.foreach { case (line, x) =>
+    var x: Int = 0
+    file.getLines.foreach { case line =>
       rest = printLine(output, line, x, rest)
+      x += 1
     }
   }
 }
