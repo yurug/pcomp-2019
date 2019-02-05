@@ -68,7 +68,6 @@ object CSVPreProcessor {
         return acs
       else if(ac.p.x == p.x && ac.p.y == p.y) {
         ac.oldValue = v
-        ac.valueWithInitialA = ac.v
       }
       return propagateInA(p, v, q)
   }
