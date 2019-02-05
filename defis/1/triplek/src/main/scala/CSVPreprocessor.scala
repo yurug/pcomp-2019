@@ -3,6 +3,8 @@ package csv_preprocessor
 import change._
 import utils._
 import cell_parser._
+import scala.util.{Try, Success}
+import scala.math.max
 
 /** Preprocess a CSV file to simplify the future evaluation.
   * Here, compute the initial value for each formulae couting
@@ -33,20 +35,42 @@ object CSVPreProcessor {
     * @param bcs The list of BChange which could be impacted.
     * @return The list of BChange which could be impacted by the following cell.
     */
-  private def propagateInB(
+  /*private def propagateInB(
       p: Position,
       v: Int,
       bcs: List[BChange]): List[BChange] = bcs match {
     case Nil => Nil
     case bc::q =>
-      if(bc.b.isAfter(p))
+      if(bc.b.topLeft > p) {
         return bcs
-      else if(p > bc.b.bottomRight)
+      }
+      else if(p > bc.b.bottomRight || p == bc.b.bottomRight)
         return propagateInB(p, v, q)
       else if(bc.b.contains(p) && bc.counted == v) {
         bc.valueWithInitialA += 1
       }
       return bc :: propagateInB(p, v, q)
+  }*/
+
+  def propagateInB(p: Position, v: Int, l: Array[BChange], minX: Int): Int = {
+    var min: Int = minX
+    var i: Int = minX
+    while(i < l.size && p > l(i).b.bottomRight) {
+      i += 1
+    }
+    while(i < l.size && p == l(i).b.bottomRight) {
+      if(l(i).counted == v) {
+        l(i).valueWithInitialA += 1
+      }
+      i += 1
+    }
+    min = i
+    for(i <- min until l.size) {
+      if(l(i).b.contains(p) && l(i).counted == v) {
+        l(i).valueWithInitialA += 1
+      }
+    }
+    return min
   }
 
   /** Change the oldValue of AChanges which are at the position of a cell
@@ -58,38 +82,18 @@ object CSVPreProcessor {
     *
     * @return The list of BChange that could be impacted by the following cells.
     */
-  private def propagateInA(
+  private def propagate(
       p: Position,
       v: Int,
-      acs: List[AChange]): List[AChange] = acs match {
-    case Nil => Nil
-    case ac::q =>
-      if(ac.p > p)
-        return acs
-      else if(ac.p.x == p.x && ac.p.y == p.y) {
-        ac.oldValue = v
-      }
-      return propagateInA(p, v, q)
-  }
-
-  /** Propagate the value of a cell in all the changes. Of course, propagate
-    * only the value of the cell of type A.
-    *
-    * @param c The change associeted to the cell.
-    * @param p The position of the cell.
-    * @param bcs The list of BChange which could be affected by `c`.
-    * @param acs The list of AChange which could be affected by `c`.
-    *
-    * @return The list of BChange and AChange that could be impacted by the
-              following cells.
-    */
-  private def propagateCell(
-      c: Change,
-      p: Position,
-      bcs: List[BChange],
-      acs: List[AChange]): (List[BChange], List[AChange]) = c match {
-    case _: BChange => return (bcs, acs)
-    case _: AChange => (propagateInB(p, c.v, bcs), propagateInA(p, c.v, acs))
+      cs: Array[Change],
+      i_min: Int): Int = {
+    var min: Int = i_min
+    var i: Int = i_min
+    while(i < cs.size && cs(i).p.x == p.x && cs(i).p.y == p.y) {
+      cs(i).oldValue = v
+      i += 1
+    }
+    return i
   }
 
   /** Propagate all the values of the cells of a line in all the changes.
@@ -105,18 +109,25 @@ object CSVPreProcessor {
               following lines.
     */
   private def processLine(
-      cellsWithY: Iterator[(String, Int)],
+      cells: Iterator[String],
       x: Int,
-      bcs: List[BChange],
-      acs: List[AChange]): (List[BChange], List[AChange]) = {
-    if((bcs.isEmpty && acs.isEmpty) || cellsWithY.isEmpty) {
-      return (bcs, acs)
+      y: Int,
+      bcs: Array[BChange],
+      minX: Int,
+      acs: Array[Change],
+      minA: Int): (Int, Int) = {
+    if((minX >= bcs.size && minA >= acs.size) || cells.isEmpty) {
+      return (minX, minA)
     }
-    val (cell, y): (String, Int) = cellsWithY.next
+    val cell: String = cells.next
     val p: Position = new Position(x, y)
-    val c: Change = CellParser.parse(x, y, cell)
-    val (fr, ar): (List[BChange], List[AChange]) = propagateCell(c, p, bcs, acs)
-    processLine(cellsWithY, x, fr, ar)
+    Try(cell.toInt) match {
+      case Success(v) =>
+        val min: Int = propagateInB(p, v, bcs, minX)
+        val min2: Int = propagate(p, v, acs, minA)
+        processLine(cells, x, y + 1, bcs, min, acs, min2)
+      case _ => processLine(cells, x, y + 1, bcs, minX, acs, minA)
+    }
   }
 
   /** Propagate all the values of the cells of some lines in all the changes.
@@ -126,18 +137,19 @@ object CSVPreProcessor {
     * @param acs The list of AChange which could be affected by the cells.
     */
   private def process(
-      linesWithX: Iterator[(String, Int)],
-      bcs: List[BChange],
-      acs: List[AChange]): Unit = {
-    if((bcs.isEmpty && acs.isEmpty) || linesWithX.isEmpty) {
+      lines: Iterator[String],
+      x: Int,
+      bcs: Array[BChange],
+      minX: Int,
+      acs: Array[Change],
+      minA: Int): Unit = {
+    if((minX >= bcs.size && minA >= acs.size) || lines.isEmpty) {
       return
     }
-    val (str, x) = linesWithX.next
-    val cellsWithY: Iterator[(String, Int)] =
-      str.split(";").iterator.zipWithIndex
-    val (fr, ar): (List[BChange], List[AChange]) =
-      processLine(cellsWithY, x, bcs, acs)
-    process(linesWithX, fr, ar)
+    val str: String = lines.next
+    val cells: Iterator[String] = str.split(";").iterator
+    val (min, min2): (Int, Int) = processLine(cells, x, 0, bcs, minX, acs, minA)
+    process(lines, x + 1, bcs, min, acs, min2)
   }
 
   /** Count the initial value of AChanges and BChanges, that is to say,
@@ -151,11 +163,11 @@ object CSVPreProcessor {
   def countInitialValues(
       file: io.BufferedSource,
       bcs: List[BChange],
-      acs: List[AChange]) = {
-    val sortedAcs: List[AChange] = acs.sortBy(c => (c.p.x, c.p.y))
-    val sortedBcs: List[BChange] = Change.sortByBlockPosition(bcs)
-    val linesWithX = file.getLines.zipWithIndex
-    process(linesWithX, sortedBcs, sortedAcs)
+      acs: List[Change]) = {
+    val sortedAcs: Array[Change] = acs.toArray.sortBy(c => (c.p.x, c.p.y))
+    val sortedBcs: Array[BChange] = Change.sortByBlockPosition(bcs.toArray)
+    val lines = file.getLines
+    process(lines, 0, sortedBcs, 0, sortedAcs, 0)
   }
 
 }
