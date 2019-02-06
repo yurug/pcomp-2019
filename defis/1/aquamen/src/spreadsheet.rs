@@ -137,11 +137,20 @@ mod tests {
     }
 
     #[test]
-    fn test_supports_unfinished_spreadsheet() {
+    fn test_supports_partial_spreadsheet() {
         let mut spreadsheet = Spreadsheet::new(3) ;
         let p = Point{x:2,y:1} ;
         let c = Cell{content:Val(0),loc:p};
         spreadsheet.add_cell(c) ;
         assert_eq!(spreadsheet.eval(p).unwrap(), c) ;
+    }
+
+    #[test]
+    fn test_dependency_missing() {
+        let mut spreadsheet = Spreadsheet::new(3) ;
+        let p = Point{x:0,y:0} ;
+        let c = Cell{content:Fun(Count(p,Point{x:1,y:0},0)),loc:p};
+        spreadsheet.add_cell(c) ;
+        assert_eq!(spreadsheet.eval(p), None) ;
     }
 }
