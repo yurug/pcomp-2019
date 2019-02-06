@@ -9,6 +9,7 @@ mod interpreter;
 mod printer;
 mod process;
 mod bench;
+mod spreadsheet;
 
 
 use std::env;
