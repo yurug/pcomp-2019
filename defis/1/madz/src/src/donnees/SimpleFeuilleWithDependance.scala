@@ -3,7 +3,8 @@
 package donnees
 import scala.io._
 
-class SimpleFeuilleWithDependance(feuille:BufferedSource) extends FeuilleSimple(feuille) with FeuilleWithDependance{
+class SimpleFeuilleWithDependance(feuille:BufferedSource) /*extends FeuilleSimple(feuille) with FeuilleWithDependance*/{
+ 
   private val all_formule =  Nil
   
   def getDependance(c:Case):List[Case] = {
@@ -16,6 +17,7 @@ class SimpleFeuilleWithDependance(feuille:BufferedSource) extends FeuilleSimple(
     }
     all_formule.filter(depend_by(c,_))
   }
+  /*
   override def loadCalc(): Unit = {
     var i=0;var j=0
     println("ok")
@@ -31,6 +33,6 @@ class SimpleFeuilleWithDependance(feuille:BufferedSource) extends FeuilleSimple(
       }
       i+=1;j=0
     }
-  } 
+  }*/ 
     
 }

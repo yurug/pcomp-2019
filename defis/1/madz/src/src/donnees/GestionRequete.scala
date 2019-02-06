@@ -5,7 +5,7 @@ import scala.io._
 import scala.collection.mutable.ListBuffer
 
 
-class GestionRequete(f:BufferedSource, i:Interpreteur_implement) {
+class GestionRequete(f:BufferedSource, i:DataInterpreteur) {
   
   def chargeRequete(): ListBuffer[Requete] = {
     val listReq = ListBuffer[Requete]()
@@ -18,7 +18,8 @@ class GestionRequete(f:BufferedSource, i:Interpreteur_implement) {
   }
   
   def eval_requete(r:Requete) :(Case, Option[Int])= {
-    (r.getCase,i.evalData(r.getData))
+    //(r.getCase,i.evalData(r.getData))
+    null
 	}
   
   def eval_list_req : ListBuffer[(Case,Option[Int])] = {

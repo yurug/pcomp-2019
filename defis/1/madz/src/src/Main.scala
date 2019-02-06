@@ -8,14 +8,12 @@ object Main {
     if (args.length <4) {
         println("4 agrs minimum")
     }
-    val feuille = Source.fromFile(args(0)) 
-    val f= new SimpleFeuilleWithDependance(feuille)
+    val f= new FeuilleSimple(args(0))
     f.loadCalc()
-    println(f.getCellules(0)(0))
-    val interpreter = new Interpreteur_implement(f)
-    interpreter.evalSheet
-    val user = Source.fromFile(args(1))
-    val gr = new GestionRequete(user,interpreter)
-//    DataParser.writeView0(f.cellules) 
+    val I = new DataInterpreteur(f)
+    I.evalCellules()
+    I.writeView(args(2))
+   
+   
   }   
 }
