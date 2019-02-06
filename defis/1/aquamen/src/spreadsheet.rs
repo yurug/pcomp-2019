@@ -15,17 +15,17 @@ impl Spreadsheet {
         panic!("Impl missing")
     }
 
+    /** Doit être un binding sur add_cell **/
     pub fn add_line(&mut self, cells: Vec<Cell>) {
-        /** Doit être un binding sur add_cell **/
         panic!("Impl missing")
     }
 
     pub fn eval(&mut self, p : Point) -> Cell {
         panic!("Impl missing")
     }
-    
+
+    /** Doit être un binding sur eval **/
     pub fn eval_all(&mut self) -> &Vec<Vec<Data>> {
-        /** Doit être un binding sur eval **/
         panic!("Impl missing")
     }
 
@@ -61,13 +61,22 @@ mod tests {
         let spreadsheet = Spreadsheet::new(3) ;
         (spreadsheet,cells)
     }
-
+    
     #[test]
     fn test_simple_val() {
         let p = Point{x:0,y:1} ;
         let (mut spreadsheet,matrix) = basic_guinea_pigs() ;
         load_matrix_in_spreadsheet(matrix, &mut spreadsheet) ;
         assert_eq!(Cell{content:Val(2),loc:p}, spreadsheet.eval(p)) ;
+    }
+
+    #[test]
+    fn test_order_consistency() {
+        let p = Point{x:1,y:0} ;
+        let (mut spreadsheet,mut matrix) = basic_guinea_pigs() ;
+        matrix.reverse();
+        load_matrix_in_spreadsheet(matrix, &mut spreadsheet) ;
+        assert_eq!(Cell{content:Val(8),loc:p}, spreadsheet.eval(p)) ;
     }
 
     #[test]
@@ -87,4 +96,52 @@ mod tests {
         assert_eq!(Cell{content:Wrong,loc:p}, spreadsheet.eval(p)) ;
     }
 
+    #[test]
+    fn test_simple_change() {
+        let c = Cell{content:Val(9),loc:Point{x:0,y:1}} ;
+        let (mut spreadsheet,matrix) = basic_guinea_pigs() ;
+        load_matrix_in_spreadsheet(matrix, &mut spreadsheet) ;
+        spreadsheet.add_cell(c) ;
+        assert_eq!(
+            spreadsheet.changes(),
+            vec![c]
+        );
+    }
+
+    #[test]
+    fn test_propagate_changes() {
+        let c = Cell{content:Val(9),loc:Point{x:0,y:0}} ;
+        let (mut spreadsheet,matrix) = basic_guinea_pigs() ;
+        load_matrix_in_spreadsheet(matrix, &mut spreadsheet) ;
+        spreadsheet.add_cell(c) ;
+        assert_eq!(
+            spreadsheet.changes(),
+            vec![c, Cell{content:Val(1), loc:Point{x:2,y:1}}]
+        );
+    }
+    
+    #[test]
+    fn test_simple_cycle() {
+        let mut spreadsheet = Spreadsheet::new(3) ;
+        let p = Point{x:0,y:0} ;
+        let c = Cell{content:Fun(Count(p,p,0)),loc:p};
+        spreadsheet.add_cell(c) ;
+        assert_eq!(spreadsheet.eval(p), Cell{content:Wrong,loc:p}) ;
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_rectangle_consistency() {
+        let mut spreadsheet = Spreadsheet::new(3) ;
+        spreadsheet.add_cell(Cell{content:Val(0),loc:Point{x:4,y:0}}) ;
+    }
+
+    #[test]
+    fn test_supports_unfinished_spreadsheet() {
+        let mut spreadsheet = Spreadsheet::new(3) ;
+        let p = Point{x:2,y:1} ;
+        let c = Cell{content:Val(0),loc:p};
+        spreadsheet.add_cell(c) ;
+        assert_eq!(spreadsheet.eval(p), c) ;
+    }
 }
