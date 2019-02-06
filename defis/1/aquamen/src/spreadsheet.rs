@@ -20,7 +20,7 @@ impl Spreadsheet {
         panic!("Impl missing")
     }
 
-    pub fn eval(&mut self, p : Point) -> Cell {
+    pub fn eval(&mut self, p : Point) -> Option<Cell> {
         panic!("Impl missing")
     }
 
@@ -67,7 +67,7 @@ mod tests {
         let p = Point{x:0,y:1} ;
         let (mut spreadsheet,matrix) = basic_guinea_pigs() ;
         load_matrix_in_spreadsheet(matrix, &mut spreadsheet) ;
-        assert_eq!(Cell{content:Val(2),loc:p}, spreadsheet.eval(p)) ;
+        assert_eq!(Cell{content:Val(2),loc:p}, spreadsheet.eval(p).unwrap()) ;
     }
 
     #[test]
@@ -76,7 +76,7 @@ mod tests {
         let (mut spreadsheet,mut matrix) = basic_guinea_pigs() ;
         matrix.reverse();
         load_matrix_in_spreadsheet(matrix, &mut spreadsheet) ;
-        assert_eq!(Cell{content:Val(8),loc:p}, spreadsheet.eval(p)) ;
+        assert_eq!(Cell{content:Val(8),loc:p}, spreadsheet.eval(p).unwrap()) ;
     }
 
     #[test]
@@ -84,7 +84,7 @@ mod tests {
         let p = Point{x:2,y:1} ;
         let (mut spreadsheet,matrix) = basic_guinea_pigs() ;
         load_matrix_in_spreadsheet(matrix, &mut spreadsheet) ;
-        assert_eq!(Cell{content:Val(2),loc:p}, spreadsheet.eval(p)) ;
+        assert_eq!(Cell{content:Val(2),loc:p}, spreadsheet.eval(p).unwrap()) ;
     }
 
     #[test]
@@ -93,7 +93,7 @@ mod tests {
         let (mut spreadsheet,mut matrix) = basic_guinea_pigs() ;
         matrix[0][1] = Cell{content:Wrong,loc:Point{x:1,y:0}} ;
         load_matrix_in_spreadsheet(matrix, &mut spreadsheet) ;
-        assert_eq!(Cell{content:Wrong,loc:p}, spreadsheet.eval(p)) ;
+        assert_eq!(Cell{content:Wrong,loc:p}, spreadsheet.eval(p).unwrap()) ;
     }
 
     #[test]
@@ -126,7 +126,7 @@ mod tests {
         let p = Point{x:0,y:0} ;
         let c = Cell{content:Fun(Count(p,p,0)),loc:p};
         spreadsheet.add_cell(c) ;
-        assert_eq!(spreadsheet.eval(p), Cell{content:Wrong,loc:p}) ;
+        assert_eq!(spreadsheet.eval(p).unwrap(), Cell{content:Wrong,loc:p}) ;
     }
 
     #[test]
@@ -142,6 +142,6 @@ mod tests {
         let p = Point{x:2,y:1} ;
         let c = Cell{content:Val(0),loc:p};
         spreadsheet.add_cell(c) ;
-        assert_eq!(spreadsheet.eval(p), c) ;
+        assert_eq!(spreadsheet.eval(p).unwrap(), c) ;
     }
 }
