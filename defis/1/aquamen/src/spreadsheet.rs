@@ -39,7 +39,15 @@ mod tests {
 
     use super::*;
 
-    fn basic_guinea_pig () -> Spreadsheet {
+    fn load_matrix_in_spreadsheet(m : Vec<Vec<Cell>>, s : &mut Spreadsheet) {
+        for line in m.iter() {
+            for c in line.iter() {
+                s.add_cell(*c) ;
+            }
+        }
+    }
+    
+    fn basic_guinea_pigs () -> (Spreadsheet, Vec<Vec<Cell>>) {
         let num = 5 ;
         let r = (Point{x:0,y:0},Point{x:2,y:0});
         let cells = vec![
@@ -50,20 +58,33 @@ mod tests {
                  Cell{content:Val(2),loc:Point{x:1,y:1}},
                  Cell{content:Fun(Count(r.0,r.1,num)),loc:Point{x:2,y:1}}]
         ];
-        let mut spreadsheet = Spreadsheet::new(3) ;
-        for line in cells.iter() {
-            for c in line.iter() {
-                spreadsheet.add_cell(*c) ;
-            }
-        }
-        spreadsheet
+        let spreadsheet = Spreadsheet::new(3) ;
+        (spreadsheet,cells)
     }
 
     #[test]
     fn test_simple_val() {
-        let mut spreadsheet = basic_guinea_pig() ;
         let p = Point{x:0,y:1} ;
+        let (mut spreadsheet,matrix) = basic_guinea_pigs() ;
+        load_matrix_in_spreadsheet(matrix, &mut spreadsheet) ;
         assert_eq!(Cell{content:Val(2),loc:p}, spreadsheet.eval(p)) ;
+    }
+
+    #[test]
+    fn test_simple_count() {
+        let p = Point{x:2,y:1} ;
+        let (mut spreadsheet,matrix) = basic_guinea_pigs() ;
+        load_matrix_in_spreadsheet(matrix, &mut spreadsheet) ;
+        assert_eq!(Cell{content:Val(2),loc:p}, spreadsheet.eval(p)) ;
+    }
+
+    #[test]
+    fn test_propagate_wrong() {
+        let p = Point{x:2,y:1} ;
+        let (mut spreadsheet,mut matrix) = basic_guinea_pigs() ;
+        matrix[0][1] = Cell{content:Wrong,loc:Point{x:1,y:0}} ;
+        load_matrix_in_spreadsheet(matrix, &mut spreadsheet) ;
+        assert_eq!(Cell{content:Wrong,loc:p}, spreadsheet.eval(p)) ;
     }
 
 }
