@@ -2,19 +2,19 @@
 use std::fs::File;
 use std::io::Write;
 
-use data::{Matrix, Cell, Data};
+use data::{Cell, Data};
 use data::Data::{Val, Wrong};
 
 // FIXME test!!!
-pub fn print_spreadsheet(block: &Matrix<Cell>, filename: &str) {
+pub fn print_spreadsheet(block: &Vec<Vec<Data>>, filename: &str) {
 
     let mut file = File::create(filename).expect(
         &format!("Error creating file {}", filename)
     );
 
-    for line in block.lines() {
-        writeln!(&mut file, "{}", line.into_iter().map(|cell| {
-            to_string(&cell.content)
+    for line in block {
+        writeln!(&mut file, "{}", line.into_iter().map(|data| {
+            to_string(&data)
         }).collect::<Vec<String>>().join(";")).unwrap();
     }
 }

@@ -3,10 +3,9 @@ use std::cmp::Ordering;
 
 use parser::parse_line;
 use parser::parse_change;
-use interpreter::*;
+use spreadsheet::*;
 use printer::*;
 
-use data::Matrix;
 use data::Cell;
 
 use bench::bench;
@@ -22,14 +21,13 @@ pub fn process(spreadsheet_str: String,
                _channel: Sender<Requirement>,
                bench: bench::Sender) {
 
-    let sheet = build_spreadsheet(spreadsheet_str);
-    let view0 = eval(&sheet, bench.clone());
+    let mut sheet = build_spreadsheet(spreadsheet_str);
+    let view0 = sheet.eval_all();
     print_spreadsheet(&view0, view0_path);
 
     //Step 2
-    let changes = build_changes(user_mod);
-    let mut changes = eval_changes(&changes, &sheet, bench.clone());
-    changes.sort_by(|c1, c2| cell_cmp(&c1, &c2));
+    let changes = sheet.changes();
+    
     print_changes(changes, changes_path);
 }
 
@@ -45,8 +43,14 @@ fn cell_cmp(c1: &Cell, c2: &Cell) -> Ordering {
 // receive the full sheet. This should be modified
 // so that it can take an arbitrary rectangle view
 // of the spreadsheet
-fn build_spreadsheet(buffer: String) -> Matrix<Cell> {
-    Matrix::from_2d_vec(buffer.split("\n").map(|l| parse_line(0, l)).collect())
+fn build_spreadsheet(buffer: String) -> Spreadsheet {
+    let mut res = Spreadsheet::new(0);
+    
+    for line in buffer.split("\n") {
+        res.add_line(parse_line(0, line));
+    }
+
+    res
 }
 
 fn build_changes(buffer: String) -> Vec<Cell> {

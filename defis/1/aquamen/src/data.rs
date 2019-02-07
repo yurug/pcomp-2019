@@ -1,27 +1,86 @@
 use std::hash::{Hash, Hasher};
+use std::cmp::Ordering;
+use std::collections::HashSet;
+use std::collections::HashMap;
 
-pub type Num = u8 ;
+pub type Num = u8;
+pub type Index = u64;
 
-pub struct Matrix<T: Copy + Clone> {
-    inner: Vec<Vec<T>>
+
+///===============================///
+///============ Point ============///
+///===============================///
+
+
+#[derive(Debug,Clone,Copy,PartialEq)]
+pub struct Point {
+    pub x: Index,
+    pub y: Index
 }
 
-impl<T: Copy + Clone> Matrix<T> {
-    pub fn from_2d_vec(v: Vec<Vec<T>>) -> Matrix<T> {
-        Matrix {
-            inner: v
+impl Point {
+    pub fn cmp(self, p: &Point) -> Ordering {
+        match self.x.cmp(&p.x) {
+            Ordering::Equal => self.y.cmp(&p.y),
+            o => o
         }
     }
-    // Assume that the ordering of cell is conserved
-    // aka mat.get(p).loc == p
-    pub fn get(&self, c: Point) -> T {
-        self.inner[c.x as usize][c.y as usize].clone()
-    }
+}
 
-    pub fn lines(&self) -> &Vec<Vec<T>> {
-        &self.inner
+impl Hash for Point {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.x.hash(state);
+        self.y.hash(state);
     }
 }
+
+impl Eq for Point {}
+
+pub type PointsList = HashSet<Point>;
+
+pub type PointsListsMap = HashMap<Point, PointsList>;
+
+
+///===============================///
+///============= Cell ============///
+///===============================///
+
+
+#[derive(Debug,Clone,Copy,PartialEq)]
+pub struct Cell {
+    pub content: Data,
+    pub loc: Point
+}
+
+impl Cell {
+    pub fn cmp(self, c: &Cell) -> Ordering {
+        self.loc.cmp(&c.loc)
+    }
+}
+
+
+///===============================///
+///============= Data ============///
+///===============================///
+
+
+#[derive(Debug,Clone,Copy,PartialEq)]
+pub enum Data {
+    Val(Num),
+    Fun(Function),
+    Wrong
+}
+
+
+///===============================///
+///=========== Function ==========///
+///===============================///
+
+#[derive(Debug,Clone,Copy,PartialEq)]
+pub enum Function {
+    Count(Point, Point, Num)
+}
+
 
 /// For now we don't need requirements
 /// so the type is a "singleton" type
@@ -31,35 +90,23 @@ impl<T: Copy + Clone> Matrix<T> {
 // pub type Requirements = Vec<Cell>;
 pub enum Requirements { Empty }
 
+// pub struct Matrix<T: Copy + Clone> {
+//     inner: Vec<Vec<T>>
+// }
 
-#[derive(Debug,Clone,Copy,PartialEq)]
-pub struct Point {
-    pub x: u64,
-    pub y: u64
-}
+// impl<T: Copy + Clone> Matrix<T> {
+//     pub fn from_2d_vec(v: Vec<Vec<T>>) -> Matrix<T> {
+//         Matrix {
+//             inner: v
+//         }
+//     }
+//     // Assume that the ordering of cell is conserved
+//     // aka mat.get(p).loc == p
+//     pub fn get(&self, c: Point) -> T {
+//         self.inner[c.x as usize][c.y as usize].clone()
+//     }
 
-#[derive(Debug,PartialEq,Copy,Clone)]
-pub struct Cell {
-    pub content: Data,
-    pub loc: Point
-}
-
-impl Hash for Point {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.x.hash(state);
-        self.y.hash(state);
-    }
-}
-impl Eq for Point {}
-
-#[derive(Debug,Clone,PartialEq,Copy)]
-pub enum Data {
-    Val(Num),
-    Fun(Function),
-    Wrong
-}
-
-#[derive(Debug,Clone,PartialEq,Copy)]
-pub enum Function {
-    Count(Point, Point, Num)
-}
+//     pub fn lines(&self) -> &Vec<Vec<T>> {
+//         &self.inner
+//     }
+// }
