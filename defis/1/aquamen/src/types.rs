@@ -9,7 +9,6 @@ use ::Function::Count;
 pub type Num = u8;
 pub type Index = u128;
 
-
 /**
  * Note de Hugo : Je pense qu'il ne faut pas regrouper les types représentant
  * les données parsées et les types représentant les données structurées
@@ -134,7 +133,7 @@ impl Spreadsheet {
     
     pub fn eval(&mut self) -> Vec<Data> {        
         let len = self.inner.len();
-        let res = Vec::with_capacity(len);
+        let mut res = Vec::with_capacity(len);
         let width = self.width;
 
         for i in 0..(len as u128 / width) {
