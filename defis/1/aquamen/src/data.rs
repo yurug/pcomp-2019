@@ -12,7 +12,8 @@ pub type Index = u64;
 ///===============================///
 
 
-#[derive(Debug,Clone,Copy,PartialEq)]
+// FIXME derivemore pour cmp (Ord)
+#[derive(Debug,Clone,Copy,PartialEq,Hash,Eq)]
 pub struct Point {
     pub x: Index,
     pub y: Index
@@ -26,15 +27,6 @@ impl Point {
         }
     }
 }
-
-impl Hash for Point {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.x.hash(state);
-        self.y.hash(state);
-    }
-}
-
-impl Eq for Point {}
 
 pub type PointsList = HashSet<Point>;
 
