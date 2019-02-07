@@ -44,10 +44,17 @@ fn cell_cmp(c1: &Cell, c2: &Cell) -> Ordering {
 // so that it can take an arbitrary rectangle view
 // of the spreadsheet
 fn build_spreadsheet(buffer: String) -> Spreadsheet {
-    let mut res = Spreadsheet::new(0);
+    let mut it = buffer.split("\n") ;
+    let first_line = match it.next() {
+        Some(t) => parse_line(0,t),
+        None => vec![],
+    };
     
-    for line in buffer.split("\n") {
-        res.add_line(parse_line(0, line));
+    let mut res = Spreadsheet::new(first_line.len() as u64);
+    res.add_line(first_line) ;
+    
+    for (i,line) in buffer.split("\n").enumerate() {
+        res.add_line(parse_line(i as u64, line));
     }
 
     res
