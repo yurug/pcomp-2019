@@ -6,12 +6,11 @@ Merci de passer la tâche en DONE quand finie.
 
 ** TODO Spreadsheet : commenter, nettoyer, raccourcir les fonctions
 ** TODO AST : commenter, nettoyer, raccourcir les fonctions
-** TODO Refléchir à comment gérer des tableaux de grandes tailles : Quels modules vont demander du changement
 ** TODO compléter le README
 ** TODO Ajouter plus de tests
 ** TODO Message d'erreurs quand problème à la lecture du fichier
 ** TODO Optimisation position avec un unique int et Patricia trees
-** TODO
+** TODO Sur changement utilisateur : si case en fait inchangée (1 dans 1) -> pas besoin de faire du calcul
 
 * Antonin
 ** TODO Faire marcher "make tests"
