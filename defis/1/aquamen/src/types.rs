@@ -151,8 +151,8 @@ impl Spreadsheet {
             Fun(Count(Point { x: x1, y: y1 }, Point { x: x2, y: y2 }, n)) => {
                 let mut res = 0;
                 
-                for x in x1..(x2 + 1) {
-                    for y in y1..(y2 + 1) {
+                for x in *x1..(x2 + 1) {
+                    for y in *y1..(y2 + 1) {
                         if let Some(val) = self.eval_one(Point { x: x, y: y }) {
                             res += 1;
                         }
