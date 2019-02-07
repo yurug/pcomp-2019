@@ -6,7 +6,7 @@ object DataParser{
   def isAllDigits(x: String) = x forall Character.isDigit
   
   def parseData(data : String):CaseData={ 
-    val dateREGX = "\\=\\#\\((\\d+),(\\d+),(\\d+),(\\d+),(\\d+)\\)".r    	
+    val dateREGX = "\\=\\#\\((\\d+), (\\d+), (\\d+), (\\d+), (\\d+)\\)".r    	
     isAllDigits (data) match {  
       case true =>if (data.toInt<256)  Number(data.toInt) else P()
       case false =>
@@ -18,10 +18,12 @@ object DataParser{
     }
   }
   
-  def formuleToString(datacase:Option[CaseData]):String={
+ 
+  
+  def formuleToString(datacase:CaseData):String={
     datacase match{
-      case Some(Number(n)) => n+""
-      case Some (P()) => "P"
+      case Number(n) => n+""
+      case P() => "P"
       case _ => "P"
     }
   }

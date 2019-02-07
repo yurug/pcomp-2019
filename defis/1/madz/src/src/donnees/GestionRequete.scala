@@ -5,8 +5,9 @@ import scala.io._
 import scala.collection.mutable.ListBuffer
 
 
-class GestionRequete(f:BufferedSource, i:DataInterpreteur) {
+class GestionRequete(f:BufferedSource) {
   
+  /*
   def chargeRequete(): ListBuffer[Requete] = {
     val listReq = ListBuffer[Requete]()
     
@@ -31,4 +32,6 @@ class GestionRequete(f:BufferedSource, i:DataInterpreteur) {
   
   def maj_feuille = {
   }
+  */
+  
 }

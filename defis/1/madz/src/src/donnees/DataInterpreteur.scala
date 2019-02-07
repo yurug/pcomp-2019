@@ -3,9 +3,26 @@ package donnees
 import java.io.File
 import java.io.PrintWriter
 
-class DataInterpreteur(fs:FeuilleSimple) {
+object DataInterpreteur {
   
   
+  def getEvalRegionV0(c1:Case, c2:Case,v:Int,view0:String):CaseData={
+    var count=0
+    val out = new java.io.BufferedWriter( new java.io.FileWriter(view0) );
+    var i=0;var j=0
+    for(l <- io.Source.fromFile(view0).getLines){
+      if(c1.i<=i && i<=c2.i){
+        for(c <- l.split(";")){
+          if(c1.j<=j && j<=c2.j){
+            if (c.equals(v)) count+=1
+          }else j+=1
+        }
+      }else i+=1
+    }
+    Number(count)
+  }
+  
+  /*
   def evalData (data: Option[CaseData]): CaseData ={
     data match  {
 			case Some (Number (n)) => Number(n)
@@ -35,5 +52,5 @@ class DataInterpreteur(fs:FeuilleSimple) {
      }
     writer.close()
    }
-				
+				*/
 }
