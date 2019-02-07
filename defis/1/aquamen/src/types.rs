@@ -101,7 +101,7 @@ pub enum Function {
 
 pub struct Spreadsheet {
     width: Index,
-    inner: Vec<Vec<Data>>,
+    inner: HashMap<Point, Data>,
     bindings: PointsListsMap,
     changes: PointsList
 }
@@ -117,30 +117,38 @@ impl Spreadsheet {
     pub fn new(n: Index) -> Self {
         Spreadsheet {
             width: n,
-            inner: Vec::new(),
+            inner: HashMap::new(),
             bindings: HashMap::new(),
             changes: HashSet::new()
         }
     }
     
     pub fn add_cell(&mut self, cell: Cell) {
-        match self.get(&cell.loc) {
+        match self.inner.get(&cell.loc) {
             Some(_) => { self.update_changes(cell.loc); },
-            None => ()
+            None => self.bind(&cell)
         }
 
-        // TODO
-        self.inner[cell.loc.x as usize][cell.loc.y as usize] = cell.content; // Will crash
+        self.inner.insert(cell.loc, cell.content);
     }
     
-    pub fn eval(&mut self) -> &Vec<Vec<Data>> {
-        // TODO
-        &self.inner
+    pub fn eval(&mut self) -> Vec<Data> {        
+        let len = self.inner.len();
+        let res = Vec::with_capacity(len);
+        let width = self.width;
+
+        for i in 0..(len as u128 / width) {
+            for j in 0..width {
+                res.push(self.inner.get(&Point { x: i, y: j }).unwrap().clone());
+            }
+        }
+        
+        res
     }
-
-    pub fn eval_one(&mut self, p: Point) -> Option<Cell> { // Recursive
-        let data = match self.get_unchecked(&p) {
-
+    
+    pub fn eval_one(&self, p: Point) -> Option<Cell> { // Recursive
+        let data = match self.inner.get(&p).unwrap() {
+            
             Fun(Count(Point { x: x1, y: y1 }, Point { x: x2, y: y2 }, n)) => {
                 let mut res = 0;
                 
@@ -158,17 +166,17 @@ impl Spreadsheet {
                 Val(res)
             },
 
-            x => x
+            x => x.clone()
         };
         
         Some(Cell { content: data, loc: p })
     }
     
-    pub fn changes(&mut self) -> Vec<Cell> {
+    pub fn changes(&self) -> Vec<Cell> {
         let mut changes = Vec::new();
         
-        for point in self.changes.into_iter() {
-            if let Some(cell) = self.eval_one(point) { // hard to handle if None
+        for point in &self.changes {
+            if let Some(cell) = self.eval_one(point.clone()) { // hard to handle if None
                 changes.push(cell);
             }
         }
@@ -183,24 +191,11 @@ impl Spreadsheet {
      */
      
     pub fn add_line(&mut self, cells: Vec<Cell>) {
-        cells.iter().for_each(|c| self.bind(&c));
-        let data = cells.iter().map(|c| c.content).collect();
-        self.inner.push(data);
+        cells.into_iter().for_each(|c| self.add_cell(c));
     }
     
 
     ///======== PRIVATE SCOPE ========///
-
-    fn get(&self, p: &Point) -> Option<&Data> {
-        match self.inner.get(p.x as usize) {
-            Some(v) => v.get(p.y as usize),
-            None => None
-        }
-    }
-
-    fn get_unchecked(&self, p: &Point) -> Data {
-        self.inner[p.x as usize][p.y as usize]
-    }
 
     fn bind(&mut self, c: &Cell) {
         match c.content {
@@ -224,18 +219,21 @@ impl Spreadsheet {
     fn bind_cell(&mut self, pcell: Point, p: Point) {
         if let Some(set) = self.bindings.get_mut(&pcell) {
             set.insert(p);
-        } else {
-            let mut set = HashSet::new();
-            set.insert(p);
-            self.bindings.insert(pcell, set);
+            return;
         }
+        
+        let mut set = HashSet::new();
+        set.insert(p);
+        self.bindings.insert(pcell, set);
     }
 
     fn update_changes(&mut self, p: Point) { // Recursive
         self.changes.insert(p);
 
-        if let Some(set) = self.bindings.get(&p) {
-            for point in set.into_iter() {
+        let value = self.bindings.get(&p);
+
+        if let Some(set) = value {
+            for point in set {
                 self.update_changes(point.clone());
             }
         }
