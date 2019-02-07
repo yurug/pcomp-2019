@@ -58,8 +58,8 @@ let add_neighbour label new_neighbour g =
       new_neighbour
       {content = Val Empty; neighbours = label ++ empty_neighbours}
       g
-  | Some {content; neighbours} ->
-    Mpos.add new_neighbour {content; neighbours = label ++ neighbours} g
+  | Some node ->
+    Mpos.add new_neighbour {node with neighbours = label ++ node.neighbours} g
 
 let add_neighbours region label g =
   let s = region_to_set region in
