@@ -138,7 +138,7 @@ impl Spreadsheet {
 
         for i in 0..(len as u128 / width) {
             for j in 0..width {
-                res.push(self.inner.get(&Point { x: i, y: j }).unwrap().clone());
+                res.push(*self.inner.get(&Point { x: i, y: j }).unwrap());
             }
         }
         
@@ -154,7 +154,11 @@ impl Spreadsheet {
                 for x in *x1..(x2 + 1) {
                     for y in *y1..(y2 + 1) {
                         if let Some(val) = self.eval_one(Point { x: x, y: y }) {
-                            res += 1;
+                            match val.content {
+                                Wrong => (),
+                                Val(x) => if x == *n { res += 1; },
+                                Fun(_) => panic!("Unlikely")
+                            }
                         }
                         else {
                             return None;
@@ -175,7 +179,7 @@ impl Spreadsheet {
         let mut changes = Vec::new();
         
         for point in &self.changes {
-            if let Some(cell) = self.eval_one(point.clone()) { // hard to handle if None
+            if let Some(cell) = self.eval_one(*point) { // hard to handle if None
                 changes.push(cell);
             }
         }
@@ -205,7 +209,7 @@ impl Spreadsheet {
 
     fn bind_function(&mut self, f: Function, p: Point) {        
         match f {
-            Count(Point { x: x1, y: y1 }, Point { x: x2, y: y2 }, n) =>
+            Count(Point { x: x1, y: y1 }, Point { x: x2, y: y2 }, _) =>
                 for x in x1..(x2 + 1) {
                     for y in y1..(y2 + 1) {
                         let pcell = Point { x, y };
@@ -234,14 +238,14 @@ impl Spreadsheet {
             match self.bindings.get(&top) {
                 Some(set) => {
                     for point in set {
-                        stack.push(point.clone());
+                        stack.push(*point);
                     }
                 },
-                None => {}
+                None => ()
             }
-
+            
         }
-
+        
     }
 }
 
