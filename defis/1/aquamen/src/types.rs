@@ -226,16 +226,22 @@ impl Spreadsheet {
         self.bindings.insert(pcell, set);
     }
 
-    fn update_changes(&mut self, p: Point) { // Recursive
-        self.changes.insert(p);
-
-        let value = self.bindings.get(&p);
-
-        if let Some(set) = value {
-            for point in set {
-                self.update_changes(point.clone());
+    fn update_changes(&mut self, p: Point) {
+        let mut stack = vec!(p);
+        while !stack.is_empty() {
+            self.changes.insert(p);
+            let top = stack.pop().unwrap();
+            match self.bindings.get(&top) {
+                Some(set) => {
+                    for point in set {
+                        stack.push(point.clone());
+                    }
+                },
+                None => {}
             }
+
         }
+
     }
 }
 
