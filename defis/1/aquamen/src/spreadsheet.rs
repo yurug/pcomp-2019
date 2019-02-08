@@ -299,16 +299,6 @@ mod tests {
     }
 
     #[test]
-    fn test_wrong_if_rec() {
-        let mut spreadsheet = Spreadsheet::new(3) ;
-        let p1 = Point{x:0,y:0} ;
-        let c1 = Cell{content:Fun(Count(p1,p1,0)),loc:p1};
-        spreadsheet.add_cell(c1) ;
-        assert_eq!(spreadsheet.eval(p1).unwrap(),
-                   Cell{content:Wrong,loc:p1}) ;
-    }
-    
-    #[test]
     fn test_wrong_if_mut_rec() {
         let mut spreadsheet = Spreadsheet::new(3) ;
         let p1 = Point{x:0,y:0} ;
