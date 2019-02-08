@@ -17,9 +17,9 @@ pub fn schedule(sheet_path: &str,
     // Step 1
 
     let sheet = fs::read_to_string(sheet_path)
-        .expect("Something went wrong reading the file");
+        .expect("Something went wrong reading the first file");
     let changes = fs::read_to_string(user_mod_path)
-        .expect("Something went wrong reading the file");
+        .expect("Something went wrong reading the second file");
 
     let (sender, _recv) = channel();
     process(sheet, changes, view0_path, changes_path, sender, bench);

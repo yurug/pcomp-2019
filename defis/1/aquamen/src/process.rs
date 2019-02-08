@@ -1,5 +1,4 @@
 use std::sync::mpsc::Sender;
-use std::cmp::Ordering;
 
 use parser::parse_line;
 use parser::parse_change;
@@ -26,16 +25,13 @@ pub fn process(spreadsheet_str: String,
     print_spreadsheet(&view0, view0_path);
 
     //Step 2
-    let changes = sheet.changes();
-    
-    print_changes(changes, changes_path);
-}
+    let changes = build_changes(user_mod);
 
-fn cell_cmp(c1: &Cell, c2: &Cell) -> Ordering {
-    match c1.loc.x.cmp(&c2.loc.x) {
-        Ordering::Equal => c1.loc.y.cmp(&c2.loc.y),
-        o => o
+    for cell in changes {
+        sheet.add_cell(cell);
     }
+    
+    print_changes(sheet.changes(), changes_path);
 }
 
 

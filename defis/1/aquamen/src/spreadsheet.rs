@@ -34,13 +34,13 @@ impl Spreadsheet {
     }
     
     pub fn add_cell(&mut self, cell: Cell) {
-        match self.inner.get(&cell.loc) {
+        match self.get(&cell.loc) {
             Some(_) => { self.update_changes(cell.loc); },
             None => self.bind(&cell)
         }
         
         if cell.loc.y < self.width {
-            self.inner.insert(cell.loc, cell.content);
+            self.set(cell.loc, cell.content);
         } else {
             panic!("add_cell: Index out of bounds error");
         }
@@ -52,33 +52,39 @@ impl Spreadsheet {
     }
 
     pub fn eval(&self, p: Point) -> Option<Cell> {
-        let data = match self.inner.get(&p).unwrap() {
-            
-            Fun(Count(Point { x: x1, y: y1 }, Point { x: x2, y: y2 }, n)) => {
+        match self._eval(p, &mut HashSet::new()) {
+            Some(data) => Some(Cell { content: data, loc: p }),
+            None => None
+        }
+    }
+
+    fn _eval(&self, p: Point, viewed: &mut HashSet<Point>) -> Option<Data> {
+        if viewed.contains(&p) {
+            return Some(Wrong)
+        } 
+        viewed.insert(p);
+        
+        match self.get(&p) {
+            Some(Fun(Count(Point { x: x1, y: y1 }, Point { x: x2, y: y2 }, n))) => {
                 let mut res = 0;
-                
                 for x in *x1..(x2 + 1) {
                     for y in *y1..(y2 + 1) {
-                        if let Some(val) = self.eval(Point { x: x, y: y }) {
-                            match val.content {
-                                Wrong => (),
-                                Val(x) => if x == *n { res += 1; },
-                                Fun(_) => panic!("Unlikely")
-                            }
-                        }
-                        else {
-                            return None;
+                        let point = Point { x: x, y: y };
+                        match self._eval(point, viewed) {
+                            Some(Val(x)) => if x == *n {
+                                res += 1;
+                            },
+                            Some(Fun(_)) => panic!("Unlikely"),
+                            Some(Wrong) => return Some(Wrong),
+                            None => return None
                         }
                     }
                 }
-
-                Val(res)
+                Some(Val(res))
             },
-
-            x => x.clone()
-        };
-        
-        Some(Cell { content: data, loc: p })
+            Some(x) => Some(*x),
+            None => None
+        }
     }
 
     /** Doit être un binding sur eval **/
@@ -91,7 +97,7 @@ impl Spreadsheet {
             let mut line = Vec::with_capacity(self.width as usize);
             
             for j in 0..self.width {
-                line.push(*self.inner.get(&Point { x: i, y: j }).unwrap());
+                line.push(*self.get(&Point { x: i, y: j }).unwrap());
             }
 
             matrix.push(line);
@@ -115,6 +121,14 @@ impl Spreadsheet {
     }
 
     ///======== PRIVATE SCOPE ========///
+
+    fn get(&self, p: &Point) -> Option<&Data> {
+        self.inner.get(p)
+    }
+
+    fn set(&mut self, p: Point, d: Data) {
+        self.inner.insert(p, d);
+    }
 
     fn bind(&mut self, c: &Cell) {
         match c.content {
@@ -277,7 +291,7 @@ mod tests {
     #[should_panic]
     fn test_rectangle_consistency() {
         let mut spreadsheet = Spreadsheet::new(3) ;
-        spreadsheet.add_cell(Cell{content:Val(0),loc:Point{x:4,y:0}}) ;
+        spreadsheet.add_cell(Cell{content:Val(0),loc:Point{x:0,y:4}}) ;
     }
 
     #[test]
@@ -293,7 +307,7 @@ mod tests {
     fn test_dependency_missing() {
         let mut spreadsheet = Spreadsheet::new(3) ;
         let p = Point{x:0,y:0} ;
-        let c = Cell{content:Fun(Count(p,Point{x:1,y:0},0)),loc:p};
+        let c = Cell{content:Fun(Count(p,Point{x:1,y:0},0)),loc:Point{x:2,y:0}};
         spreadsheet.add_cell(c) ;
         assert_eq!(spreadsheet.eval(p), None) ;
     }
