@@ -217,6 +217,21 @@ mod tests {
     }
 
     #[test]
+    fn test_complex_count() {
+        let p0 = Point{x:0,y:0};
+        let p1 = Point{x:2,y:1};
+        let pp = Point{x:1,y:1} ;
+        let (mut spreadsheet,mut matrix) = basic_guinea_pigs() ;
+        matrix[0][0] = Cell{content:Fun(Count(pp,pp,2)),
+                            loc:Point{x:0,y:0}};
+        load_matrix_in_spreadsheet(matrix, &mut spreadsheet) ;
+        assert_eq!(
+            (spreadsheet.eval(p1).unwrap(), spreadsheet.eval(p0).unwrap()),
+            (Cell{content:Val(1), loc:p1}, Cell{content:Val(1), loc:p0})
+            );
+    }
+    
+    #[test]
     fn test_propagate_wrong() {
         let p = Point{x:2,y:1} ;
         let (mut spreadsheet,mut matrix) = basic_guinea_pigs() ;
@@ -281,5 +296,28 @@ mod tests {
         let c = Cell{content:Fun(Count(p,Point{x:1,y:0},0)),loc:p};
         spreadsheet.add_cell(c) ;
         assert_eq!(spreadsheet.eval(p), None) ;
+    }
+
+    #[test]
+    fn test_wrong_if_rec() {
+        let mut spreadsheet = Spreadsheet::new(3) ;
+        let p1 = Point{x:0,y:0} ;
+        let c1 = Cell{content:Fun(Count(p1,p1,0)),loc:p1};
+        spreadsheet.add_cell(c1) ;
+        assert_eq!(spreadsheet.eval(p1).unwrap(),
+                   Cell{content:Wrong,loc:p1}) ;
+    }
+    
+    #[test]
+    fn test_wrong_if_mut_rec() {
+        let mut spreadsheet = Spreadsheet::new(3) ;
+        let p1 = Point{x:0,y:0} ;
+        let p2 = Point{x:1,y:1} ;
+        let c1 = Cell{content:Fun(Count(p2,p2,0)),loc:p1};
+        let c2 = Cell{content:Fun(Count(p1,p1,0)),loc:p2};
+        spreadsheet.add_cell(c1) ;
+        spreadsheet.add_cell(c2) ;
+        assert_eq!(spreadsheet.eval(p2).unwrap(),
+                   Cell{content:Wrong,loc:p2}) ;
     }
 }
