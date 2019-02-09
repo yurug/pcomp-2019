@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate combine;
 extern crate separator;
-extern crate memmap;
+// extern crate memmap;
 
 mod data;
 mod sched;

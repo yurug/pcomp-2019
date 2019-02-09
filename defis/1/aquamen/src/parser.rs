@@ -92,8 +92,8 @@ pub fn parse_line(line: u64, s: &str) -> Vec<Cell> {
         cell_vec.push(Cell {
             content: v[i].clone(),
             loc: Point {
-                x: (i as u64),
-                y: line,
+                x: line,
+                y: (i as u64),
             },
         });
     }

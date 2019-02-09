@@ -51,11 +51,8 @@ impl Spreadsheet {
         cells.into_iter().for_each(|c| self.add_cell(c));
     }
 
-    pub fn eval(&self, p: Point) -> Option<Cell> {
-        match self._eval(p, &mut HashSet::new()) {
-            Some(data) => Some(Cell { content: data, loc: p }),
-            None => None
-        }
+    pub fn eval(&self, p: Point) -> Option<Data> {
+        self._eval(p, &mut HashSet::new())
     }
 
     fn _eval(&self, p: Point, viewed: &mut HashSet<Point>) -> Option<Data> {
@@ -97,7 +94,8 @@ impl Spreadsheet {
             let mut line = Vec::with_capacity(self.width as usize);
             
             for j in 0..self.width {
-                line.push(*self.get(&Point { x: i, y: j }).unwrap());
+                line.push(self.eval(Point { x: i, y: j })
+                          .expect(&format!("Cell {}-{} doesn't exist", i, j)));
             }
 
             matrix.push(line);
@@ -110,14 +108,20 @@ impl Spreadsheet {
         let mut changes = Vec::new();
         
         for point in &self.changes {
-            if let Some(cell) = self.eval(*point) { // hard to handle if None
-                changes.push(cell);
+            if let Some(data) = self.eval(*point) { // hard to handle if None
+                changes.push(Cell { content: data, loc: *point});
             }
         }
         
         changes.sort_by(|c1, c2| c1.cmp(&c2));
         
         changes
+    }
+
+    pub fn print(&self) {
+        for (k, v) in self.inner.iter() {
+            print!("{}-{} ", k.x, k.y);
+        }
     }
 
     ///======== PRIVATE SCOPE ========///
@@ -210,7 +214,7 @@ mod tests {
         let p = Point{x:0,y:1} ;
         let (mut spreadsheet,matrix) = basic_guinea_pigs() ;
         load_matrix_in_spreadsheet(matrix, &mut spreadsheet) ;
-        assert_eq!(Cell{content:Val(2),loc:p}, spreadsheet.eval(p).unwrap()) ;
+        assert_eq!(Val(2), spreadsheet.eval(p).unwrap()) ;
     }
 
     #[test]
@@ -219,7 +223,7 @@ mod tests {
         let (mut spreadsheet,mut matrix) = basic_guinea_pigs() ;
         matrix.reverse();
         load_matrix_in_spreadsheet(matrix, &mut spreadsheet) ;
-        assert_eq!(Cell{content:Val(8),loc:p}, spreadsheet.eval(p).unwrap()) ;
+        assert_eq!(Val(8), spreadsheet.eval(p).unwrap()) ;
     }
 
     #[test]
@@ -227,7 +231,7 @@ mod tests {
         let p = Point{x:2,y:1} ;
         let (mut spreadsheet,matrix) = basic_guinea_pigs() ;
         load_matrix_in_spreadsheet(matrix, &mut spreadsheet) ;
-        assert_eq!(Cell{content:Val(2),loc:p}, spreadsheet.eval(p).unwrap()) ;
+        assert_eq!(Val(2), spreadsheet.eval(p).unwrap()) ;
     }
 
     #[test]
@@ -241,7 +245,7 @@ mod tests {
         load_matrix_in_spreadsheet(matrix, &mut spreadsheet) ;
         assert_eq!(
             (spreadsheet.eval(p1).unwrap(), spreadsheet.eval(p0).unwrap()),
-            (Cell{content:Val(1), loc:p1}, Cell{content:Val(1), loc:p0})
+            (Val(1), Val(1))
             );
     }
     
@@ -251,7 +255,7 @@ mod tests {
         let (mut spreadsheet,mut matrix) = basic_guinea_pigs() ;
         matrix[0][1] = Cell{content:Wrong,loc:Point{x:1,y:0}} ;
         load_matrix_in_spreadsheet(matrix, &mut spreadsheet) ;
-        assert_eq!(Cell{content:Wrong,loc:p}, spreadsheet.eval(p).unwrap()) ;
+        assert_eq!(Wrong, spreadsheet.eval(p).unwrap()) ;
     }
 
     #[test]
@@ -284,7 +288,7 @@ mod tests {
         let p = Point{x:0,y:0} ;
         let c = Cell{content:Fun(Count(p,p,0)),loc:p};
         spreadsheet.add_cell(c) ;
-        assert_eq!(spreadsheet.eval(p).unwrap(), Cell{content:Wrong,loc:p}) ;
+        assert_eq!(spreadsheet.eval(p).unwrap(), Wrong) ;
     }
 
     #[test]
@@ -298,9 +302,10 @@ mod tests {
     fn test_supports_partial_spreadsheet() {
         let mut spreadsheet = Spreadsheet::new(3) ;
         let p = Point{x:2,y:1} ;
-        let c = Cell{content:Val(0),loc:p};
+        let v = Val(0);
+        let c = Cell{content:v,loc:p};
         spreadsheet.add_cell(c) ;
-        assert_eq!(spreadsheet.eval(p).unwrap(), c) ;
+        assert_eq!(spreadsheet.eval(p).unwrap(), v) ;
     }
 
     #[test]
@@ -321,7 +326,6 @@ mod tests {
         let c2 = Cell{content:Fun(Count(p1,p1,0)),loc:p2};
         spreadsheet.add_cell(c1) ;
         spreadsheet.add_cell(c2) ;
-        assert_eq!(spreadsheet.eval(p2).unwrap(),
-                   Cell{content:Wrong,loc:p2}) ;
+        assert_eq!(spreadsheet.eval(p2).unwrap(),  Wrong) ;
     }
 }
