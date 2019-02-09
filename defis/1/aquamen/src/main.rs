@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate combine;
 extern crate separator;
+extern crate memmap;
 
 mod data;
 mod sched;
@@ -10,7 +11,7 @@ mod printer;
 mod process;
 mod bench;
 mod spreadsheet;
-
+mod aprinter ;
 
 use std::env;
 
