@@ -50,7 +50,7 @@ fn build_spreadsheet(buffer: String) -> Spreadsheet {
     res.add_line(first_line) ;
     
     for (i,line) in buffer.split("\n").enumerate() {
-        res.add_line(parse_line(i as u64, line));
+        res.add_line(parse_line((i + 1) as u64, line));
     }
 
     res
