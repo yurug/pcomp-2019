@@ -41,7 +41,8 @@ pub fn process(spreadsheet_str: String,
 // of the spreadsheet
 fn build_spreadsheet(buffer: String) -> Spreadsheet {
     let mut it = buffer.split("\n") ;
-    let first_line = match it.next() {
+    let head = it.next();
+    let first_line = match head {
         Some(t) => parse_line(0,t),
         None => vec![],
     };
@@ -49,7 +50,7 @@ fn build_spreadsheet(buffer: String) -> Spreadsheet {
     let mut res = Spreadsheet::new(first_line.len() as u64);
     res.add_line(first_line) ;
     
-    for (i,line) in buffer.split("\n").enumerate() {
+    for (i,line) in it.enumerate() {
         res.add_line(parse_line((i + 1) as u64, line));
     }
 
