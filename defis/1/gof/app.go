@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/yurug/pcomp-2019/defis/1/gof/eval"
-	"github.com/yurug/pcomp-2019/defis/1/gof/parseutil"
+	parserutil "github.com/yurug/pcomp-2019/defis/1/gof/parseutil"
 )
 
 func main() {
@@ -16,13 +16,12 @@ func main() {
 	}
 	csv := args[0]
 	//user := args[1]
-	view := args[2]
+	//	view := args[2]
 	//changes := args[3]
-	ch := make(chan []eval.Cell)
-	e, err := eval.NewEvaluator(view)
-	if err != nil {
-		fmt.Printf("Error with evaluator: %v\n", err)
-	}
-	go parserutil.ParseSheet(csv, ch)
-	e.Process(ch)
+	ch := make(chan eval.Formula)
+	chbreak := make(chan int)
+	defer close(chbreak)
+	go parserutil.ParseSheet(csv, ch, chbreak)
+	<-chbreak
+
 }

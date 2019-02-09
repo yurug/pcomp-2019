@@ -2,6 +2,7 @@ package parserutil
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -19,24 +20,77 @@ const EXPRESSION_FORMULA = `=#[(]\d+, \d+, \d+, \d+, \d+[)]`
 //ParseSheet takes a file's path and a channel. It extracts all the Cells from the file and send them
 //Into the channel to another go-routine. It returns error if the controller fails to init
 //Or if NextLine() read all the file
-func ParseSheet(sheet string, c chan []eval.Cell) error {
+func ParseSheet(sheet string, c chan eval.Formula, chbreak chan int) error {
 	defer close(c)
 	controller, err := db.New(sheet)
 	if err != nil {
+		fmt.Printf("%v", err)
 		return fmt.Errorf("Error while calling new controller for ParseSheet: %v", err)
 	}
-
 	rowID := 0
+
+	binaryFile, _ := db.NewFile("binary")
+	detailsFile, _ := db.NewFile("details")
+	formulasFile, _ := db.NewFile("formulas")
+
 	for {
 		line, err := controller.NextLine()
 		if err != nil {
+			chbreak <- 1
 			return err
 		}
-		cells := strings.Split(string(line[:]), ";")
-		c <- constructLine(cells, rowID)
-		rowID++
 
+		values, formulas, lineSize := preprocess(string(line), rowID, c)
+		_, err = binaryFile.WriteBytes(values)
+		if err != nil {
+			chbreak <- 1
+			return err
+		}
+
+		_, err = detailsFile.WriteLines(strconv.Itoa(rowID) + ":" + strconv.Itoa(lineSize) + "\n")
+		if err != nil {
+			chbreak <- 1
+			return err
+		}
+
+		_, err = formulasFile.WriteLines(formulas)
+		if err != nil {
+			chbreak <- 1
+			return err
+		}
+
+		rowID++
 	}
+}
+
+func preprocess(line string, rowID int, c chan eval.Formula) ([]uint8, string, int) {
+	cells := strings.Split(string(line[:]), ";")
+	number := make([]uint8, len(cells))
+	formula := ""
+	cmp := 0
+
+	reg, err := regexp.Compile(`[0-9]+`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for column, cell := range cells {
+		switch checkType(cell) {
+		case KIND_NUMBER:
+			v, _ := strconv.ParseUint(cell, 10, 8)
+			number[cmp] = uint8(v)
+			cmp++
+		case KIND_FORMULA:
+			formula += strconv.Itoa(rowID) + ";" + strconv.Itoa(column) + ";"
+			formula += strings.Join(reg.FindAllString(cell, -1), ",") + "\n"
+			number[cmp] = uint8(0)
+			cmp++
+		default:
+			number[cmp] = uint8(0)
+			cmp++
+		}
+	}
+	return number, formula, len(cells)
 }
 
 func constructLine(cells []string, rowID int) []eval.Cell {
