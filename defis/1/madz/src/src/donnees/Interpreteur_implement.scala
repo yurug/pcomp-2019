@@ -48,6 +48,18 @@ class Interpreteur_implement{
 	
 	def eval_next_expr() = evalData (sheet_iterator.next)
 	
+	
+	def getDependance(c:Case):List[Case] = {
+    def depend_by (case_target: Case ,formule :Formule) = formule match { 
+      case Formule(lt,br,v) =>
+      if (case_target.i <= lt.i && case_target.i >= br.i 
+          && case_target.j >= lt.j && case_target.j <= br.j)
+      {true}
+      else {false}
+    }
+    all_formule.filter(depend_by(c,_))
+  }
+	
 	*/
 
 }
