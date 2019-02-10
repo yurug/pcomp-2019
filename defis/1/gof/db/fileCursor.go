@@ -9,9 +9,8 @@ import (
 )
 
 type FileModifier struct {
-	file     *os.File
-	m        map[int]int
-	position int
+	file *os.File
+	m    map[int]int
 }
 
 func NewFileModifier(path string, desc string) (*FileModifier, error) {
@@ -40,16 +39,12 @@ func NewFileModifier(path string, desc string) (*FileModifier, error) {
 		m[y] = previousX
 		previousX += x
 	}
-	fm := FileModifier{f, m, 0}
+	fm := FileModifier{f, m}
 	return &fm, nil
 }
 
 func (fm *FileModifier) GetValue(x int, y int) (int, error) {
-	originPosition := fm.m[y] + x
-	offset := fm.position - originPosition
-	fm.position = fm.position - offset
-
-	fm.file.Seek(int64(fm.position), 1)
+	fm.file.Seek(int64(fm.m[y]+x), 0)
 	b := make([]byte, 1)
 	fm.file.Read(b)
 
@@ -57,14 +52,9 @@ func (fm *FileModifier) GetValue(x int, y int) (int, error) {
 }
 
 func (fm *FileModifier) WriteValue(x int, y int, value int) {
-	originPosition := fm.m[y] + x
-	offset := fm.position - originPosition
-	fm.position = fm.position - offset
-
-	fm.file.Seek(int64(fm.position), 1)
+	fm.file.Seek(int64(fm.m[y]+x), 0)
 	b := make([]byte, 1)
-	b[0] = byte(value)
-	fmt.Println(b)
+	b[0] = byte(uint8(value))
 	_, err := fm.file.Write(b)
 	if err != nil {
 		fmt.Println("ici")
