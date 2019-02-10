@@ -8,6 +8,13 @@ def print val = val match{
 	case VInt v => ..
 }
 */
+package donnees
+package object A{
+type Value = CaseData  
+}
+
+/*
 abstract class Value
 case class VInt(v : Int) extends Value 
 case class VUncalculabe() extends Value
+*/

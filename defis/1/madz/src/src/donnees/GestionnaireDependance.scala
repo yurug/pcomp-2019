@@ -61,7 +61,7 @@ class GestionnaireDependance(fs:FeuilleSimple) {
     fs.get_FormuleId(formule) match{
       case None => Nil
       case Some(id) => getDependance(id).map( 
-          id => { val Some((i,c)) = fs.listCoord.get(id)
+          id => { val Some(c) = fs.listCoord.get(id)
         c
       })
     }
