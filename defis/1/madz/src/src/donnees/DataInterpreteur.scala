@@ -3,7 +3,7 @@ package donnees
 import java.io.File
 import java.io.PrintWriter
 
-object DataInterpreteur extends Interpreteur{
+object DataInterpreteur {
   private val database = "view0.txt"  
   
   def getEvalRegionV0(c1:Case, c2:Case,v:Int,view0:String):CaseData={

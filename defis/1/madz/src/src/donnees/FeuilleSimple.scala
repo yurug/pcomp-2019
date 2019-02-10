@@ -17,6 +17,11 @@ class FeuilleSimple(data0:String,view0:String) extends FeuilleCalque {
           case Some((id, _)) => Some(id) 
         }
   }
+  
+  def idToCase (id:Int)  = listCoord.get(id) match{
+          case None => Nil
+          case Some(c) => List(c)
+        }
       
         
     
@@ -59,6 +64,17 @@ class FeuilleSimple(data0:String,view0:String) extends FeuilleCalque {
   def getCaseData(id:Int):CaseData={
     val Some((data,l)) = listFormule.get(id)
     data
+  }
+  def getDependance(c:Case):List[Case] = {
+    get_FormuleId(c) match {
+      case None => Nil //case c is a int
+      case Some(id) => { 
+        val Some((data,dependances)) = listFormule.get(id)        
+        val listCase = dependances.map(id => listCoord.get(id))
+        val listClean = listCase.filter(elt => elt match {case None => false case Some(_) => true })
+        listClean.map(a => a match {case Some(a) => a})
+      }
+    }
   }
   def writeDep():String={
     var l= List[String]()
