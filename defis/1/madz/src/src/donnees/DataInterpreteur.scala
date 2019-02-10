@@ -3,8 +3,8 @@ package donnees
 import java.io.File
 import java.io.PrintWriter
 
-object DataInterpreteur {
-  
+object DataInterpreteur extends Interpreteur{
+  private val database = "view0.txt"  
   
   def getEvalRegionV0(c1:Case, c2:Case,v:Int,view0:String):CaseData={
     var count=0
@@ -21,7 +21,10 @@ object DataInterpreteur {
     }
     Number(count)
   }
-  
+  //def getValueData (c: Case): CaseData = get_FormuleId 
+    
+    
+   // getEvalRegionV0(c,c,v,database)
   /*
   def evalData (data: Option[CaseData]): CaseData ={
     data match  {

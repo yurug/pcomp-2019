@@ -6,7 +6,20 @@ class FeuilleSimple(data0:String,view0:String) extends FeuilleCalque {
   var listFormule:Map[Int,(CaseData,List[Int])] = Map()
   var listCoord:Map[Int,(Case)] = Map()
   var listP =List[Int]()
-
+  
+  def get_FormuleId(c: Case) = {
+    val res = listCoord.find( 
+        (K ) => { val _,d = K
+        if (d == c) {true} else {false}         
+      })
+     res match{
+          case None => None
+          case Some((id, _)) => Some(id) 
+        }
+  }
+      
+        
+    
   def copyF():Unit ={
     val out = new java.io.BufferedWriter( new java.io.FileWriter(view0) );
     var i=0
