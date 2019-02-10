@@ -20,7 +20,6 @@ type Coordinate struct {
 type Number struct {
 	position Coordinate
 	value    int
-	parents  []Coordinate
 }
 
 func NewNumber(x int, y int, v int) (*Number, error) {
@@ -37,10 +36,6 @@ func (n *Number) Coordinate() Coordinate {
 	return n.position
 }
 
-func (n *Number) Parents() []Coordinate {
-	return n.parents
-}
-
 func (n *Number) Value() string {
 	return strconv.Itoa(n.value)
 }
@@ -50,7 +45,6 @@ type Formula struct {
 	Start    Coordinate
 	End      Coordinate
 	ToEval   int
-	parents  []Coordinate
 }
 
 func NewFormula(r1 int, c1 int, r2 int, c2 int, v int, x int, y int) *Formula {
@@ -66,19 +60,8 @@ func (f *Formula) Coordinate() Coordinate {
 	return f.position
 }
 
-func (f *Formula) Parents() []Coordinate {
-	return f.parents
-}
-
 func (f *Formula) Value() string {
 	return "F"
-}
-
-func (f *Formula) isChild(c Cell) bool {
-	return f.End.X >= c.Coordinate().X && // r2 > x
-		c.Coordinate().X >= f.Start.X && // x > r1
-		f.End.Y >= c.Coordinate().Y && // c2 > x
-		c.Coordinate().Y >= f.Start.Y // x > c1
 }
 
 type Unknown struct {

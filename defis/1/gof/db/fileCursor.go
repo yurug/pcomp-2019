@@ -2,7 +2,6 @@ package db
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -55,8 +54,5 @@ func (fm *FileModifier) WriteValue(x int, y int, value int) {
 	fm.file.Seek(int64(fm.m[y]+x), 0)
 	b := make([]byte, 1)
 	b[0] = byte(uint8(value))
-	_, err := fm.file.Write(b)
-	if err != nil {
-		fmt.Println("ici")
-	}
+	fm.file.Write(b)
 }
