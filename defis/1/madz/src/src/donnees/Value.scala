@@ -8,7 +8,6 @@ def print val = val match{
 	case VInt v => ..
 }
 */
-/*trait Value
-case class VInt(v : Int) extends Int with Value 
-case class VUnknow extends Value
-*/
+abstract class Value
+case class VInt(v : Int) extends Value 
+case class VUncalculabe() extends Value
