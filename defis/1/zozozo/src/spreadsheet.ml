@@ -97,7 +97,7 @@ module Make (D : Data.DATA) = struct
     | Ast.Val v -> v
     | Ast.Occ ((pos, pos'), v) -> Ast.Int (eval_occ data pos pos' v)
 
-  let rec loop_eval data graph order changes content pos =
+  let rec loop_eval data order changes content pos =
     let v = eval data content in
     let data = D.set pos Ast.{value = v} data in
     let changes = (pos, v) :: changes in
@@ -107,7 +107,7 @@ module Make (D : Data.DATA) = struct
     let order = FormulaOrder.remove_computed_formula pos order in
     List.fold_left
       (fun (dat, depend, changes) (content, pos) ->
-        loop_eval dat graph depend changes content pos )
+        loop_eval dat depend changes content pos )
       (data, order, changes)
       computable
 
@@ -117,7 +117,7 @@ module Make (D : Data.DATA) = struct
       let order = FormulaOrder.build_order_from graph pos in
       let data, order, changes =
         if FormulaOrder.is_computable pos order
-        then loop_eval data graph order [] content pos
+        then loop_eval data order [] content pos
         else data, order, []
       in
       (* Put non-computable node to Undefined in data*)
@@ -137,7 +137,7 @@ module Make (D : Data.DATA) = struct
     let data, order, changes =
       List.fold_left
         (fun (dat, depend, ch) (content, pos) ->
-          loop_eval dat graph depend ch content pos )
+          loop_eval dat depend ch content pos )
         (data, order, [])
         computable
     in
