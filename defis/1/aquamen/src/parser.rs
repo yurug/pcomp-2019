@@ -38,8 +38,8 @@ parser! {
                  coord().skip(token(SEP_COUNT)),
                  coord().skip(token(SEP_COUNT)),
                  num())
-            .map(|t| Fun(Count(Point{x:t.0,y:t.1},
-                               Point{x:t.2,y:t.3},
+            .map(|t| Fun(Count(Point{x:t.1,y:t.0},
+                               Point{x:t.3,y:t.2},
                                t.4)));
 
         between(string(LCOUNT),token(RCOUNT), p)
