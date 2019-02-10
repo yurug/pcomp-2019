@@ -15,7 +15,7 @@ extends Request_change(c, value){
   /*
    * update case value, then update value of its dependance case*/
   private def update_case(c: Case, init:CaseData, current:CaseData) = {
-    Interpreter interpreter = new 
+    val result = DataInterpreteur.getEvalRegionV0(c, c,:Int,view0:String)
     if (init != current) {
       
       this.sheet.getDependance(c).map(
