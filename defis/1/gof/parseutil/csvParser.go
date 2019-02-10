@@ -16,6 +16,10 @@ const KIND_FORMULA = "FORMULA"
 const KIND_UNKNOWN = "UNKOWN"
 const SIZE_FORMULA = 5
 const EXPRESSION_FORMULA = `=#[(]\d+, \d+, \d+, \d+, \d+[)]`
+const BINARY_FILE = "binary"
+const DETAILS = "details"
+const FORMULAS_FILE = "formulas"
+const DEPENDENCIES_FILE = "dependencies"
 
 //ParseSheet takes a file's path and a channel. It extracts all the Cells from the file and send them
 //Into the channel to another go-routine. It returns error if the controller fails to init
@@ -29,9 +33,9 @@ func ParseSheet(sheet string, c chan eval.Formula, chbreak chan int) error {
 	}
 	rowID := 0
 
-	binaryFile, _ := db.NewFile("binary")
-	detailsFile, _ := db.NewFile("details")
-	formulasFile, _ := db.NewFile("formulas")
+	binaryFile, _ := db.NewFile(BINARY_FILE)
+	detailsFile, _ := db.NewFile(DETAILS)
+	formulasFile, _ := db.NewFile(FORMULAS_FILE)
 
 	for {
 		line, err := controller.NextLine()
