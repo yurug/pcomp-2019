@@ -16,10 +16,10 @@ const KIND_FORMULA = "FORMULA"
 const KIND_UNKNOWN = "UNKOWN"
 const SIZE_FORMULA = 5
 const EXPRESSION_FORMULA = `=#[(]\d+, \d+, \d+, \d+, \d+[)]`
-const BINARY_FILE = "binary"
-const DETAILS = "details"
-const FORMULAS_FILE = "formulas"
-const DEPENDENCIES_FILE = "dependencies"
+const BINARY_FILE = "binaries/binary"
+const DETAILS = "binaries/details"
+const FORMULAS_FILE = "binaries/formulas"
+const DEPENDENCIES_FILE = "binaries/dependencies"
 
 //ParseSheet takes a file's path and a channel. It extracts all the Cells from the file and send them
 //Into the channel to another go-routine. It returns error if the controller fails to init
