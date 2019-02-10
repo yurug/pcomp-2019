@@ -1,6 +1,9 @@
 package eval
 
-import "container/list"
+import (
+	"container/list"
+	"strconv"
+)
 
 type formList interface {
 	createList() *list.List
@@ -39,13 +42,14 @@ func (fl *fList) deleteFormula(f *Formula) {
 	}
 }
 
-func (fl *fList) getDepends(c Coordinate) []Coordinate {
+func (fl *fList) getDepends(c Cell) []Coordinate {
 	var dep []Coordinate
+	var value, _ = strconv.Atoi(c.Value())
 	for e := fl.l.Front(); e != nil; e = e.Next() {
-		if compareCoord(c, e.Value.(Formula).Start) == -1 {
+		if compareCoord(c.Coordinate(), e.Value.(Formula).Start) == -1 {
 			break
 		}
-		if isIn(c, e.Value.(Formula)) {
+		if isIn(c.Coordinate(), e.Value.(Formula)) && (value == e.Value.(Formula).ToEval) {
 			dep = append(dep, e.Value.(Formula).position)
 		}
 	}
