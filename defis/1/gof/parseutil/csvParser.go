@@ -20,22 +20,24 @@ const BINARY_FILE = "binaries/binary"
 const DETAILS = "binaries/details"
 const FORMULAS_FILE = "binaries/formulas"
 const DEPENDENCIES_FILE = "binaries/dependencies"
+const CREATE_FILE = 1
+const OPEN_FILE = 0
 
 //ParseSheet takes a file's path and a channel. It extracts all the Cells from the file and send them
 //Into the channel to another go-routine. It returns error if the controller fails to init
 //Or if NextLine() read all the file
 func ParseSheet(sheet string, c chan eval.Formula, chbreak chan int) error {
 	defer close(c)
-	controller, err := db.NewController(sheet, 0)
+	controller, err := db.NewController(sheet, OPEN_FILE)
 	if err != nil {
 		fmt.Printf("%v", err)
 		return fmt.Errorf("Error while calling new controller for ParseSheet: %v", err)
 	}
 	rowID := 0
 
-	binaryFile, _ := db.NewController(BINARY_FILE, 1)
-	detailsFile, _ := db.NewController(DETAILS, 1)
-	formulasFile, _ := db.NewController(FORMULAS_FILE, 1)
+	binaryFile, _ := db.NewController(BINARY_FILE, CREATE_FILE)
+	detailsFile, _ := db.NewController(DETAILS, CREATE_FILE)
+	formulasFile, _ := db.NewController(FORMULAS_FILE, CREATE_FILE)
 
 	for {
 		line, err := controller.NextLine()
@@ -65,6 +67,46 @@ func ParseSheet(sheet string, c chan eval.Formula, chbreak chan int) error {
 
 		rowID++
 	}
+}
+
+func dependencies(formulas *db.Controller) error {
+	/*	var err error
+		dep, _ := db.NewController(DEPENDENCIES_FILE, CREATE_FILE)
+		for {
+			line, err := formulas.NextLine()
+			if err != nil {
+				break
+			}
+			lineStr := string(line[:])
+			tmpArr := strings.Split(lineStr, ";")
+			pos := strings.Split(tmpArr[2], ",")
+			x, y := pos[0], pos[1]
+		}
+		return err*/
+	return nil
+}
+
+func extractFormulas(formulas *db.Controller) ([]*eval.Formula, error) {
+	l := make([]*eval.Formula, 0)
+	fml, err := formulas.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, line := range strings.Split(string(fml), "\n") {
+		arr := strings.Split(line, ";")
+		posArr, err := atoiSlice(arr[:1])
+		if err != nil {
+			return nil, err
+		}
+		arr2 := strings.Split(arr[2], ",")
+		paramArr, err := atoiSlice(arr2)
+		if err != nil {
+			return nil, err
+		}
+		l = append(l, eval.NewFormula(paramArr[0], paramArr[1], paramArr[2], paramArr[3], paramArr[4], posArr[0], posArr[1]))
+	}
+	return l, nil
 }
 
 func preprocess(line string, rowID int) ([]byte, string, int) {
