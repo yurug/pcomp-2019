@@ -4,16 +4,10 @@ import "container/list"
 
 type formList interface {
 	createList() *list.List
-	insertFormula(f *Formul)
+	insertFormula(f *Formula)
 	deleteFormula()
 	getList() list.List
 	getDepends(c *Coordinate) []Coordinate
-}
-
-type Formul struct {
-	position  Coordinate
-	startArea Coordinate
-	EndArea   Coordinate
 }
 
 type fList struct {
@@ -28,18 +22,18 @@ func (fl *fList) getList() list.List {
 	return fl.l
 }
 
-func (fl *fList) insertFormula(f *Formul) {
+func (fl *fList) insertFormula(f *Formula) {
 	for e := fl.l.Front(); e != nil; e = e.Next() {
-		if compareCoord(f.startArea, e.Value.(Formul).startArea) == -1 {
+		if compareCoord(f.Start, e.Value.(Formula).Start) == -1 {
 			continue
 		}
 		fl.l.InsertBefore(f, e)
 	}
 }
 
-func (fl *fList) deleteFormula(f *Formul) {
+func (fl *fList) deleteFormula(f *Formula) {
 	for e := fl.l.Front(); e != nil; e = e.Next() {
-		if compareCoord(f.position, e.Value.(Formul).position) == 0 {
+		if compareCoord(f.position, e.Value.(Formula).position) == 0 {
 			fl.l.Remove(e)
 		}
 	}
@@ -48,19 +42,19 @@ func (fl *fList) deleteFormula(f *Formul) {
 func (fl *fList) getDepends(c Coordinate) []Coordinate {
 	var dep []Coordinate
 	for e := fl.l.Front(); e != nil; e = e.Next() {
-		if compareCoord(c, e.Value.(Formul).startArea) == -1 {
+		if compareCoord(c, e.Value.(Formula).Start) == -1 {
 			break
 		}
-		if isIn(c, e.Value.(Formul)) {
-			dep = append(dep, e.Value.(Formul).position)
+		if isIn(c, e.Value.(Formula)) {
+			dep = append(dep, e.Value.(Formula).position)
 		}
 	}
 	return dep
 }
 
-func isIn(c Coordinate, f Formul) bool {
-	return compareCoord(c, f.startArea) > 1 &&
-		compareCoord(c, f.EndArea) < 1
+func isIn(c Coordinate, f Formula) bool {
+	return compareCoord(c, f.Start) > 1 &&
+		compareCoord(c, f.End) < 1
 }
 
 // Compare between two coordiantes (first X then Y)
