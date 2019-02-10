@@ -394,3 +394,5 @@ tags
 *.csv
 
 # End of https://www.gitignore.io/api/c,c++,go,java,ocaml,python,ruby,rust,scala,emacs,vim
+.DS_Store
+.vscode
