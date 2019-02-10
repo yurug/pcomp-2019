@@ -1,64 +1,75 @@
 use std::sync::mpsc::Sender;
 
+use aprinter::APrinter ;
+use data::{Cell,Point};
 use parser::parse_line;
 use parser::parse_change;
-use spreadsheet::*;
-use printer::*;
+use spreadsheet::Spreadsheet;
 
-use data::Cell;
+use printer::*;
 
 use bench::bench;
 
 type Requirement = Cell;
 
-// FIXME add queue from scheduler to the process for cells
-// FIXME add queue from scheduler to the process for changes???
-pub fn process(spreadsheet_str: String,
-               user_mod: String,
-               view0_path: &str,
-               changes_path:&str,
-               _channel: Sender<Requirement>,
-               bench: bench::Sender) {
-
-    let mut sheet = build_spreadsheet(spreadsheet_str);
-    let view0 = sheet.eval_all();
-    print_spreadsheet(&view0, view0_path);
-
-    //Step 2
-    let changes = build_changes(user_mod);
-
-    for cell in changes {
-        sheet.add_cell(cell);
-    }
-    
-    print_changes(sheet.changes(), changes_path);
+pub struct Processor {
+    line_len : usize,
+    sheet : Spreadsheet,
+    printer : APrinter,
+    mychannel : Sender<Requirement>
 }
 
+impl Processor {
 
-// FIXME for now we are going to assume that we
-// receive the full sheet. This should be modified
-// so that it can take an arbitrary rectangle view
-// of the spreadsheet
-fn build_spreadsheet(buffer: String) -> Spreadsheet {
-    let mut it = buffer.split("\n") ;
-    let head = it.next();
-    let first_line = match head {
-        Some(t) => parse_line(0,t),
-        None => vec![],
-    };
+    pub fn new(view0_path : &str, changes_path : &str, line_len : usize,
+               mychannel : Sender<Requirement>) -> Processor {
+        let vp = view0_path.to_string() ;
+        let cp = changes_path.to_string();
+        let sheet = Spreadsheet::new(line_len as u64);
+        let printer = APrinter::new(vp,cp,line_len as u64) ;
+        Processor {
+            line_len : line_len,
+            sheet : sheet,
+            printer : printer,
+            mychannel : mychannel
+        }
+    }
     
-    let mut res = Spreadsheet::new(first_line.len() as u64);
-    res.add_line(first_line) ;
-    
-    for (i,line) in it.enumerate() {
-        res.add_line(parse_line((i + 1) as u64, line));
+    pub fn initial_valuation(&mut self,buffer : String) {
+        let it = buffer.split("\n") ;
+        let line_num = it.clone().count() ;
+        for (i,line) in it.enumerate() {
+            let cells = parse_line(i as u64,line) ;
+            for c in cells {
+                // print!("add {:?}\n",c);
+                self.sheet.add_cell(c) ;
+            }
+        }
+        for i in 0..line_num {
+            for j in 0..self.line_len {
+                let p = Point{x:j as u64,y:i as u64};
+                // quand il y aura le multithreading, il faudra traiter
+                // le cas où il n'y a pas de résultat
+                let v = match self.sheet.eval(p) {
+                    Some(v) => v,
+                    None => panic!(format!("{:?} impossible",p))
+                };
+                let c = Cell{content:v,loc:p};
+                self.printer.print(c);
+            }
+        }
     }
 
-    res
-}
-
-fn build_changes(buffer: String) -> Vec<Cell> {
-    let mut v: Vec<&str> = buffer.split("\n").collect();
-    v.pop();
-    v.into_iter().map(|l| parse_change(l)).collect()
+    pub fn changes(&mut self,buffer : String) {
+        let mut lines: Vec<&str> = buffer.split("\n").collect();
+        lines.pop();
+        let cells : Vec<Cell> = lines.into_iter()
+            .map(|l| parse_change(l))
+            .collect();
+        for c in cells {
+            self.sheet.add_cell(c) ;
+        }
+        let consequences = self.sheet.changes();
+        self.printer.print_changes(consequences) ;
+    }
 }
