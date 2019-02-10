@@ -12,6 +12,7 @@ mod process;
 mod bench;
 mod spreadsheet;
 mod aprinter ;
+mod tree;
 
 use std::env;
 
