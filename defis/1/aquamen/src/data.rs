@@ -18,8 +18,14 @@ pub struct Point {
     pub y: Index
 }
 
-impl Point {
-    pub fn cmp(self, p: &Point) -> Ordering {
+impl PartialOrd for Point {
+    fn partial_cmp(&self, p: &Point) -> Option<Ordering> {
+        Some(self.cmp(p))
+    }
+}
+
+impl Ord for Point {
+    fn cmp(&self, p: &Point) -> Ordering {
         match self.x.cmp(&p.x) {
             Ordering::Equal => self.y.cmp(&p.y),
             o => o
