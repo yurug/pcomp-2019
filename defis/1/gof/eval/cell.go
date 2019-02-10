@@ -9,7 +9,6 @@ const BAD_FORMAT = "P"
 
 type Cell interface {
 	Coordinate() Coordinate
-	Parents() []Coordinate
 	Value() string
 }
 
@@ -66,7 +65,6 @@ func (f *Formula) Value() string {
 
 type Unknown struct {
 	position Coordinate
-	parents  []Coordinate
 }
 
 func NewUnknown(x int, y int) *Unknown {
@@ -77,10 +75,6 @@ func NewUnknown(x int, y int) *Unknown {
 
 func (u *Unknown) Coordinate() Coordinate {
 	return u.position
-}
-
-func (u *Unknown) Parents() []Coordinate {
-	return u.parents
 }
 
 func (u *Unknown) Value() string {
