@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/yurug/pcomp-2019/defis/1/gof/db"
+	"github.com/yurug/pcomp-2019/defis/1/gof/eval"
 )
 
 func main() {
@@ -13,21 +14,20 @@ func main() {
 		fmt.Printf("Not enough arguments\n")
 		return
 	}
-	//	csv := args[0]
-	user := args[1]
-	view := args[2]
+	csv := args[0]
+	//	user := args[1]
+	//	view := args[2]
 
 	//changes := args[3]
-	/*
-		ch := make(chan eval.Formula)
-		chbreak := make(chan int)
-		defer close(chbreak)
-		go parserutil.ParseSheet(csv, ch, chbreak)
-		<-chbreak
-	*/
 
-	f, _ := db.NewFileModifier(view, user)
-	g, _ := f.GetValue(3, 1)
+	ch := make(chan eval.Formula)
+	chbreak := make(chan int)
+	defer close(chbreak)
+	go parserutil.ParseSheet(csv, ch, chbreak)
+	<-chbreak
+
+	f, _ := db.NewFileModifier("binary", "details")
+	g, _ := f.GetValue(10, 10)
 	fmt.Println(g)
 
 	f.WriteValue(10, 10, 10)
