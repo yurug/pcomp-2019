@@ -30,7 +30,7 @@ func (fl *fList) getList() list.List {
 
 func (fl *fList) insertFormula(f *Formul) {
 	for e := fl.l.Front(); e != nil; e = e.Next() {
-		if compareCoord(f.startArea, e.Value.startArea) == -1 {
+		if compareCoord(f.startArea, e.Value.(Formul).startArea) == -1 {
 			continue
 		}
 		fl.l.InsertBefore(f, e)
@@ -39,7 +39,7 @@ func (fl *fList) insertFormula(f *Formul) {
 
 func (fl *fList) deleteFormula(f *Formul) {
 	for e := fl.l.Front(); e != nil; e = e.Next() {
-		if compareCoord(f.position, e.Value.position) == 0 {
+		if compareCoord(f.position, e.Value.(Formul).position) == 0 {
 			fl.l.Remove(e)
 		}
 	}
@@ -47,12 +47,12 @@ func (fl *fList) deleteFormula(f *Formul) {
 
 func (fl *fList) getDepends(c Coordinate) []Coordinate {
 	var dep []Coordinate
-	for e:= fl.l.Front(); e!= nil; e = e.Next() {
-		if compareCoord(c, e.Value.startArea) == -1 {
+	for e := fl.l.Front(); e != nil; e = e.Next() {
+		if compareCoord(c, e.Value.(Formul).startArea) == -1 {
 			break
 		}
-		if isIn(c, e.Value) {
-			dep = append(dep, e.Value.position)
+		if isIn(c, e.Value.(Formul)) {
+			dep = append(dep, e.Value.(Formul).position)
 		}
 	}
 	return dep
