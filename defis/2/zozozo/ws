@@ -1,0 +1,2 @@
+#!/bin/sh
+OCAMLRUNPARAM=b _build/default/src/main.exe "$@"
