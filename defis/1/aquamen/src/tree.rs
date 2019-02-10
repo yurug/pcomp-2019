@@ -56,23 +56,40 @@ impl Tree {
     // 
 
     pub fn add_cell(&mut self, cell: Cell) {
-        match self.content {
-            Content::Leaf{filename: _, ref mut data} => {
-                data.push(cell);
-                if data.len() > (NODE_MAX_SIZE as usize) {
-                    self.split()
-                }
+        let c = match self.content {
+            Content::Leaf{filename: _, ref data} => {
+                self.add_cell_leaf(data.to_vec(), cell)
             },
             Content::Node{ ref mut left, ref mut right } => {
                 let end = (*left).end;
+                let r = Rc::get_mut(right).unwrap();
+                let l = Rc::get_mut(left).unwrap();
                 if cell.loc.x > end.x {
-                    (*right).add_cell(cell);
+                    r.add_cell(cell);
                 } else if cell.loc.y > end.y {
-                    (*right).add_cell(cell);
+                    r.add_cell(cell);
                 } else {
-                    (*left).add_cell(cell)
+                    l.add_cell(cell)
                 }
+                None
             }
+        };
+        match c {
+            Some(c) => self.content = c,
+            None => {}
+        };
+    }
+
+    fn add_cell_leaf(&self, mut data: Vec<Cell>, cell: Cell) -> Option<Content> {
+        data.push(cell);
+        if data.len() > (NODE_MAX_SIZE as usize) {
+            let mid = Point {
+                x: (self.end.x  - self.begin.x) / 2,
+                y: (self.end.y  - self.begin.y) / 2,
+            };
+            Some(self.split_content(&data, mid))
+        } else {
+            None
         }
     }
 
