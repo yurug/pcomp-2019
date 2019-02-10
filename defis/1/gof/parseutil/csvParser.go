@@ -44,7 +44,7 @@ func ParseSheet(sheet string, c chan eval.Formula, chbreak chan int) error {
 			return err
 		}
 
-		values, formulas, lineSize := preprocess(string(line), rowID, c)
+		values, formulas, lineSize := preprocess(string(line), rowID)
 		_, err = binaryFile.WriteBytes(values)
 		if err != nil {
 			chbreak <- 1
@@ -67,9 +67,9 @@ func ParseSheet(sheet string, c chan eval.Formula, chbreak chan int) error {
 	}
 }
 
-func preprocess(line string, rowID int, c chan eval.Formula) ([]uint8, string, int) {
+func preprocess(line string, rowID int) ([]byte, string, int) {
 	cells := strings.Split(string(line[:]), ";")
-	number := make([]uint8, len(cells))
+	number := make([]byte, len(cells)*2)
 	formula := ""
 	cmp := 0
 
@@ -82,19 +82,22 @@ func preprocess(line string, rowID int, c chan eval.Formula) ([]uint8, string, i
 		switch checkType(cell) {
 		case KIND_NUMBER:
 			v, _ := strconv.ParseUint(cell, 10, 8)
-			number[cmp] = uint8(v)
-			cmp++
+			number[cmp] = byte(v)
+			number[cmp+1] = byte(0)
+			cmp += 2
 		case KIND_FORMULA:
 			formula += strconv.Itoa(rowID) + ";" + strconv.Itoa(column) + ";"
 			formula += strings.Join(reg.FindAllString(cell, -1), ",") + "\n"
-			number[cmp] = uint8(0)
-			cmp++
+			number[cmp] = byte(0)
+			number[cmp+1] = byte(0)
+			cmp += 2
 		default:
-			number[cmp] = uint8(0)
-			cmp++
+			number[cmp] = byte(0)
+			number[cmp+1] = byte(0)
+			cmp += 2
 		}
 	}
-	return number, formula, len(cells)
+	return number, formula, len(number)
 }
 
 func constructLine(cells []string, rowID int) []eval.Cell {

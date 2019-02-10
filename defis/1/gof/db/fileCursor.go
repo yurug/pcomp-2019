@@ -33,26 +33,31 @@ func NewFileModifier(path string, desc string) (*FileModifier, error) {
 		}
 		values := strings.Split(string(line), ":")
 		y, _ := strconv.Atoi(values[0])
-		x, _ := strconv.Atoi(values[1])
+		xSize, _ := strconv.Atoi(values[1])
 
 		m[y] = previousX
-		previousX += x
+		previousX += xSize
 	}
 	fm := FileModifier{f, m}
 	return &fm, nil
 }
 
-func (fm *FileModifier) GetValue(x int, y int) (int, error) {
-	fm.file.Seek(int64(fm.m[y]+x), 0)
-	b := make([]byte, 1)
+func (fm *FileModifier) GetValue(x int, y int) ([]int, error) {
+	fm.file.Seek(int64(fm.m[y]+(x*2)), 0)
+	b := make([]byte, 2)
 	fm.file.Read(b)
 
-	return int(b[0]), nil
+	value := make([]int, 2)
+	value[0] = int(b[0])
+	value[1] = int(b[1])
+
+	return value, nil
 }
 
-func (fm *FileModifier) WriteValue(x int, y int, value int) {
-	fm.file.Seek(int64(fm.m[y]+x), 0)
-	b := make([]byte, 1)
-	b[0] = byte(uint8(value))
+func (fm *FileModifier) WriteValue(x int, y int, value int, flag int) {
+	fm.file.Seek(int64(fm.m[y]+(x*2)), 0)
+	b := make([]byte, 2)
+	b[0] = byte(value)
+	b[1] = byte(flag)
 	fm.file.Write(b)
 }
