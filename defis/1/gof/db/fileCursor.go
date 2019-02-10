@@ -64,9 +64,12 @@ func (fm *FileModifier) WriteValue(x int, y int, value int) {
 	fm.file.Seek(int64(fm.position), 1)
 	b := make([]byte, 1)
 	b[0] = byte(value)
-	fmt.Println(b)
-	_, err := fm.file.Write(b)
+	fmt.Printf("Value to be written: %v\n", b)
+	fmt.Printf("Value to be written: %v\n", b[0])
+
+	a, err := fm.file.Write(b)
 	if err != nil {
 		fmt.Println("ici")
 	}
+	fmt.Printf("Int written: %v\n", a)
 }
