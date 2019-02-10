@@ -11,7 +11,7 @@ class CSVFile(fileName:String, separator:String) extends BufferedReader(new File
 		}catch{
 			case ex: IOException =>  null
 			}
-		if (tmp == null) { null}
+		if (tmp == null) { null} //if end of file
 			else {tmp.split(separator)}
 		}
 		

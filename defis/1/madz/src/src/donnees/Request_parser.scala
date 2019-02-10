@@ -8,7 +8,9 @@ trait Request_parser {
 				Case(Integer.parseInt(data(0)),Integer.parseInt(data(1))),
 				DataParser.parseData(data(2))
 			)
-			  } else {throw new java.util.zip.DataFormatException()}
+			  } else { 
+			    //new java.util.zip.DataFormatException().printStackTrace()
+			    null}
 			    
 			  
 			    
