@@ -39,7 +39,7 @@ impl Spreadsheet {
             None => self.bind(&cell)
         }
         
-        if cell.loc.y < self.width {
+        if cell.loc.x < self.width {
             self.set(cell.loc, cell.content);
         } else {
             panic!("add_cell: Index out of bounds error");
@@ -64,11 +64,11 @@ impl Spreadsheet {
         match self.get(&p) {
             Some(Fun(Count(Point { x: x1, y: y1 }, Point { x: x2, y: y2 }, n))) => {
                 let mut res = 0;
-                for x in *x1..(x2 + 1) {
-                    for y in *y1..(y2 + 1) {
-                        let point = Point { x: x, y: y };
+                for y in *y1..(y2 + 1) {
+                    for x in *x1..(x2 + 1) {
+                        let point = Point { x, y };
                         match self._eval(point, viewed) {
-                            Some(Val(x)) => if x == *n {
+                            Some(Val(v)) => if v == *n {
                                 res += 1;
                             },
                             Some(Fun(_)) => panic!("Unlikely"),
@@ -79,7 +79,7 @@ impl Spreadsheet {
                 }
                 Some(Val(res))
             },
-            Some(x) => Some(*x),
+            Some(d) => Some(*d),
             None => None
         }
     }
@@ -90,12 +90,12 @@ impl Spreadsheet {
 
         let mut matrix = Vec::with_capacity(height as usize);
 
-        for i in 0..height {
+        for y in 0..height {
             let mut line = Vec::with_capacity(self.width as usize);
             
-            for j in 0..self.width {
-                line.push(self.eval(Point { x: i, y: j })
-                          .expect(&format!("Cell {}-{} doesn't exist", i, j)));
+            for x in 0..self.width {
+                line.push(self.eval(Point { x, y })
+                          .expect(&format!("Cell {}-{} doesn't exist", x, y)));
             }
 
             matrix.push(line);
@@ -144,8 +144,8 @@ impl Spreadsheet {
     fn bind_function(&mut self, f: Function, p: Point) {        
         match f {
             Count(Point { x: x1, y: y1 }, Point { x: x2, y: y2 }, _) =>
-                for x in x1..(x2 + 1) {
-                    for y in y1..(y2 + 1) {
+                for y in y1..(y2 + 1) {
+                    for x in x1..(x2 + 1) {
                         let pcell = Point { x, y };
                         self.bind_cell(pcell, p);
                     }
