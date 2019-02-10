@@ -26,7 +26,8 @@ const OPEN_FILE = 0
 //ParseSheet takes a file's path and a channel. It extracts all the Cells from the file and send them
 //Into the channel to another go-routine. It returns error if the controller fails to init
 //Or if NextLine() read all the file
-func ParseSheet(sheet string, c chan eval.Formula, chbreak chan int) error {
+func ParseSheet(sheet string, c chan []eval.Cell, chbreak chan int) error {
+	fmt.Println("ParseSheet..")
 	defer close(c)
 	controller, err := db.NewController(sheet, OPEN_FILE)
 	if err != nil {
@@ -45,6 +46,9 @@ func ParseSheet(sheet string, c chan eval.Formula, chbreak chan int) error {
 			chbreak <- 1
 			return err
 		}
+
+		cells := strings.Split(string(line[:]), ";")
+		c <- constructLine(cells, rowID)
 
 		values, formulas, lineSize := preprocess(string(line), rowID)
 		_, err = binaryFile.WriteBytes(values)

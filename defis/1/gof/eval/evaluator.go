@@ -24,6 +24,7 @@ func NewEvaluator(targetPath string) (*Evaluator, error) {
 }
 
 func (e *Evaluator) initMatrix(lines chan []Cell) {
+	fmt.Println("init Matrix..")
 	for line := range lines {
 		e.m = append(e.m, line)
 	}
@@ -34,12 +35,15 @@ func (e *Evaluator) Matrix() matrix {
 }
 
 func (e *Evaluator) serialize() {
+	fmt.Println("Serialize..")
 	for _, line := range e.m {
 		for i, cell := range line {
 			if i == len(line)-1 {
-				e.target.WriteString(fmt.Sprintf("%v", cell.Value()))
+				e.target.WriteString(cell.Value())
 			} else {
-				e.target.WriteString(fmt.Sprintf("%v;", cell.Value()))
+				e.target.WriteString(cell.Value())
+				e.target.WriteString(";")
+
 			}
 		}
 		e.target.WriteString("\n")
@@ -47,7 +51,8 @@ func (e *Evaluator) serialize() {
 	return
 }
 
-func (e *Evaluator) Process(ch chan []Cell) {
+func (e *Evaluator) Process(ch chan []Cell, doneEval chan int) {
+	fmt.Println("Process..")
 	e.initMatrix(ch)
 	for r, line := range e.m {
 		for c, cell := range line {
@@ -56,8 +61,7 @@ func (e *Evaluator) Process(ch chan []Cell) {
 				continue
 			case *Formula:
 				var num Cell
-				visited := make(map[string]bool)
-				valueAfterEval, err := e.eval(Cell(v), v.ToEval, 0, visited)
+				valueAfterEval, err := e.eval(Cell(v), v.ToEval, 0)
 				if err != nil {
 					num = NewUnknown(r, c)
 					e.m[r][c] = num
@@ -73,17 +77,10 @@ func (e *Evaluator) Process(ch chan []Cell) {
 		}
 	}
 	e.serialize()
+	doneEval <- 1
 }
 
-func (e *Evaluator) eval(c Cell, param int, occ int, visited map[string]bool) (int, error) {
-	//check if presence of a cyclic graph
-	coord := c.Coordinate()
-	if visited[fmt.Sprintf("%v;%v", coord.X, coord.Y)] {
-		return -1, fmt.Errorf("Error occured in method eval: cyclic graph detected")
-	}
-	//add the current cell to the visited cells
-	visited[fmt.Sprintf("%v;%v", coord.X, coord.Y)] = true
-
+func (e *Evaluator) eval(c Cell, param int, occ int) (int, error) {
 	switch v := c.(type) {
 	case *Unknown:
 		return 0, nil
@@ -93,13 +90,25 @@ func (e *Evaluator) eval(c Cell, param int, occ int, visited map[string]bool) (i
 		}
 		return 0, nil
 	case *Formula: //Call recursively e.val() to count the occurence of the parameter
+		//check if presence of a cyclic graph
+		coord := c.Coordinate()
+		if e.m[coord.X][coord.Y].Visited() {
+			if v.FinalV != -1 {
+				return v.FinalV, nil
+			}
+			return -1, fmt.Errorf("Error occured in method eval: cyclic graph detected")
+		}
+		//add the current cell to the visited cells
+		e.m[coord.X][coord.Y].MarkVisit()
+
 		for i := v.Start.X; i <= v.End.X; i++ {
 			for j := v.Start.Y; j <= v.End.Y; j++ {
-				val, err := e.eval(e.m[i][j], param, occ, visited)
+				val, err := e.eval(e.m[i][j], param, occ)
 				if err != nil {
 					return -1, err
 				}
 				occ += val
+				v.FinalV = val
 			}
 		}
 	}
