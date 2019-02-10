@@ -41,7 +41,6 @@ impl Processor {
         for (i,line) in it.enumerate() {
             let cells = parse_line(i as u64,line) ;
             for c in cells {
-                // print!("add {:?}\n",c);
                 self.sheet.add_cell(c) ;
             }
         }
@@ -49,7 +48,8 @@ impl Processor {
             for j in 0..self.line_len {
                 let p = Point{x:j as u64,y:i as u64};
                 // quand il y aura le multithreading, il faudra traiter
-                // le cas où il n'y a pas de résultat
+                // le cas où il n'y a pas de résultat en utilisant le
+                // channel
                 let v = match self.sheet.eval(p) {
                     Some(v) => v,
                     None => panic!(format!("{:?} impossible",p))
