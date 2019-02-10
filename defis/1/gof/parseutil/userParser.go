@@ -15,7 +15,7 @@ type UserCommands struct {
 
 //ParseUserRequest TO-DO
 func ParseUserRequest(usrReq string) ([]UserCommands, error) {
-	controller, err := db.New(usrReq)
+	controller, err := db.NewController(usrReq, 0)
 	if err != nil {
 		return nil, fmt.Errorf("Error while calling new controller for ParseSheet: %v", err)
 	}

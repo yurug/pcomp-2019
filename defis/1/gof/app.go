@@ -23,11 +23,11 @@ func main() {
 	go parserutil.ParseSheet(csv, ch, chbreak)
 	<-chbreak
 
-	f, _ := db.NewFileModifier("binary", "details")
+	f, _ := db.NewFileModifier(parserutil.BINARY_FILE, parserutil.DETAILS)
 	g, _ := f.GetValue(10, 10)
 	fmt.Printf("Value Read before Write: %v\n", g)
 
-	f.WriteValue(10, 10, 99)
+	f.WriteValue(10, 10, 98, 0)
 	g, _ = f.GetValue(10, 10)
 
 	fmt.Printf("Value Read after Write: %v\n", g)

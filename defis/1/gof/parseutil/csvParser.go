@@ -26,16 +26,16 @@ const DEPENDENCIES_FILE = "binaries/dependencies"
 //Or if NextLine() read all the file
 func ParseSheet(sheet string, c chan eval.Formula, chbreak chan int) error {
 	defer close(c)
-	controller, err := db.New(sheet)
+	controller, err := db.NewController(sheet, 0)
 	if err != nil {
 		fmt.Printf("%v", err)
 		return fmt.Errorf("Error while calling new controller for ParseSheet: %v", err)
 	}
 	rowID := 0
 
-	binaryFile, _ := db.NewFile(BINARY_FILE)
-	detailsFile, _ := db.NewFile(DETAILS)
-	formulasFile, _ := db.NewFile(FORMULAS_FILE)
+	binaryFile, _ := db.NewController(BINARY_FILE, 1)
+	detailsFile, _ := db.NewController(DETAILS, 1)
+	formulasFile, _ := db.NewController(FORMULAS_FILE, 1)
 
 	for {
 		line, err := controller.NextLine()
