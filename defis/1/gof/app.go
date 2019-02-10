@@ -17,11 +17,15 @@ func main() {
 		return
 	}
 	csv := args[0]
-	ch := make(chan eval.Formula)
-	chbreak := make(chan int)
-	defer close(chbreak)
-	go parserutil.ParseSheet(csv, ch, chbreak)
-	<-chbreak
+	ch := make(chan []eval.Cell)
+	doneParse := make(chan int)
+	doneEval := make(chan int)
+	defer close(doneParse)
+	go parserutil.ParseSheet(csv, ch, doneParse)
+	e, _ := eval.NewEvaluator("view0.csv")
+	go e.Process(ch, doneEval)
+	<-doneParse
+	<-doneEval
 
 	f, _ := db.NewFileModifier(parserutil.BINARY_FILE, parserutil.DETAILS)
 	g, _ := f.GetValue(10, 10)
