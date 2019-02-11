@@ -8,7 +8,7 @@
     BINARY_UNIX=$(BINARY_NAME)_unix
 all:
 	docker build -t spreadsheet .
-	docker run -i -t spreadsheet:latest
+#	docker run -i -t spreadsheet:latest
 build: 
 	$(GOBUILD) -o $(BINARY_NAME) -v
 test: 

@@ -1,0 +1,2 @@
+#!/bin/bash
+docker run spreadsheet:latest "$1" "$2" "$3" "$4"
