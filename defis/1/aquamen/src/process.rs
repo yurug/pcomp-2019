@@ -6,10 +6,6 @@ use parser::parse_line;
 use parser::parse_change;
 use spreadsheet::Spreadsheet;
 
-use printer::*;
-
-use bench::bench;
-
 type Requirement = Cell;
 
 pub struct Processor {
