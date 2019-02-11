@@ -63,13 +63,16 @@ impl Processor {
     pub fn changes(&mut self,buffer : String) {
         let mut lines: Vec<&str> = buffer.split("\n").collect();
         lines.pop();
-        let cells : Vec<Cell> = lines.into_iter()
+
+        let changes: Vec<Cell> = lines.into_iter()
             .map(|l| parse_change(l))
             .collect();
-        for c in cells {
-            self.sheet.add_cell(c) ;
-        }
-        let consequences = self.sheet.changes();
-        self.printer.print_changes(consequences) ;
+
+        let effects: Vec<Vec<Cell>> = changes.clone()
+            .into_iter()
+            .map(|cell| self.sheet.apply_change(cell))
+            .collect();
+    
+        self.printer.print_changes(changes, effects);
     }
 }

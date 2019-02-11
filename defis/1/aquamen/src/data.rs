@@ -55,6 +55,10 @@ impl Cell {
     }
 }
 
+pub fn new_cell(d: Data, p: Point) -> Cell {
+    Cell { content: d, loc: p}
+}
+
 
 ///===============================///
 ///============= Data ============///
