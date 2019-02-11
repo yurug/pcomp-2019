@@ -137,7 +137,7 @@ impl Spreadsheet {
         matrix
     }
 
-    pub fn apply_change(&mut self, cell: Cell) -> Vec<Cell> {
+    pub fn apply_change(&mut self, cell: Cell) -> (Cell, Vec<Cell>) {
         let mut changes: Vec<Cell> = Vec::new();
         
         if self.get(&cell.loc).unwrap() != cell.content {
@@ -182,7 +182,7 @@ impl Spreadsheet {
             changes.sort_by(|c1, c2| c1.cmp(&c2));
         }
 
-        changes
+        (cell, changes)
     }
 
     ///======== PRIVATE SCOPE ========///

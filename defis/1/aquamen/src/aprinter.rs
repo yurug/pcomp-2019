@@ -86,17 +86,17 @@ impl APrinter {
     //     }
     // }
 
-    pub fn print_changes(&mut self, changes: Vec<Cell>, effects: Vec<Vec<Cell>>) {
-        for (i, change) in changes.iter().enumerate() {
+    pub fn print_changes(&mut self, effects: Vec<(Cell, Vec<Cell>)>) {
+        for (change, consequences) in effects {
             writeln!(self.change_file, "after \"{} {} {}\":",
                      change.loc.x, change.loc.y,
                      APrinter::data_to_string(&change.content)
             ).unwrap();
             
-            for effect in effects.get(i).unwrap() { // safe
+            for consequence in consequences { // safe
                 writeln!(self.change_file, "{} {} {}",
-                         effect.loc.x, effect.loc.y,
-                         APrinter::data_to_string(&effect.content)
+                         consequence.loc.x, consequence.loc.y,
+                         APrinter::data_to_string(&consequence.content)
                 ).unwrap();
             }
         }
