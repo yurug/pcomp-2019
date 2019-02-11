@@ -129,7 +129,6 @@ fn add_cell_leaf(begin: Point, end: Point, data: &mut Vec<Cell>, cell: Cell) -> 
 
 
 impl Tree {
-    // FIXME dump data when needed
 
     pub fn add_cell(&mut self, cell: Cell) {
         let c = match self.content {
