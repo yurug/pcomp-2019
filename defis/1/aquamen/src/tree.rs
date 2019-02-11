@@ -268,20 +268,4 @@ impl Tree {
             }
         }
     }
-
-    // // Assume that content is a Leaf
-    // // Can't split Node since it doesn't contains "data"
-    // fn split(&mut self) {
-    //     let mid = Point {
-    //         x: (self.end.x  - self.begin.x) / 2,
-    //         y: (self.end.y  - self.begin.y) / 2,
-    //     };
-    //     let new = match self.content {
-    //         Content::Leaf{ filename: _, ref data, dumped:_ } => {
-    //             self.split_content(&data, mid)
-    //         },
-    //         _ => panic!("Trying to split a non-Leaf Node !")
-    //     };
-    //     self.content = new;
-    // }
 }
