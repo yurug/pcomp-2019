@@ -52,7 +52,7 @@ object CSVPreProcessor {
       return bc :: propagateInB(p, v, q)
   }*/
 
-  def propagateInB(p: Position, v: Int, l: Array[BChange], minX: Int): Int = {
+  def propagateInB(p: Position, v: Int, l: Array[BChange], minX: Int, topL: Array[Position]): Int = {
     var min: Int = minX
     var i: Int = minX
     while(i < l.size && p > l(i).b.bottomRight) {
@@ -66,7 +66,10 @@ object CSVPreProcessor {
     }
     min = i
     for(i <- min until l.size) {
-      if(l(i).b.contains(p) && l(i).counted == v) {
+      if(topL(i) > p) {
+        return min
+      }
+      else if(l(i).b.contains(p) && l(i).counted == v) {
         l(i).valueWithInitialA += 1
       }
     }
@@ -114,6 +117,7 @@ object CSVPreProcessor {
       y: Int,
       bcs: Array[BChange],
       minX: Int,
+      topL: Array[Position],
       acs: Array[Change],
       minA: Int): (Int, Int) = {
     if((minX >= bcs.size && minA >= acs.size) || cells.isEmpty) {
@@ -123,10 +127,10 @@ object CSVPreProcessor {
     val p: Position = new Position(x, y)
     Try(cell.toInt) match {
       case Success(v) =>
-        val min: Int = propagateInB(p, v, bcs, minX)
+        val min: Int = propagateInB(p, v, bcs, minX, topL)
         val min2: Int = propagate(p, v, acs, minA)
-        processLine(cells, x, y + 1, bcs, min, acs, min2)
-      case _ => processLine(cells, x, y + 1, bcs, minX, acs, minA)
+        processLine(cells, x, y + 1, bcs, min, topL, acs, min2)
+      case _ => processLine(cells, x, y + 1, bcs, minX, topL, acs, minA)
     }
   }
 
@@ -141,6 +145,7 @@ object CSVPreProcessor {
       x: Int,
       bcs: Array[BChange],
       minX: Int,
+      topL: Array[Position],
       acs: Array[Change],
       minA: Int): Unit = {
     if((minX >= bcs.size && minA >= acs.size) || lines.isEmpty) {
@@ -148,8 +153,8 @@ object CSVPreProcessor {
     }
     val str: String = lines.next
     val cells: Iterator[String] = str.split(";").iterator
-    val (min, min2): (Int, Int) = processLine(cells, x, 0, bcs, minX, acs, minA)
-    process(lines, x + 1, bcs, min, acs, min2)
+    val (min, min2): (Int, Int) = processLine(cells, x, 0, bcs, minX, topL, acs, minA)
+    process(lines, x + 1, bcs, min, topL, acs, min2)
   }
 
   /** Count the initial value of AChanges and BChanges, that is to say,
@@ -166,8 +171,26 @@ object CSVPreProcessor {
       acs: List[Change]) = {
     val sortedAcs: Array[Change] = acs.toArray.sortBy(c => (c.p.x, c.p.y))
     val sortedBcs: Array[BChange] = Change.sortByBlockPosition(bcs.toArray)
+    var topL: Array[Position] = computeTopLeft(sortedBcs)
     val lines = file.getLines
-    process(lines, 0, sortedBcs, 0, sortedAcs, 0)
+    process(lines, 0, sortedBcs, 0, topL, sortedAcs, 0)
+  }
+
+  def computeTopLeft(l: Array[BChange]): Array[Position] = {
+    if(l.isEmpty) {
+      return new Array[Position](0)
+    }
+    val topL: Array[Position] = new Array[Position](l.size)
+    topL(l.size - 1) = l(l.size - 1).b.topLeft
+    for(i <- l.size - 2 to 0 by -1) {
+      if(l(i).b.topLeft > l(i + 1).b.topLeft) {
+        topL(i) = l(i + 1).b.topLeft
+      }
+      else {
+        topL(i) = l(i).b.topLeft
+      }
+    }
+    return topL
   }
 
 }

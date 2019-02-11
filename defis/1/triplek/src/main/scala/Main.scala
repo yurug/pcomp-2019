@@ -18,7 +18,6 @@ object Main {
     case c::t =>
       val newApplied: List[Change] = Modifier.applyNewChange(c, applied)
       CommandEffectsPrinter.printEffect(bw, c, newApplied)
-      newApplied.foreach {c => println(c.p)}
       applyUserCommands(bw, newApplied, t)
   }
 
@@ -31,10 +30,10 @@ object Main {
     val ucs: List[Change] = Reader.interpret(args(1)) { UserFileParser.parse(_) }
     val (uacs, ubcs): (List[AChange], List[BChange]) = Change.split(ucs)
     val fbcs: List[BChange] = Reader.interpret(args(0)) { CSVParser.parse(_) }
+    println("Reader fini")
     Reader.interpret(args(0)) {
       CSVPreProcessor.countInitialValues(_, fbcs ::: ubcs, uacs)
     }
-
     Dependencies.compute(fbcs)
     Evaluator.evaluateChanges(fbcs)
 
@@ -43,7 +42,6 @@ object Main {
         CSVPrinter.printCSVWithChanges(input, output, fbcs)
       }
     }
-
     Writer.write(args(3)) { applyUserCommands(_, fbcs, ucs) }
   }
 }

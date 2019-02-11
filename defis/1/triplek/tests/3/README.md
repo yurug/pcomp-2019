@@ -1,10 +1,1 @@
 Test interdependant formula.
-
-Should obtain
-
-P;1;0
-1;1;P
-3;0;3 
-
-and 
-
