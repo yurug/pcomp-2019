@@ -121,16 +121,16 @@ mod tests {
     const T1 : (&str,Data) = ("12",Val(12));
     const T2 : (&str,Data) = ("=#(1250,6000,7851,92573, 125)",
                               Fun(Count
-                                 (Point{x:1250,y:6000},
-                                  Point{x:7851,y:92573},
+                                 (Point{x:6000,y:1250},
+                                  Point{x:92573,y:7851},
                                   125)));
     const T3 : (&str,Data) = ("aaa",Wrong);
     const T4 : (&str,Cell) = ("489 1000 5",Cell{content:Val(5),
                                                 loc:Point{x:1000,y:489}});
     const T5 : (&str,Cell) = ("489 1000 =#(1250,6000,7851,92573, 125)",
                               Cell{content:Fun(Count
-                                               (Point{x:1250,y:6000},
-                                                Point{x:7851,y:92573},
+                                               (Point{x:6000,y:1250},
+                                                Point{x:92573,y:7851},
                                                 125)),
                                    loc:Point{x:1000,y:489}});
     
