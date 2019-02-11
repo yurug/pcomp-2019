@@ -118,7 +118,7 @@ fn add_cell_leaf(begin: Point, end: Point, data: &mut Vec<Cell>, cell: Cell) -> 
     data.push(cell);
     if data.len() > (NODE_MAX_SIZE as usize) {
         let mid = Point {
-            x: (end.x  - begin.x) / 2,
+            x: end.x,
             y: (end.y  - begin.y) / 2,
         };
         Some(split_content(begin, end, &data, mid))
@@ -146,6 +146,9 @@ impl Tree {
     pub fn add_cell(&mut self, cell: Cell) {
         let c = match self.content {
             Content::Leaf{ref filename, ref mut data, ref mut dumped} => {
+                if cell.loc.y > self.end.y {
+                    self.end.y = cell.loc.y
+                }
                 if *dumped {
                     *data = read_data(self.begin, self.end, filename);
                 }
@@ -155,9 +158,7 @@ impl Tree {
                 let end = (*left).end;
                 let r = Rc::get_mut(right).unwrap();
                 let l = Rc::get_mut(left).unwrap();
-                if cell.loc.x > end.x {
-                    r.add_cell(cell);
-                } else if cell.loc.y > end.y {
+                if cell.loc.y > end.y {
                     r.add_cell(cell);
                 } else {
                     l.add_cell(cell)
@@ -258,9 +259,7 @@ impl Tree {
                 let end = (*left).end;
                 let r = Rc::get_mut(right).unwrap();
                 let l = Rc::get_mut(left).unwrap();
-                if pos.x > end.x {
-                    r.get_cell(pos)
-                } else if pos.y > end.y {
+                if pos.y > end.y {
                     r.get_cell(pos)
                 } else {
                     l.get_cell(pos)
