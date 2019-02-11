@@ -64,11 +64,10 @@ impl Processor {
             .map(|l| parse_change(l))
             .collect();
 
-        let effects: Vec<Vec<Cell>> = changes.clone()
-            .into_iter()
+        let effects: Vec<(Cell, Vec<Cell>)> = changes.into_iter()
             .map(|cell| self.sheet.apply_change(cell))
             .collect();
     
-        self.printer.print_changes(changes, effects);
+        self.printer.print_changes(effects);
     }
 }
