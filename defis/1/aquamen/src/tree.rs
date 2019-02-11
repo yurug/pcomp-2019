@@ -213,6 +213,34 @@ impl Tree {
         }
     }
 
+    pub fn set_cell(&mut self, pos: Point, cell: Data) {
+        match self.content {
+            Content::Leaf{ref filename, ref mut data, ref dumped} => {
+                if *dumped {
+                    *data = read_data(self.begin, self.end, filename);
+                }
+                for c in data {
+                    if c.loc == pos {
+                        c.content = cell;
+                        return
+                    }
+                }
+                // If the cell doesn't exists, add it
+                // add_cell_leaf(self.begin, self.end, data, Cell{loc: pos, content: cell});
+            },
+            Content::Node{ref mut left, ref mut right} => {
+                let end = (*left).end;
+                let r = Rc::get_mut(right).unwrap();
+                let l = Rc::get_mut(left).unwrap();
+                if pos.y > end.y {
+                    r.set_cell(pos, cell)
+                } else {
+                    l.set_cell(pos, cell)
+                }
+            }
+        }
+    }
+
     pub fn get_cell(&mut self, pos: Point) -> Option<Cell> {
         match self.content {
             Content::Leaf{ref filename, ref mut data, ref dumped} => {
