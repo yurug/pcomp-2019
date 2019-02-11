@@ -74,7 +74,7 @@ type fkind = Occurrence
 
 type cell = {value : value}
 let create_cell v = {value = v}
-let value {value} = value
+let value {value=v} = v
 
 let empty_formulas = Mpos.empty
 

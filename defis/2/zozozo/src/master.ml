@@ -168,17 +168,17 @@ let combine_evals sorted_partial =
     | [] ->
       if prev_pos = build_pos (-1) (-1)
       then []
-      else (prev_pos, acc_eval) :: acc_res
-  | (p1, Occurrence, v) :: xs ->
-    if prev_pos = p1 then
-      aux acc_res (acc_eval+v) prev_pos xs
-    else
-      begin
-        if prev_pos = build_pos (-1) (-1)
-        then aux acc_res v p1 xs
-        else
-          aux ((prev_pos, acc_eval) :: acc_res) v p1 xs
-      end
+      else (prev_pos, Ast.Int acc_eval) :: acc_res
+    | (p1, Occurrence, v) :: xs ->
+      if prev_pos = p1 then
+        aux acc_res (acc_eval + v) prev_pos xs
+      else
+        begin
+          if prev_pos = build_pos (-1) (-1)
+          then aux acc_res v p1 xs
+          else
+            aux ((prev_pos, Ast.Int acc_eval) :: acc_res) v p1 xs
+        end
   in
   aux [] 0 (build_pos (-1) (-1)) sorted_partial
 
@@ -188,7 +188,7 @@ let apply_changes filename region_depth evaluated_formulas =
     (fun (pos, v) ->
        let region = Ast.pos_to_region region_depth pos in
        let filename = build_name_file_region filename region in
-       Slave.apply_change filename region_depth region pos (Ast.Int v)
+       Slave.apply_change filename region_depth region pos v
     )
     evaluated_formulas
 
@@ -232,7 +232,11 @@ let first_evaluation filename region_depth formulas graph =
   let computable =
     FormulaOrder.get_computable_formulas order in
   let formulas_evaluated, order = loop_eval filename region_depth order computable in
-  let formulas_indefined = FormulaOrder.get_non_computable_formulas order in ()
+  let formulas_indefined =
+    FormulaOrder.get_non_computable_formulas order
+    |> List.map (fun p -> (p, Undefined)) in
+  let () = apply_changes filename region_depth formulas_indefined in
+  ()
   (*List.iter
     (fun (p1, eval) ->
        Format.printf "Formule en %s vaut %d@." (string_of_pos p1) eval)

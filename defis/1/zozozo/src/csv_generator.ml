@@ -22,13 +22,10 @@ let generate_formula a b =
   let v = int 256 in
   Printf.sprintf "=#(%d, %d, %d, %d, %d)" x y x' y' v
 
-let generate_value () =
-  string_of_int (int 256)
+let generate_value () = string_of_int (int 256)
 
 let generate_element rate a b =
-  if float 1. < rate
-  then generate_formula a b
-  else generate_value ()
+  if float 1. < rate then generate_formula a b else generate_value ()
 
 let generate_line rate a b n =
   let rec aux acc = function
@@ -55,8 +52,7 @@ let write_files rate csv change lines columns =
   write_file rate lines columns csv ";" lines columns;
   write_file rate 3 10 change " " 3 10
 
-let compute_rate x y =
-  1. /. (0.10 *. (float_of_int (x * y)))
+let compute_rate x y = 1. /. (0.10 *. float_of_int (x * y))
 
 let rec generator max = function
   | 0 -> ()

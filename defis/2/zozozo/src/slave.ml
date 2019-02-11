@@ -105,7 +105,6 @@ let find_formula_opt region_depth pos graph =
 
 let apply_change filename region_depth region pos v =
   let prel = relative_pos (region_depth*region) pos in
-  let _ = Format.printf "Change %s with %s @." (Ast.string_of_pos prel) (Ast.string_of_value v) in
   let data = D.init filename in
   let data = D.set prel (create_cell v) data in
   D.output_init data filename

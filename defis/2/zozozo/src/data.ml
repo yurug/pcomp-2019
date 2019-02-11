@@ -157,7 +157,7 @@ module DataArray : DATA = struct
       else if i >= data.rows
       then max_size_bis 0 (j + 1) rows cols
       else
-        match Ast.value data.data.(i).(j) with
+          match Ast.value data.data.(i).(j) with
         | Empty -> max_size_bis (i + 1) j rows cols
         | _ ->
           let cols = if j > cols then j else cols in
@@ -167,10 +167,9 @@ module DataArray : DATA = struct
     let rows, cols = max_size binding 0 0 in
     let rows, cols =
       if rows < data.rows || cols < data.cols
-      then max_size_bis rows cols rows cols
+      then max_size_bis 0 0 rows cols
       else rows, cols
     in
-    let _ = Format.printf "La %d %d" rows cols in
     let file = open_out view0 in
     for i = 0 to rows do
       for j = 0 to cols do
