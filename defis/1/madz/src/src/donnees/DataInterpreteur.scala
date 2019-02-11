@@ -22,7 +22,11 @@ object DataInterpreteur {
     Number(count)
   }
   //def getValueData (c: Case): CaseData = get_FormuleId 
-    
+  def evalData(data :CaseData) = data match {
+    case Number(n) =>  Number(n)
+    case Formule(lt,br,v) => getEvalRegionV0(lt, br, v,database)
+			case _ => P()
+  }
     
    // getEvalRegionV0(c,c,v,database)
   /*
