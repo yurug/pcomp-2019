@@ -33,7 +33,7 @@ enum Content {
     }
 }
 
-struct Tree {
+pub struct Tree {
     // FIXME abstract away in Rect struct
     begin: Point,
     end: Point,
