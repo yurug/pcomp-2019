@@ -42,14 +42,17 @@ func (fl *fList) deleteFormula(f *Formula) {
 	}
 }
 
-func (fl *fList) getDepends(c Cell) []Coordinate {
+func (fl *fList) getDepends(oldC Cell, newC Cell) []Coordinate {
 	var dep []Coordinate
-	var value, _ = strconv.Atoi(c.Value())
+	var oldVal, _ = strconv.Atoi(oldC.Value())
+	var newVal, _ = strconv.Atoi(newC.Value())
 	for e := fl.l.Front(); e != nil; e = e.Next() {
-		if compareCoord(c.Coordinate(), e.Value.(Formula).Start) == -1 {
-			break
+		if compareCoord(newC.Coordinate(), e.Value.(Formula).Start) == -1 {
+			return dep
 		}
-		if isIn(c.Coordinate(), e.Value.(Formula)) && (value == e.Value.(Formula).ToEval) {
+		// FIX ME
+		if isIn(newC.Coordinate(), e.Value.(Formula)) &&
+			((oldVal == e.Value.(Formula).ToEval) || (newVal == e.Value.(Formula).ToEval)) {
 			dep = append(dep, e.Value.(Formula).position)
 		}
 	}
