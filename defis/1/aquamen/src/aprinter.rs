@@ -26,13 +26,11 @@ impl APrinter {
         // place pour les séparateurs
             + cells_by_line ;
         let f = OpenOptions::new()
-            .read(true).write(true).truncate(true)
-            .open(tp.clone())
-            .unwrap();
+            .read(true).write(true).create(true).truncate(true)
+            .open(tp.clone()).unwrap();
         let c = OpenOptions::new()
-            .write(true).truncate(true)
-            .open(cp.clone())
-            .unwrap();
+            .write(true).create(true).truncate(true)
+            .open(cp.clone()).unwrap();
         APrinter {
             target_path : tp,
             change_path : cp,
