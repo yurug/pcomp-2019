@@ -7,6 +7,7 @@ use data::Point;
 use data::Cell;
 use data::Index;
 use data::Data::*;
+use data::Data;
 use data::Function::*;
 
 static NODE_MAX_SIZE: Index = 1000000;
@@ -129,6 +130,18 @@ fn add_cell_leaf(begin: Point, end: Point, data: &mut Vec<Cell>, cell: Cell) -> 
 
 
 impl Tree {
+
+    pub fn new() -> Tree {
+        Tree {
+            begin: Point{x:0, y:0},
+            end: Point{x:0, y:0},
+            content: Content::Leaf {
+                filename: String::new(),
+                data: Vec::new(),
+                dumped: false
+            }
+        }
+    }
 
     pub fn add_cell(&mut self, cell: Cell) {
         let c = match self.content {
