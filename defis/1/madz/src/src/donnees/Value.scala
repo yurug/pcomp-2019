@@ -9,12 +9,9 @@ def print val = val match{
 }
 */
 package donnees
-package object A{
-type Value = CaseData  
-}
 
-/*
+
+
 abstract class Value
 case class VInt(v : Int) extends Value 
-case class VUncalculabe() extends Value
-*/
+case class VUncalculable() extends Value

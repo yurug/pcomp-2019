@@ -1,7 +1,13 @@
 package donnees
 
-class Estimate_change(case_toChange: Case, expression : CaseData) 
+case class Change(case_leftTop:Case, 
+	case_bottomRight:Case,
+	value: Value)
+	
+	class Estimate_change(case_toChange: Case, expression : CaseData) 
 extends Request_change(case_toChange, expression){ 
+  
+  protected var result: List[Change] = Nil 
   
   def this (c: Case, value : CaseData, sheet: FeuilleCalque) =
     this(c, value)
@@ -20,5 +26,7 @@ extends Request_change(case_toChange, expression){
       c =>     
     )}   */   
   }
-  def result_exec():String = ""  
+  def get_result = result
+    
+    
 }
