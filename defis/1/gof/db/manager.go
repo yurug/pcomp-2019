@@ -13,6 +13,7 @@ const LINE_DELIMITER = '\n'
 type Controller struct {
 	file    *os.File
 	scanner *bufio.Scanner
+	reader  *bufio.Reader
 }
 
 //New singleton concept as we want only one controller over the database
@@ -30,6 +31,7 @@ func NewController(path string, flag int) (*Controller, error) {
 	return &Controller{
 		file:    f,
 		scanner: bufio.NewScanner(f),
+		reader:  bufio.NewReader(f),
 	}, nil
 }
 
@@ -40,11 +42,11 @@ func (c *Controller) ReadAll() ([]byte, error) {
 
 //NextLine returns the next line read in the associated file, or an error if EOF
 func (c *Controller) NextLine() ([]byte, error) {
-	ok := c.scanner.Scan()
-	if !ok {
-		return nil, fmt.Errorf("Error in GetLine() of %s", c.file.Name())
+	token, _, err := c.reader.ReadLine()
+	if err != nil {
+		return nil, fmt.Errorf("Error in GetLine() of %s: %v", c.file.Name(), err)
 	}
-	return c.scanner.Bytes(), nil
+	return token, nil
 }
 
 //LineByID returns the line at position n
