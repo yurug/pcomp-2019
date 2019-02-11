@@ -66,7 +66,7 @@ let init_graph region_depth ic   =
     let end_of_file, formulas =
       try
         false,
-        Slave.parse_formulas_in region_depth ic line_nb
+        Region.parse_formulas_in region_depth ic line_nb
       with End formulas -> true, formulas
     in
 
@@ -104,7 +104,7 @@ let add_neighbours region_depth formulas graph regions =
   List.fold_left
     (fun g rl ->
        let neighbours =
-         Slave.build_neighbours_map region_depth formulas rl in
+         Region.build_neighbours_map region_depth formulas rl in
        Graph.change_neighbours rl neighbours g)
       graph
       regions
@@ -188,7 +188,7 @@ let apply_changes filename region_depth evaluated_formulas =
     (fun (pos, v) ->
        let region = Ast.pos_to_region region_depth pos in
        let filename = build_name_file_region filename region in
-       Slave.apply_change filename region_depth region pos v
+       Region.apply_change filename region_depth region pos v
     )
     evaluated_formulas
 
@@ -202,7 +202,7 @@ let eval_formulas filename region_depth computable =
     Mint.fold
       (fun region tasks res ->
          let filename = build_name_file_region filename region in
-         Slave.partial_eval tasks filename (region*region_depth) ((region+1)*region_depth-1)::res
+         Region.partial_eval tasks filename (region*region_depth) ((region+1)*region_depth-1)::res
       )
       tasks_list_map
       []
@@ -253,7 +253,7 @@ let first_evaluation filename region_depth formulas graph =
   Mint.fold
     (fun region tasks res ->
        let filename = build_name_file_region filename region in
-       Slave.partial_eval tasks filename (region*region_depth) ((region+1)*region_depth-1)::res
+       Region.partial_eval tasks filename (region*region_depth) ((region+1)*region_depth-1)::res
     )
     tasks_list_map
     []

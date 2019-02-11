@@ -20,11 +20,11 @@ let main () =
     parse_input Sys.argv in
   let dr = 100 in
   let t0 = Unix.gettimeofday () in
-  let () = Master.cut_file_into_region data_filename dr in
+  let () = Spreadsheet.cut_file_into_region data_filename dr in
   let t1 = Unix.gettimeofday () in
-  let f, g = Master.build_graph data_filename dr in
+  let f, g = Spreadsheet.build_graph data_filename dr in
   let t2 = Unix.gettimeofday () in
-  let _ = Master.first_evaluation data_filename dr f g in
+  let _ = Spreadsheet.first_evaluation data_filename dr f g in
   let t3 = Unix.gettimeofday () in
   print_execution_time t0 t1 t2 t3
 
