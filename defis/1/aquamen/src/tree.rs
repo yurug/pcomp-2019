@@ -146,6 +146,9 @@ impl Tree {
     pub fn add_cell(&mut self, cell: Cell) {
         let c = match self.content {
             Content::Leaf{ref filename, ref mut data, ref mut dumped} => {
+                // If we need to make the area grow
+                // e.g. adding a cell in a new line
+                // (since we don't know beforehand the size of the sheet)
                 if cell.loc.y > self.end.y {
                     self.end.y = cell.loc.y
                 }
@@ -162,6 +165,12 @@ impl Tree {
                     r.add_cell(cell);
                 } else {
                     l.add_cell(cell)
+                }
+                // If we need to make the area grow
+                // e.g. adding a cell in a new line
+                // (since we don't know beforehand the size of the sheet)
+                if cell.loc.y > self.end.y {
+                    self.end.y = cell.loc.y
                 }
                 None
             }
