@@ -32,7 +32,7 @@ object Main {
     val fbcs: List[BChange] = Reader.interpret(args(0)) { CSVParser.parse(_) }
     println("Reader fini")
     Reader.interpret(args(0)) {
-      CSVPreProcessor.countInitialValues(_, fbcs ::: ubcs, uacs)
+      CSVPreProcessor.countInitialValues(_, fbcs ::: ubcs, ucs)
     }
     Dependencies.compute(fbcs)
     Evaluator.evaluateChanges(fbcs)
