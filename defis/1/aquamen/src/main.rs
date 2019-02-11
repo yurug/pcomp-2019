@@ -6,7 +6,6 @@ extern crate separator;
 mod data;
 mod sched;
 mod parser;
-mod interpreter;
 mod printer;
 mod process;
 mod bench;
