@@ -6,13 +6,13 @@ import utils._
 object CommandEffectsPrinter {
 
   private def changeDescription(c: Change): String = c match {
-    case  c:AChange => s"""${c}""""
+    case  c:AChange => s"""${c}":"""
     case c:BChange => {
       s"""=#(${c.b.topLeft.x},
           |${c.b.topLeft.y},
           |${c.b.bottomRight.x},
           |${c.b.bottomRight.y},
-          |${c.counted})"""".stripMargin.replaceAll("\n", " ")
+          |${c.counted})":""".stripMargin.replaceAll("\n", " ")
     }
   }
 
@@ -22,7 +22,7 @@ object CommandEffectsPrinter {
     bw.write("\n")
     l.sortBy { c => (c.p.x, c.p.y) }. foreach { c =>
       if(c.hasChanged) {
-        bw.write(s"${c.p.x}, ${c.p.y}, ${c}\n")
+        bw.write(s"${c.p.x} ${c.p.y} ${c}\n")
       }
     }
   }
