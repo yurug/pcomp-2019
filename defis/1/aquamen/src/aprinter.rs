@@ -1,6 +1,6 @@
-use data::{Index,Cell,Data};
+use data::{Index,Cell,Data,Point};
 use data::Data::{Val,Wrong,Fun};
-use std::fs::{OpenOptions,remove_file};
+use std::fs::{OpenOptions,remove_file,read_to_string};
 use std::io::{Write,Seek,SeekFrom,Error};
 
 const NUM_SIZE_IN_BYTES : Index = 3 ;
