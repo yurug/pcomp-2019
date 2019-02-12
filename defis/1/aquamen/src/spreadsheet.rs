@@ -23,7 +23,7 @@ pub struct Spreadsheet {
 }
 
 impl Spreadsheet {
-    
+
     pub fn new(n: Index) -> Self {
         Spreadsheet {
             width: n,
@@ -32,8 +32,8 @@ impl Spreadsheet {
             bindings: HashMap::new(),
         }
     }
-    
-    pub fn add_cell(&mut self, cell: Cell) {                
+
+    pub fn add_cell(&mut self, cell: Cell) {
         if cell.loc.x < self.width {
             self.set(cell.loc, cell.content);
         } else {
@@ -60,7 +60,7 @@ impl Spreadsheet {
     fn _eval(&mut self, p: Point, viewed: &mut HashSet<Point>) -> Option<Data> {
         if viewed.contains(&p) {
             return Some(Wrong)
-        } 
+        }
         viewed.insert(p);
 
         match self.get(&p) {
@@ -119,13 +119,13 @@ impl Spreadsheet {
 
     /** Doit être un binding sur eval **/
     pub fn eval_all(&mut self) -> Vec<Vec<Data>> {
-        let height = self.inner.len() as Index / self.width;        
+        let height = self.inner.len() as Index / self.width;
 
         let mut matrix = Vec::with_capacity(height as usize);
 
         for y in 0..height {
             let mut line = Vec::with_capacity(self.width as usize);
-            
+
             for x in 0..self.width {
                 line.push(self.eval(Point { x, y })
                           .expect(&format!("Cell {}-{} doesn't exist", x, y)));
@@ -133,13 +133,13 @@ impl Spreadsheet {
 
             matrix.push(line);
         }
-        
+
         matrix
     }
 
     pub fn apply_change(&mut self, cell: Cell) -> (Cell, Vec<Cell>) {
         let mut changes: Vec<Cell> = Vec::new();
-        
+
         if self.get(&cell.loc).unwrap() != cell.content {
             self.set(cell.loc, cell.content);
             changes.push(cell);
@@ -211,7 +211,7 @@ impl Spreadsheet {
             Count(Point { x: x1, y: y1 }, Point { x: x2, y: y2 }, _) =>
                 for y in y1..(y2 + 1) {
                     for x in x1..(x2 + 1) {
-                        let pcell = Point { x, y };                        
+                        let pcell = Point { x, y };
                         self.bind_cell(pcell, p);
                     }
                 }
@@ -223,7 +223,7 @@ impl Spreadsheet {
             set.insert(p);
             return;
         }
-        
+
         let mut set = HashSet::new();
         set.insert(p);
         self.bindings.insert(pcell, set);
@@ -243,7 +243,7 @@ mod tests {
             }
         }
     }
-    
+
     fn basic_guinea_pigs () -> (Spreadsheet, Vec<Vec<Cell>>) {
         let num = 5 ;
         let r = (Point{x:0,y:0},Point{x:2,y:0});
@@ -258,7 +258,7 @@ mod tests {
         let spreadsheet = Spreadsheet::new(3) ;
         (spreadsheet,cells)
     }
-    
+
     #[test]
     fn test_simple_val() {
         let p = Point{x:0,y:1} ;
@@ -298,7 +298,7 @@ mod tests {
             (Val(1), Val(1))
             );
     }
-    
+
     #[test]
     fn test_propagate_wrong() {
         let p = Point{x:2,y:1} ;
@@ -331,7 +331,7 @@ mod tests {
     //         vec![c, Cell{content:Val(1), loc:Point{x:2,y:1}}]
     //     );
     // }
-    
+
     #[test]
     fn test_simple_cycle() {
         let mut spreadsheet = Spreadsheet::new(3) ;
