@@ -9,6 +9,7 @@ use data::Function;
 use data::Index;
 use data::new_cell;
 
+use tree::Tree;
 
 ///===============================///
 ///========= Spreadsheet =========///
@@ -17,7 +18,7 @@ use data::new_cell;
 
 pub struct Spreadsheet {
     width: Index,
-    inner: HashMap<Point, Data>,
+    inner: Tree,
     functions: HashMap<Point, Function>,
     bindings: PointsListsMap,
 }
@@ -27,7 +28,7 @@ impl Spreadsheet {
     pub fn new(n: Index) -> Self {
         Spreadsheet {
             width: n,
-            inner: HashMap::new(),
+            inner: Tree::new(),
             functions: HashMap::new(),
             bindings: HashMap::new(),
         }
@@ -119,7 +120,8 @@ impl Spreadsheet {
 
     /** Doit être un binding sur eval **/
     pub fn eval_all(&mut self) -> Vec<Vec<Data>> {
-        let height = self.inner.len() as Index / self.width;
+        let height = self.inner.end.y - self.inner.begin.y;
+
 
         let mut matrix = Vec::with_capacity(height as usize);
 
@@ -187,9 +189,9 @@ impl Spreadsheet {
 
     ///======== PRIVATE SCOPE ========///
 
-    fn get(&self, p: &Point) -> Option<Data> {
-        match self.inner.get(p) {
-            Some(d) => Some(*d),
+    fn get(&mut self, p: &Point) -> Option<Data> {
+        match self.inner.get(*p) {
+            Some(d) => Some(d.content),
             None => None
         }
     }
