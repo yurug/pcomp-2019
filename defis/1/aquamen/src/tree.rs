@@ -276,4 +276,18 @@ impl Tree {
             }
         }
     }
+
+    // Interface for spreadsheet to make sure
+    // we don't have to much changes to do
+    pub fn get(&mut self, pos: Point) -> Option<Cell> {
+        self.get_cell(pos)
+    }
+
+    pub fn insert(&mut self, pos: Point, cell: Data) {
+        match self.get(pos) {
+            None => self.add_cell(Cell{loc: pos, content: cell}),
+            Some(_) => self.set_cell(pos, cell),
+        }
+    }
 }
+
