@@ -6,6 +6,8 @@ authors = ["n3f4s <tiv.crb@gmail.com>"]
 [dependencies]
 combine = "3.6.6"
 separator = "*"
+log = "*"
+env_logger = "*"
 
 [features]
 default = []

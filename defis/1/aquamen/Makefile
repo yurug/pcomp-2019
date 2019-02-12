@@ -55,8 +55,9 @@ docker:
 	docker build $(CLEAN) -t $(TARGET) .
 
 perf: build # FIXME check /usr/bin/time format string
-	@echo "File size: " `du -sch $(DATA)`
-	@$(TIME) ./target/$(EXECDIR)/$(TARGET) $(DATA) $(USER) $(VIEW) $(CHANGE)
+	@mkdir -p tests
+	@echo "File size: " `du -sch tests/$(DATA)`
+	RUST_LOG="trace" $(TIME) ./target/$(EXECDIR)/$(TARGET) tests/$(DATA) tests/$(USER) tests/$(VIEW) tests/$(CHANGE)
 
 mrproper:
 	$(CLEANER)

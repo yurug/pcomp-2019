@@ -10,7 +10,9 @@ use data::Data::*;
 use data::Data;
 use data::Function::*;
 
-static NODE_MAX_SIZE: Index = 1000000;
+use log::*;
+
+static NODE_MAX_SIZE: Index = 1_000;
 
 // Idea: store the nodes in a vec
 // and find a way to store them
@@ -53,6 +55,7 @@ fn contained_in(p: Point, b: Point, e: Point) -> bool {
 }
 
 fn split_data(data: &Vec<Cell>, b: Point, e: Point) -> Vec<Cell> {
+    trace!("Getting data between {:?} and {:?}", b, e);
     data.iter()
         .filter( |c| contained_in(c.loc, b, e) )
         .map(|c| c.clone())
@@ -76,6 +79,7 @@ fn read_data(begin: Point, end: Point, filename: &String) -> Vec<Cell> {
             2 => Wrong,
             _ => panic!("Unexpected value in data dump")
         };
+        trace!("Reading cell {:?}", Cell{loc:Point{x:x,y:y},content:r});
         data.push(Cell{
             content: r,
             loc: Point{x: x, y: y},
@@ -92,6 +96,7 @@ fn read_data(begin: Point, end: Point, filename: &String) -> Vec<Cell> {
 }
 
 fn split_content(begin: Point, end: Point, data: &Vec<Cell>, mid: Point) -> Content {
+    trace!("Building the sub leaf: ({:?}; {:?}) & ({:?}; {:?})", begin, mid, mid, end);
     Content::Node {
         left: Rc::new(Tree{
             begin: begin,
@@ -121,6 +126,7 @@ fn add_cell_leaf(begin: Point, end: Point, data: &mut Vec<Cell>, cell: Cell) -> 
             x: end.x,
             y: (end.y  - begin.y) / 2,
         };
+        trace!("Splitting content of leaf in {:?}", mid);
         Some(split_content(begin, end, &data, mid))
     } else {
         None
@@ -132,6 +138,7 @@ fn add_cell_leaf(begin: Point, end: Point, data: &mut Vec<Cell>, cell: Cell) -> 
 impl Tree {
 
     pub fn new() -> Tree {
+        trace!("Creating Tree");
         Tree {
             begin: Point{x:0, y:0},
             end: Point{x:0, y:0},
@@ -153,6 +160,7 @@ impl Tree {
                     self.end.y = cell.loc.y
                 }
                 if *dumped {
+                    trace!("Reading data from {}", filename);
                     *data = read_data(self.begin, self.end, filename);
                 }
                 add_cell_leaf(self.begin, self.end, data, cell)
@@ -177,6 +185,7 @@ impl Tree {
         };
         match c {
             Some(c) => {
+                trace!("The leaf need to be split");
                 self.content = c;
                 // If we need to split data, then dump them
                 self.dump_data();
@@ -186,6 +195,7 @@ impl Tree {
     }
 
     fn dump_data(&mut self) {
+        trace!("Dumping data");
         match self.content {
             Content::Leaf{ ref mut filename, ref mut data, ref mut dumped } => {
                 *dumped = true;
@@ -196,9 +206,11 @@ impl Tree {
                                 self.end.x,
                                 self.end.y)
                 };
+                trace!("Dumping in {}", filename);
                 let mut file = File::create(filename).unwrap(); // FIXME better error management
                 let mut res = Vec::new();
                 for c in data {
+                    trace!("Dumping {:?}", c);
                     match c.content {
                         Val(i) => {
                             res.push(0);
@@ -217,6 +229,7 @@ impl Tree {
                 file.write_all(&res);
             },
             Content::Node{ref mut left, ref mut right} => {
+                trace!("Dumping a node");
                 Rc::get_mut(right).unwrap().dump_data();
                 Rc::get_mut(left).unwrap().dump_data();
             }
@@ -226,11 +239,13 @@ impl Tree {
     pub fn set_cell(&mut self, pos: Point, cell: Data) {
         match self.content {
             Content::Leaf{ref filename, ref mut data, ref dumped} => {
+                trace!("Modifying cell at pos {:?}", pos);
                 if *dumped {
                     *data = read_data(self.begin, self.end, filename);
                 }
                 for c in data {
                     if c.loc == pos {
+                        trace!("Setting the cell at {:?}", pos);
                         c.content = cell;
                         return
                     }
