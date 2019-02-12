@@ -9,7 +9,7 @@ readonly changes=$1; shift
 
 docker run\
        aquamen\
-       /home/docker/pcomp-2019/defis/1/aquamen/run.sh\
+       /home/docker/pcomp-2019/defis/1/aquamen/scripts/run.sh\
        ${data}\
        ${user}\
        ${view}\

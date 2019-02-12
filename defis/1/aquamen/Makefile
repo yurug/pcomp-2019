@@ -37,7 +37,7 @@ endif
 FLAGS       += $(FEATURES)
 
 all: docker
-	$(CP) ws.sh $(EXEC)
+	$(CP) scripts/ws.sh $(EXEC)
 
 build:
 	$(CC) $(FLAGS)
