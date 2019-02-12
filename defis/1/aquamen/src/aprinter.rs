@@ -1,6 +1,6 @@
-use data::{Index,Cell,Data,Point};
+use data::{Index,Cell,Data};
 use data::Data::{Val,Wrong,Fun};
-use std::fs::{OpenOptions,remove_file,read_to_string};
+use std::fs::{OpenOptions,remove_file};
 use std::io::{Write,Seek,SeekFrom,Error};
 
 const NUM_SIZE_IN_BYTES : Index = 3 ;
@@ -33,6 +33,10 @@ impl APrinter {
         p
     }
 
+    pub fn cells_by_line(&self) -> Index {
+        self.cells_by_line
+    }
+    
     pub fn clean(&self) {
         let r1 = remove_file(self.target_path.clone());
         if r1.is_err() {
