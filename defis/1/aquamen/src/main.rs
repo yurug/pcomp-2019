@@ -1,4 +1,4 @@
-#![feature(fn_traits)]
+// #![feature(fn_traits)]
 #[macro_use]
 extern crate combine;
 extern crate separator;
