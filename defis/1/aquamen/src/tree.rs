@@ -18,6 +18,8 @@ static NODE_MAX_SIZE: Index = 1_000;
 // and find a way to store them
 // in a cache-friendly way
 
+type Rectangle = (Point, Point);
+
 enum Content {
     Leaf {
         // Generated when dumping data
@@ -133,7 +135,36 @@ fn add_cell_leaf(begin: Point, end: Point, data: &mut Vec<Cell>, cell: Cell) -> 
     }
 }
 
+fn split_leaf(begin: Point, end: Point, data: &mut Vec<Cell>) -> Content {
+    let mid = Point {
+        x: end.x,
+        y: (end.y  - begin.y) / 2,
+    };
+    trace!("Splitting content of leaf in {:?}", mid);
+    split_content(begin, end, &data, mid)
+}
 
+fn need_resize(rect: Rectangle, p: Point) -> bool {
+    // If we need to make the area grow
+    // e.g. adding a cell in a new line
+    // (since we don't know beforehand the size of the sheet)
+    let (begin, end) = rect;
+    p.y > end.y
+}
+
+fn resize_for(rect: Rectangle, loc: Point) -> Rectangle {
+    let (begin, end) = rect;
+    (begin, Point{x: end.x, y: loc.y})
+}
+
+fn resize(begin: &mut Point, end: &mut Point, new: Point) {
+    if need_resize((*begin, *end), new) {
+        trace!("Resizing the leaf");
+        let (b, e) = resize_for((*begin, *end), new);
+        *begin = b; // FIXME find how to put self.*
+        *end = e;     // in destructuring
+    }
+}
 
 impl Tree {
 
@@ -150,20 +181,27 @@ impl Tree {
         }
     }
 
+
+
     pub fn add_cell(&mut self, cell: Cell) {
+        let mut need_split = false;
         let c = match self.content {
             Content::Leaf{ref filename, ref mut data, ref mut dumped} => {
-                // If we need to make the area grow
-                // e.g. adding a cell in a new line
-                // (since we don't know beforehand the size of the sheet)
-                if cell.loc.y > self.end.y {
-                    self.end.y = cell.loc.y
-                }
+                trace!("Adding {:?} to the leaf", cell);
+
+                resize(&mut self.begin, &mut self.end, cell.loc);
+
                 if *dumped {
                     trace!("Reading data from {}", filename);
                     *data = read_data(self.begin, self.end, filename);
                 }
-                add_cell_leaf(self.begin, self.end, data, cell)
+                data.push(cell);
+
+                if(data.len() > (NODE_MAX_SIZE as usize)) {
+                    Some(split_leaf(self.begin, self.end, data))
+                } else {
+                    None
+                }
             },
             Content::Node{ ref mut left, ref mut right } => {
                 let end = (*left).end;
@@ -174,12 +212,9 @@ impl Tree {
                 } else {
                     l.add_cell(cell)
                 }
-                // If we need to make the area grow
-                // e.g. adding a cell in a new line
-                // (since we don't know beforehand the size of the sheet)
-                if cell.loc.y > self.end.y {
-                    self.end.y = cell.loc.y
-                }
+
+                resize(&mut self.begin, &mut self.end, cell.loc);
+
                 None
             }
         };
