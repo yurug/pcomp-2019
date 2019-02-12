@@ -1,7 +1,7 @@
 use data::{Index,Cell,Data,Point};
 use data::Data::{Val,Wrong,Fun};
-use std::fs::{File,OpenOptions,remove_file,read_to_string};
-use std::io::{Write,Seek,SeekFrom};
+use std::fs::{OpenOptions,remove_file,read_to_string};
+use std::io::{Write,Seek,SeekFrom,Error};
 
 const NUM_SIZE_IN_BYTES : Index = 3 ;
 const EOL_SEP : u8 = 10 ;
@@ -13,8 +13,6 @@ pub struct APrinter {
     change_path : String,
     cells_by_line : Index,
     bytes_by_line : Index,
-    view_file : File,
-    change_file : File
 }
 
 impl APrinter {
@@ -25,29 +23,28 @@ impl APrinter {
             cells_by_line * NUM_SIZE_IN_BYTES
         // place pour les séparateurs
             + cells_by_line ;
-        let f = OpenOptions::new()
-            .read(true).write(true).create(true).truncate(true)
-            .open(tp.clone()).unwrap();
-        let c = OpenOptions::new()
-            .write(true).create(true).truncate(true)
-            .open(cp.clone()).unwrap();
-        APrinter {
+        let p = APrinter {
             target_path : tp,
             change_path : cp,
             cells_by_line : cells_by_line,
             bytes_by_line : bbl,
-            view_file : f,
-            change_file : c
-        }
+        } ;
+        p.clean() ;
+        p
     }
 
-    pub fn clean(&mut self) {
-        remove_file(self.target_path.clone());
-        remove_file(self.change_path.clone());
+    pub fn clean(&self) {
+        let r1 = remove_file(self.target_path.clone());
+        if r1.is_err() {
+            println!("{} unreachable",self.target_path)
+        }
+        let r2 = remove_file(self.change_path.clone());
+        if r2.is_err() {
+            println!("{} unreachable",self.change_path)
+        }
     }
     
-    pub fn print(&mut self, cell:Cell) {
-        let f_len = self.view_file.metadata().unwrap().len();
+    pub fn print(&self, cell:Cell) {
         let x = cell.loc.x ;
         let y = cell.loc.y ;
         if x >= self.cells_by_line {
@@ -57,10 +54,6 @@ impl APrinter {
         let bx = x * (NUM_SIZE_IN_BYTES + 1) ;
         let by = self.bytes_by_line * y ;
         let offset = by + bx ;
-        let future_offset = offset + NUM_SIZE_IN_BYTES ;
-        if f_len <= future_offset {
-            self.view_file.set_len(future_offset + 1) ;
-        }
         let suffix = if x == self.cells_by_line - 1 {
             EOL_SEP
         } else {
@@ -68,11 +61,31 @@ impl APrinter {
         };
         let mut bytes = self.get_val(cell.content) ;
         bytes.push(suffix) ;
-        self.view_file.seek(SeekFrom::Start(offset));
-        self.view_file.write_all(bytes.as_slice()) ;
+        self.stamp(offset, bytes);
     }
 
-    pub fn print_changes(&mut self, effects: Vec<(Cell, Vec<Cell>)>) {
+    fn stamp(&self, offset : Index, text : Vec<u8>) {
+        let mut file = OpenOptions::new()
+            .read(true).write(true).create(true)
+            .open(self.target_path.clone()).unwrap();
+        let future_offset = offset + NUM_SIZE_IN_BYTES ;
+        let f_len = file.metadata().unwrap().len();
+        if f_len <= future_offset {
+            self.io_may_crash(&mut || file.set_len(future_offset + 1)) ;
+        }
+        self.io_may_crash(&mut || {
+            match file.seek(SeekFrom::Start(offset)) {
+                Ok(_) => file.write_all(text.as_slice()),
+                Err(e) => Err(e),
+            }
+        });
+    }
+
+    pub fn print_changes(&self, effects: Vec<(Cell, Vec<Cell>)>) {
+
+        let mut file = OpenOptions::new()
+            .read(true).write(true).create(true)
+            .open(self.change_path.clone()).unwrap();
         
         for (change, consequences) in effects {
 
@@ -80,18 +93,27 @@ impl APrinter {
             tmp.append(&mut self.raw_change(change)) ;
             tmp.append(&mut "\":".as_bytes().to_vec()) ;
             tmp.push(EOL_SEP) ;
-            self.change_file.write_all(tmp.as_slice()) ;
+            self.io_may_crash(&mut || file.write_all(tmp.as_slice()));
 
             for c in consequences {
                 tmp.clear() ;
                 tmp.append(&mut self.raw_change(c)) ;
                 tmp.push(EOL_SEP) ;
-                self.change_file.write_all(tmp.as_slice()) ;
+                self.io_may_crash(&mut || file.write_all(tmp.as_slice())) ;
             }
         }
     }
 
-    fn raw_change(&mut self, change : Cell) -> Vec<u8> {
+    fn io_may_crash<F>(&self, f:&mut F)
+    where F: FnMut() -> Result<(),Error> {
+        let r = f() ;
+        if r.is_err() {
+            self.clean() ;
+            panic!(r.unwrap_err()) ;
+        }
+    }
+    
+    fn raw_change(&self, change : Cell) -> Vec<u8> {
         let mut preffix = format!("{} {} ",change.loc.y,change.loc.x)
             .as_bytes()
             .to_vec() ;
@@ -102,7 +124,7 @@ impl APrinter {
         line
     }
     
-    fn raw_val(&mut self, d : Data) -> Vec<u8> {
+    fn raw_val(&self, d : Data) -> Vec<u8> {
         let res = match d {
             Val(n) => n.to_string().as_bytes().to_vec(),
             Wrong => vec![WRONG_CHAR],
@@ -116,7 +138,7 @@ impl APrinter {
         }
     }
 
-    fn get_val(&mut self, d : Data) -> Vec<u8> {
+    fn get_val(&self, d : Data) -> Vec<u8> {
         let mut significant = self.raw_val(d);
         let res = self.fill_with_until_size(&mut significant,
                                             ' ' as u8,
@@ -124,7 +146,7 @@ impl APrinter {
         res
     }
 
-    fn fill_with_until_size(&mut self,v:&mut Vec<u8>, stamp:u8, size:usize)
+    fn fill_with_until_size(&self,v:&mut Vec<u8>, stamp:u8, size:usize)
                             -> Vec<u8> {
         let missing = size - v.len() ;
         let mut v0 = Vec::with_capacity(missing) ;
@@ -143,7 +165,7 @@ mod tests {
 
     #[test]
     fn test_dummest_output() {
-        let mut printer = APrinter::new("u0".to_string(),"c0".to_string(),1);
+        let printer = APrinter::new("u0".to_string(),"c0".to_string(),1);
         printer.print(Cell{content:Val(2),loc:Point{x:0,y:0}});
         let content = read_to_string("u0").unwrap();
         printer.clean();
@@ -153,15 +175,13 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_rectangle_consistency() {
-        let mut printer = APrinter::new("u0b".to_string(),
-                                        "c0b".to_string(),
-                                        1);
+        let printer = APrinter::new("u0b".to_string(),"c0b".to_string(),1);
         printer.print(Cell{content:Val(2),loc:Point{x:3,y:0}});
     }
 
     #[test]
     fn test_two_columns() {
-        let mut printer = APrinter::new("u1".to_string(),"c1".to_string(),2);
+        let printer = APrinter::new("u1".to_string(),"c1".to_string(),2);
         printer.print(Cell{content:Val(2),loc:Point{x:0,y:0}});
         printer.print(Cell{content:Val(14),loc:Point{x:1,y:0}});
         let content = read_to_string("u1").unwrap();
@@ -171,7 +191,7 @@ mod tests {
 
     #[test]
     fn test_minimal_matrix() {
-        let mut printer = APrinter::new("u2".to_string(),"c2".to_string(),2);
+        let printer = APrinter::new("u2".to_string(),"c2".to_string(),2);
         printer.print(Cell{content:Val(2),loc:Point{x:0,y:0}});
         printer.print(Cell{content:Val(14),loc:Point{x:1,y:0}});
         printer.print(Cell{content:Val(100),loc:Point{x:0,y:1}});
@@ -183,7 +203,7 @@ mod tests {
 
     #[test]
     fn test_unordered_print() {
-        let mut printer = APrinter::new("u3".to_string(),"c3".to_string(),2);
+        let printer = APrinter::new("u3".to_string(),"c3".to_string(),2);
         printer.print(Cell{content:Val(100),loc:Point{x:0,y:1}});
         printer.print(Cell{content:Val(14),loc:Point{x:1,y:0}});
         printer.print(Cell{content:Val(2),loc:Point{x:0,y:0}});
@@ -195,7 +215,7 @@ mod tests {
 
     #[test]
     fn test_with_wrong() {
-        let mut printer = APrinter::new("u4".to_string(),"c4".to_string(),2);
+        let printer = APrinter::new("u4".to_string(),"c4".to_string(),2);
         printer.print(Cell{content:Val(100),loc:Point{x:0,y:1}});
         printer.print(Cell{content:Wrong,loc:Point{x:1,y:0}});
         printer.print(Cell{content:Val(2),loc:Point{x:0,y:0}});
@@ -207,7 +227,7 @@ mod tests {
 
     #[test]
     fn test_changes() {
-        let mut printer = APrinter::new("u5".to_string(),"c5".to_string(),2);
+        let printer = APrinter::new("u5".to_string(),"c5".to_string(),2);
         let first =  Cell{content:Val(72),loc:Point{x:5,y:100}} ;
         let changes = vec![
             (first,
@@ -225,7 +245,7 @@ mod tests {
 
     #[test]
     fn test_changes_with_wrong() {
-        let mut printer = APrinter::new("u5".to_string(),"c5".to_string(),2);
+        let printer = APrinter::new("u6".to_string(),"c6".to_string(),2);
         let first =  Cell{content:Val(72),loc:Point{x:5,y:100}} ;
         let changes = vec![
             (first,
@@ -236,7 +256,7 @@ mod tests {
             ])
         ];
         printer.print_changes(changes);
-        let content = read_to_string("c5").unwrap();
+        let content = read_to_string("c6").unwrap();
         printer.clean();
         assert_eq!(content,
                    "after \"100 5 72\":\n100 5 72\n10 500 p\n4 1230 150\n");

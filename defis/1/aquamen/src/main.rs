@@ -1,7 +1,7 @@
+#![feature(fn_traits)]
 #[macro_use]
 extern crate combine;
 extern crate separator;
-// extern crate memmap;
 
 mod data;
 mod sched;
