@@ -11,6 +11,7 @@ RUN           := $(CARGO) run
 CLEANER       := $(CARGO) clean
 CP            := $(CP)
 EXEC          := ws
+EXECDIR       := debug
 
 #==================================
 # Don't edit below this line
@@ -30,8 +31,10 @@ endif
 
 ifeq ($(DEBUG), 1)
 	FLAGS      +=
+	EXECDIR    := debug
 else
 	FLAGS      += --release
+	EXECDIR    := release
 endif
 
 FLAGS       += $(FEATURES)
@@ -51,9 +54,9 @@ run:
 docker:
 	docker build $(CLEAN) -t $(TARGET) .
 
-perf: # FIXME check /usr/bin/time format string
+perf: build # FIXME check /usr/bin/time format string
 	@echo "File size: " `du -sch $(DATA)`
-	@$(TIME) $(RUN) $(FALGS) $(DATA) $(USER) $(VIEW) $(CHANGE)
+	@$(TIME) ./target/$(EXECDIR)/$(TARGET) $(DATA) $(USER) $(VIEW) $(CHANGE)
 
 mrproper:
 	$(CLEANER)
