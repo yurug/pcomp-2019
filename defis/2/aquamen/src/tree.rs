@@ -14,7 +14,7 @@ use data::Function::*;
 
 use log::*;
 
-static NODE_MAX_SIZE: Index = 1_000;
+static NODE_MAX_SIZE: Index = 10;
 
 // Idea: store the nodes in a vec
 // and find a way to store them
