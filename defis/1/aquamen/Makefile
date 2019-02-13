@@ -43,13 +43,14 @@ all: docker
 	$(CP) scripts/ws.sh $(EXEC)
 
 build:
+	@mkdir -p data
 	$(CC) $(FLAGS)
 
 test:
 	$(TEST)
 
 run:
-	$(RUN) $(FLAGS) $(DATA) $(USER) $(VIEW) $(CHANGE)
+	$(RUN) $(FLAGS) tests/$(DATA) tests/$(USER) tests/$(VIEW) tests/$(CHANGE)
 
 docker:
 	docker build $(CLEAN) -t $(TARGET) .
