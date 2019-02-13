@@ -25,12 +25,20 @@ pub mod bench {
             }
         }
     }
+
+    static mut RESULT_SENDER: Option<Mutex<Sender>> = None;
+
     pub fn start_bench() -> Sender {
         let (send, recv) = channel();
         thread::spawn(move || {
             count(recv);
         });
+        RESULT_SENDER = Some(Mutex::new(send));
         send
+    }
+
+    pub fn get_sender() -> Sender {
+        RESULT_SENDER.as_ref().unwrap().lock().unwrap().clone()
     }
 }
 
@@ -45,6 +53,10 @@ pub mod bench {
         pub fn send(&self, _t: u64) -> Result<(), SendError<u64>> { Ok(()) }
     }
     pub fn start_bench() -> Sender {
+        Sender {}
+    }
+
+    pub fn get_sender() -> Sender {
         Sender {}
     }
 }
