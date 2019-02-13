@@ -1,7 +1,9 @@
 use std::fs::File;
+use std::fs::create_dir_all;
 use std::io::Write;
 use std::io::Read;
 use std::rc::Rc;
+use std::path::Path;
 
 use data::Point;
 use data::Cell;
@@ -27,13 +29,14 @@ enum Content {
         // Cell waiting to be dumped on disk
         // Used when filling the node (before dumping variables)
         // or before computation (when we need to load vars)
-        // FIXME option for when there is no data ?
         data: Vec<Cell>,
         dumped: bool,
     },
     Node {
         left: Rc<Tree>,
         right: Rc<Tree>,
+        // FIXME put id/filename in Tree
+        id: String,
     }
 }
 
@@ -65,7 +68,8 @@ fn split_data(data: &Vec<Cell>, b: Point, e: Point) -> Vec<Cell> {
 }
 
 fn read_data(begin: Point, end: Point, filename: &String) -> Vec<Cell> {
-    let mut file = File::open(filename).unwrap(); // FIXME better error management
+    let f = format!("{}.cells", filename);
+    let mut file = File::open(f).unwrap(); // FIXME better error management
     let mut res: Vec<u8> = Vec::new();
     file.read(&mut res).unwrap();
     let mut cpt = 0;
@@ -97,15 +101,15 @@ fn read_data(begin: Point, end: Point, filename: &String) -> Vec<Cell> {
     data
 }
 
-fn split_content(begin: Point, end: Point, data: &Vec<Cell>, mid: Point) -> Content {
-    trace!("Building the sub leaf: ({:?}; {:?}) & ({:?}; {:?})", begin, mid, mid, end);
+fn split_content(filename: String, begin: Point, end: Point, data: &Vec<Cell>, mid: Point) -> Content {
+    trace!("Building the sub leaf of {}: ({:?}; {:?}) & ({:?}; {:?})", filename, begin, mid, mid, end);
     Content::Node {
         left: Rc::new(Tree{
             begin: begin,
             end: mid,
             content: Content::Leaf {
                 dumped: false,
-                filename: String::new(),
+                filename: format!("{}/left", filename),
                 data: split_data(&data, begin, mid)
             }
         }),
@@ -114,34 +118,35 @@ fn split_content(begin: Point, end: Point, data: &Vec<Cell>, mid: Point) -> Cont
             end: end,
             content: Content::Leaf {
                 dumped: false,
-                filename: String::new(),
+                filename: format!("{}/right", filename),
                 data: split_data(&data, mid, end)
             }
-        })
+        }),
+        id: filename,
     }
 }
 
-fn add_cell_leaf(begin: Point, end: Point, data: &mut Vec<Cell>, cell: Cell) -> Option<Content> {
+fn add_cell_leaf(filename: String, begin: Point, end: Point, data: &mut Vec<Cell>, cell: Cell) -> Option<Content> {
     data.push(cell);
     if data.len() > (NODE_MAX_SIZE as usize) {
         let mid = Point {
             x: end.x,
             y: (end.y  - begin.y) / 2,
         };
-        trace!("Splitting content of leaf in {:?}", mid);
-        Some(split_content(begin, end, &data, mid))
+        trace!("Splitting content of leaf {} in {:?}", filename, mid);
+        Some(split_content(filename, begin, end, &data, mid))
     } else {
         None
     }
 }
 
-fn split_leaf(begin: Point, end: Point, data: &mut Vec<Cell>) -> Content {
+fn split_leaf(file: String, begin: Point, end: Point, data: &mut Vec<Cell>) -> Content {
     let mid = Point {
         x: end.x,
         y: (end.y  - begin.y) / 2,
     };
-    trace!("Splitting content of leaf in {:?}", mid);
-    split_content(begin, end, &data, mid)
+    trace!("Splitting content of leaf {} in {:?}", file, mid);
+    split_content(file, begin, end, &data, mid)
 }
 
 fn need_resize(rect: Rectangle, p: Point) -> bool {
@@ -166,6 +171,22 @@ fn resize(begin: &mut Point, end: &mut Point, new: Point) {
     }
 }
 
+// FIXME put magic value in enum or in cste ?
+fn dump_val_to(i: u8, dest: &mut Vec<u8>) {
+    dest.push(0);
+    dest.push(i);
+}
+
+fn dump_fun_to(dest: &mut Vec<u8>) {
+    dest.push(1);
+    dest.push(0);
+}
+
+fn dump_wrong_to(dest: &mut Vec<u8>) {
+    dest.push(2);
+    dest.push(0);
+}
+
 impl Tree {
 
     pub fn new() -> Tree {
@@ -174,7 +195,23 @@ impl Tree {
             begin: Point{x:0, y:0},
             end: Point{x:0, y:0},
             content: Content::Leaf {
-                filename: String::new(),
+                filename: String::from("data/root"),
+                data: Vec::new(),
+                dumped: false
+            }
+        }
+    }
+
+    pub fn with_size(size: Index) -> Tree {
+        trace!("Creating Tree with size {}", size);
+        Tree {
+            begin: Point{x:0, y:0},
+            // Assume that the matrix is at least square
+            // or that height > width.
+            // Make splits more balanced.
+            end: Point{x:size, y:size},
+            content: Content::Leaf {
+                filename: String::from("data/root"),
                 data: Vec::new(),
                 dumped: false
             }
@@ -187,7 +224,7 @@ impl Tree {
         let mut need_split = false;
         let c = match self.content {
             Content::Leaf{ref filename, ref mut data, ref mut dumped} => {
-                trace!("Adding {:?} to the leaf", cell);
+                trace!("Adding {:?} to the leaf {}", cell, filename);
 
                 resize(&mut self.begin, &mut self.end, cell.loc);
 
@@ -197,13 +234,13 @@ impl Tree {
                 }
                 data.push(cell);
 
-                if(data.len() > (NODE_MAX_SIZE as usize)) {
-                    Some(split_leaf(self.begin, self.end, data))
+                if data.len() > (NODE_MAX_SIZE as usize) {
+                    Some(split_leaf(filename.to_string(), self.begin, self.end, data))
                 } else {
                     None
                 }
             },
-            Content::Node{ ref mut left, ref mut right } => {
+            Content::Node{ ref mut left, ref mut right, id:_ } => {
                 let end = (*left).end;
                 let r = Rc::get_mut(right).unwrap();
                 let l = Rc::get_mut(left).unwrap();
@@ -234,37 +271,26 @@ impl Tree {
         match self.content {
             Content::Leaf{ ref mut filename, ref mut data, ref mut dumped } => {
                 *dumped = true;
-                if filename.len() == 0 {
-                    *filename = format!("{}.{}.{}.{}.cells",
-                                self.begin.x,
-                                self.begin.y,
-                                self.end.x,
-                                self.end.y)
-                };
-                trace!("Dumping in {}", filename);
-                let mut file = File::create(filename).unwrap(); // FIXME better error management
+                trace!("Dumping in {}.cells", filename);
+                create_dir_all(Path::new(filename)
+                               .parent()
+                               .unwrap()
+                               .to_str()
+                               .unwrap()).unwrap();
+                let mut file = File::create(format!("{}.cells",filename)).unwrap(); // FIXME better error management
                 let mut res = Vec::new();
                 for c in data {
                     trace!("Dumping {:?}", c);
                     match c.content {
-                        Val(i) => {
-                            res.push(0);
-                            res.push(i);
-                        },
-                        Fun(_) => {
-                            res.push(1);
-                            res.push(0);
-                        },
-                        Wrong => {
-                            res.push(2);
-                            res.push(0);
-                        },
+                        Val(i) => dump_val_to(i, &mut res),
+                        Fun(_) => dump_fun_to(&mut res),
+                        Wrong  => dump_wrong_to(&mut res),
                     }
                 }
                 file.write_all(&res);
             },
-            Content::Node{ref mut left, ref mut right} => {
-                trace!("Dumping a node");
+            Content::Node{ref mut left, ref mut right, ref id} => {
+                trace!("Dumping node {}", id);
                 Rc::get_mut(right).unwrap().dump_data();
                 Rc::get_mut(left).unwrap().dump_data();
             }
@@ -288,7 +314,7 @@ impl Tree {
                 // If the cell doesn't exists, add it
                 // add_cell_leaf(self.begin, self.end, data, Cell{loc: pos, content: cell});
             },
-            Content::Node{ref mut left, ref mut right} => {
+            Content::Node{ref mut left, ref mut right, id:_} => {
                 let end = (*left).end;
                 let r = Rc::get_mut(right).unwrap();
                 let l = Rc::get_mut(left).unwrap();
@@ -314,7 +340,7 @@ impl Tree {
                 }
                 None
             },
-            Content::Node{ref mut left, ref mut right} => {
+            Content::Node{ref mut left, ref mut right, id:_} => {
                 let end = (*left).end;
                 let r = Rc::get_mut(right).unwrap();
                 let l = Rc::get_mut(left).unwrap();
