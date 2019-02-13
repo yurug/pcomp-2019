@@ -28,7 +28,7 @@ impl Spreadsheet {
     pub fn new(n: Index) -> Self {
         Spreadsheet {
             width: n,
-            inner: Tree::new(),
+            inner: Tree::with_size(n),
             functions: HashMap::new(),
             bindings: HashMap::new(),
         }
