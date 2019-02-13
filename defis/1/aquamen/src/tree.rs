@@ -20,6 +20,11 @@ static NODE_MAX_SIZE: Index = 1_000;
 // and find a way to store them
 // in a cache-friendly way
 
+// FIXME try to avoid string copy
+// FIXME find why nothing is written
+// FIXME check the result of computation
+// FIXME find why the splits are weird => add -> resize ?? FIXED by using with_size ?
+
 type Rectangle = (Point, Point);
 
 enum Content {
