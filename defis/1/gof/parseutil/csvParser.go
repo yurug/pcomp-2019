@@ -43,6 +43,7 @@ func ParseSheet(sheet string, c chan []eval.Cell, chbreak chan int) error {
 	for {
 		line, err := controller.NextLine()
 		if err != nil {
+			fmt.Println(err)
 			chbreak <- 1
 			return err
 		}
@@ -53,18 +54,21 @@ func ParseSheet(sheet string, c chan []eval.Cell, chbreak chan int) error {
 		values, formulas, lineSize := preprocess(string(line), rowID)
 		_, err = binaryFile.WriteBytes(values)
 		if err != nil {
+			fmt.Println(err)
 			chbreak <- 1
 			return err
 		}
 
 		_, err = detailsFile.WriteLines(strconv.Itoa(rowID) + ":" + strconv.Itoa(lineSize) + "\n")
 		if err != nil {
+			fmt.Println(err)
 			chbreak <- 1
 			return err
 		}
 
 		_, err = formulasFile.WriteLines(formulas)
 		if err != nil {
+			fmt.Println(err)
 			chbreak <- 1
 			return err
 		}

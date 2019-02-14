@@ -22,17 +22,30 @@ func main() {
 	doneEval := make(chan int)
 	defer close(doneParse)
 	go parserutil.ParseSheet(csv, ch, doneParse)
-	e, _ := eval.NewEvaluator("view0.csv")
+	e, err := eval.NewEvaluator(args[2])
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	go e.Process(ch, doneEval)
 	<-doneParse
 	<-doneEval
 
-	f, _ := db.NewFileModifier(parserutil.BINARY_FILE, parserutil.DETAILS)
-	g, _ := f.GetValue(10, 10)
+	f, err := db.NewFileModifier(parserutil.BINARY_FILE, parserutil.DETAILS)
+	if err != nil {
+		fmt.Println(err)
+	}
+	g, err := f.GetValue(10, 10)
+	if err != nil {
+		fmt.Println(err)
+	}
 	fmt.Printf("Value Read before Write: %v\n", g)
 
 	f.WriteValue(10, 10, 98, 0)
-	g, _ = f.GetValue(10, 10)
+	g, err = f.GetValue(10, 10)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	fmt.Printf("Value Read after Write: %v\n", g)
 }

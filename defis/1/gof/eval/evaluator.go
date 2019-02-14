@@ -28,6 +28,7 @@ func (e *Evaluator) initMatrix(lines chan []Cell) {
 	for line := range lines {
 		e.m = append(e.m, line)
 	}
+	fmt.Printf("len: %v / %v", len(e.m), len(e.m[0]))
 }
 
 func (e *Evaluator) Matrix() matrix {
@@ -63,6 +64,7 @@ func (e *Evaluator) Process(ch chan []Cell, doneEval chan int) {
 				var num Cell
 				valueAfterEval, err := e.eval(Cell(v), v.ToEval, 0)
 				if err != nil {
+					fmt.Println(err)
 					num = NewUnknown(r, c)
 					e.m[r][c] = num
 					continue
@@ -105,6 +107,7 @@ func (e *Evaluator) eval(c Cell, param int, occ int) (int, error) {
 			for j := v.Start.Y; j <= v.End.Y; j++ {
 				val, err := e.eval(e.m[i][j], param, occ)
 				if err != nil {
+					fmt.Println(err)
 					return -1, err
 				}
 				occ += val
