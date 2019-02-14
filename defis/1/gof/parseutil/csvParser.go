@@ -26,12 +26,11 @@ const OPEN_FILE = 0
 //ParseSheet takes a file's path and a channel. It extracts all the Cells from the file and send them
 //Into the channel to another go-routine. It returns error if the controller fails to init
 //Or if NextLine() read all the file
-func ParseSheet(sheet string, c chan []eval.Cell, chbreak chan int) error {
+func ParseSheet(sheet string, c chan eval.Formula) error {
 	fmt.Println("ParseSheet..")
 	defer close(c)
 	controller, err := db.NewController(sheet, OPEN_FILE)
 	if err != nil {
-		fmt.Printf("%v", err)
 		return fmt.Errorf("Error while calling new controller for ParseSheet: %v", err)
 	}
 	rowID := 0
@@ -43,34 +42,36 @@ func ParseSheet(sheet string, c chan []eval.Cell, chbreak chan int) error {
 	for {
 		line, err := controller.NextLine()
 		if err != nil {
-			chbreak <- 1
 			return err
 		}
 
-		cells := strings.Split(string(line[:]), ";")
-		c <- constructLine(cells, rowID)
-
-		values, formulas, lineSize := preprocess(string(line), rowID)
+		values, formulas, lineSize := preprocess(string(line), rowID, c)
 		_, err = binaryFile.WriteBytes(values)
 		if err != nil {
-			chbreak <- 1
 			return err
 		}
 
 		_, err = detailsFile.WriteLines(strconv.Itoa(rowID) + ":" + strconv.Itoa(lineSize) + "\n")
 		if err != nil {
-			chbreak <- 1
 			return err
 		}
 
 		_, err = formulasFile.WriteLines(formulas)
 		if err != nil {
-			chbreak <- 1
 			return err
 		}
 
 		rowID++
 	}
+}
+
+func GetFormulaList(c chan eval.Formula, mapping map[int]eval.Formula, chbreak chan int) {
+	i := 0
+	for element := range c {
+		mapping[i] = element
+		i++
+	}
+	chbreak <- 1
 }
 
 func dependencies(formulas *db.Controller) error {
@@ -113,10 +114,10 @@ func extractFormulas(formulas *db.Controller) ([]*eval.Formula, error) {
 	return l, nil
 }
 
-func preprocess(line string, rowID int) ([]byte, string, int) {
+func preprocess(line string, rowID int, c chan eval.Formula) ([]byte, string, int) {
 	cells := strings.Split(string(line[:]), ";")
 	number := make([]byte, len(cells)*2)
-	formula := ""
+	formulas := ""
 	cmp := 0
 
 	reg, err := regexp.Compile(`[0-9]+`)
@@ -132,8 +133,15 @@ func preprocess(line string, rowID int) ([]byte, string, int) {
 			number[cmp+1] = byte(0)
 			cmp += 2
 		case KIND_FORMULA:
-			formula += strconv.Itoa(rowID) + ";" + strconv.Itoa(column) + ";"
-			formula += strings.Join(reg.FindAllString(cell, -1), ",") + "\n"
+			values := regexp.MustCompile(`\d+`).FindAllString(cell, -1)
+			if len(values) != SIZE_FORMULA {
+				continue
+			}
+			valuesInt, _ := atoiSlice(values)
+			formula := eval.NewFormula(valuesInt[0], valuesInt[1], valuesInt[2], valuesInt[3], valuesInt[4], rowID, column)
+			c <- *formula
+			formulas += strconv.Itoa(rowID) + ";" + strconv.Itoa(column) + ";"
+			formulas += strings.Join(reg.FindAllString(cell, -1), ",") + "\n"
 			number[cmp] = byte(0)
 			number[cmp+1] = byte(0)
 			cmp += 2
@@ -143,7 +151,7 @@ func preprocess(line string, rowID int) ([]byte, string, int) {
 			cmp += 2
 		}
 	}
-	return number, formula, len(number)
+	return number, formulas, len(number)
 }
 
 func constructLine(cells []string, rowID int) []eval.Cell {

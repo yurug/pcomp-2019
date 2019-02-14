@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/yurug/pcomp-2019/defis/1/gof/parseutil"
+	parserutil "github.com/yurug/pcomp-2019/defis/1/gof/parseutil"
 
 	"github.com/yurug/pcomp-2019/defis/1/gof/db"
 	"github.com/yurug/pcomp-2019/defis/1/gof/eval"
@@ -16,17 +16,22 @@ func main() {
 		fmt.Printf("Not enough arguments\n")
 		return
 	}
+	formulaMaps := make(map[int]eval.Formula)
 	csv := args[0]
-	ch := make(chan []eval.Cell)
+	formulaCh := make(chan eval.Formula)
 	doneParse := make(chan int)
-	doneEval := make(chan int)
 	defer close(doneParse)
-	go parserutil.ParseSheet(csv, ch, doneParse)
-	e, _ := eval.NewEvaluator("view0.csv")
-	go e.Process(ch, doneEval)
-	<-doneParse
-	<-doneEval
 
+	go parserutil.GetFormulaList(formulaCh, formulaMaps, doneParse)
+	go parserutil.ParseSheet(csv, formulaCh)
+
+	<-doneParse
+	/*
+		for k, v := range formulaMaps {
+			fmt.Printf("key[%s] value[%s]\n", k, v)
+		}
+	*/
+	fmt.Println(len(formulaMaps))
 	f, _ := db.NewFileModifier(parserutil.BINARY_FILE, parserutil.DETAILS)
 	g, _ := f.GetValue(10, 10)
 	fmt.Printf("Value Read before Write: %v\n", g)
