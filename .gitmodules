@@ -1,0 +1,3 @@
+[submodule "presentation/listings-rust"]
+	path = presentation/listings-rust
+	url = git@github.com:denki/listings-rust.git

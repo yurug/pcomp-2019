@@ -1,0 +1,113 @@
+\documentclass[notes]{beamer}
+% \documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{pgfpages}
+
+\usepackage{listings}
+\usepackage{listings-rust}
+\usepackage{color}
+\usepackage{verbatim}
+
+\usepackage{siunitx}
+
+\usepackage[frenchb]{babel}
+\usepackage[left=\flqq, right=\frqq, leftsub=\flqq, rightsub=\frqq]{dirtytalk}
+
+\usetheme{Warsaw}
+
+% \setbeameroption{show notes on second screen}
+
+\makeatletter
+\newenvironment{withoutheadline}{
+  \setbeamertemplate{headline}[default]
+  \def\beamer@entrycode{\vspace*{-\headheight}}
+}{}
+\makeatother
+
+\setbeamertemplate{footline}
+{%
+  \leavevmode
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm plus1fill,rightskip=.3cm]{section in head/foot}%
+    Vincent BONNEVALLE % TODO mettez vos nom
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{subsection in head/foot}%
+    Présentation du langage Rust \hfill \Tiny{\textbf{\color{white}{\insertframenumber/\inserttotalframenumber}}}
+  \end{beamercolorbox}%
+}
+
+\begin{document}
+
+\title{Un titre intelligent sur Rust}
+\author{Julien, Hugo, Vincent Bonnevalle} % Mettez vos nom :)
+\institute{Université Paris-Didierot}
+\date{}
+\titlegraphic{\includegraphics[width=.25\textwidth,height=.25\textheight]{logo.pdf}}
+
+\begin{withoutheadline}
+  \begin{frame}
+    \titlepage{}
+  \end{frame}
+\end{withoutheadline}
+
+  \section{Introduction}
+  \begin{frame}
+    \begin{itemize}
+    \item zero-cost abstraction
+    \item move semantics
+    \item guaranted memory safety
+    \item program without data races
+    \item trait-based generics
+    \item pattern matching
+    \item type inference
+    \item minimal runtime
+    \item efficient C bindings
+    \end{itemize}
+  \end{frame}
+
+\begin{withoutheadline}
+  \begin{frame}
+    \frametitle{Plan}
+    \setcounter{tocdepth}{1}
+    \tableofcontents{}
+    \setcounter{tocdepth}{2}
+  \end{frame}
+\end{withoutheadline}
+
+\section{Section}
+\begin{frame}
+  \tableofcontents[currentsection, hideothersubsections]
+\end{frame}
+
+\subsection{Du code}
+\begin{frame}[fragile]
+  Contexte d'unification :
+\begin{lstlisting}[language=Rust]
+let c = "Du code !!!"
+\end{lstlisting}
+\end{frame}
+\subsection{Séparation de la diapo en 2}
+\begin{frame}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      Une colonne
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      l'autre colonne
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\section{Syntaxe de Rust}
+\begin{frame}
+\end{frame}
+\section{Le typer de Rust}
+\begin{frame}
+\end{frame}
+\section{Rust et la parallélisation}
+\begin{frame}
+\end{frame}
+
+\end{document}
