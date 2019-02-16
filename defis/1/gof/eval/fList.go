@@ -15,6 +15,7 @@ type formList interface {
 
 type fList struct {
 	l *list.List
+	m map[int]Formula
 }
 
 func (fl *fList) create() {
@@ -29,6 +30,7 @@ func (fl *fList) fillList(c chan Formula) {
 	for f:= range c {
 		fl.insert(f)
 	}
+	fl.m = fl.createMap()
 }
 
 func (fl *fList) insert(f Formula) {
