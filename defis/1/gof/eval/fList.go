@@ -40,6 +40,7 @@ func insert(f *Formula, l *list.List) {
 			continue
 		}
 		l.InsertBefore(f, e)
+
 	}
 }
 
