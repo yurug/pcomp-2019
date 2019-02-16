@@ -81,6 +81,32 @@ func ParseSheet(sheet string, fileD *db.FileDescriptor) error {
 	}
 }
 
+func FormulasList(c chan eval.Formula, mapping map[int]eval.Formula, chbreak chan int) {
+	i := 0
+	for element := range c {
+		mapping[i] = element
+		i++
+	}
+	chbreak <- 1
+}
+
+func dependencies(formulas *db.Controller) error {
+	/*	var err error
+		dep, _ := db.NewController(DEPENDENCIES_FILE, CREATE_FILE)
+		for {
+			line, err := formulas.NextLine()
+			if err != nil {
+				break
+			}
+			lineStr := string(line[:])
+			tmpArr := strings.Split(lineStr, ";")
+			pos := strings.Split(tmpArr[2], ",")
+			x, y := pos[0], pos[1]
+		}
+		return err*/
+	return nil
+}
+
 func extractFormulas(formulas *db.Controller) ([]*eval.Formula, error) {
 	l := make([]*eval.Formula, 0)
 	fml, err := formulas.ReadAll()

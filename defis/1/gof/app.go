@@ -22,7 +22,7 @@ func main() {
 	doneParse := make(chan int)
 	defer close(doneParse)
 
-	go parserutil.GetFormulaList(formulaCh, formulaMaps, doneParse)
+	go parserutil.FormulasList(formulaCh, formulaMaps, doneParse)
 	go parserutil.ParseSheet(csv, formulaCh)
 
 	<-doneParse
