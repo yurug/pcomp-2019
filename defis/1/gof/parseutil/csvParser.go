@@ -83,6 +83,7 @@ func ParseSheet(sheet string, fileD *db.FileDescriptor, chbreak chan int) error 
 	resultList := <-resultChan
 	fileD.DefineFormulaMap()
 	fileD.DefineUnknownMap()
+	fileD.CreateFileCursor(BINARY_FILE, DETAILS)
 	chbreak <- 1
 	return nil
 }

@@ -26,7 +26,6 @@ func main() {
 
 	<-doneParse
 
-	f, _ := db.NewFileModifier(parserutil.BINARY_FILE, parserutil.DETAILS)
 	g, _ := f.GetValue(10, 10)
 	fmt.Printf("Value Read before Write: %v\n", g)
 
