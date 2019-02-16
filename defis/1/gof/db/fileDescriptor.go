@@ -93,12 +93,10 @@ func (fd *FileDescriptor) WriteValue(x int, y int, value int, flag int) (int, er
 	return n, nil
 }
 
-func (fd *FileDescriptor) SetFormulasMap(m map[int]eval.Formula) {
+func (fd *FileDescriptor) DefineFormulaMap(m map[int]eval.Formula) {
 	fd.formulas = m
 }
 
-func (fd *FileDescriptor) AddUnknownElement(element eval.Unknown) {
-	x := element.Coordinate().X
-	y := element.Coordinate().Y
-	fd.unknown[strconv.Itoa(x)+","+strconv.Itoa(y)] = element
+func (fd *FileDescriptor) DefineUnknownMap(m map[string]eval.Unknown) {
+	fd.unknown = m
 }

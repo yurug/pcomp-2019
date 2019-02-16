@@ -13,19 +13,19 @@ type formList interface {
 	getDepends(c *Coordinate) []Coordinate
 }
 
-type fList struct {
+type FList struct {
 	l list.List
 }
 
-func (fl *fList) createList() *list.List {
+func (fl *FList) createList() *list.List {
 	return list.New()
 }
 
-func (fl *fList) getList() list.List {
+func (fl *FList) getList() list.List {
 	return fl.l
 }
 
-func (fl *fList) insertFormula(f *Formula) {
+func (fl *FList) insertFormula(f *Formula) {
 	for e := fl.l.Front(); e != nil; e = e.Next() {
 		if compareCoord(f.Start, e.Value.(Formula).Start) == -1 {
 			continue
@@ -34,7 +34,7 @@ func (fl *fList) insertFormula(f *Formula) {
 	}
 }
 
-func (fl *fList) deleteFormula(f *Formula) {
+func (fl *FList) deleteFormula(f *Formula) {
 	for e := fl.l.Front(); e != nil; e = e.Next() {
 		if compareCoord(f.position, e.Value.(Formula).position) == 0 {
 			fl.l.Remove(e)
@@ -42,7 +42,7 @@ func (fl *fList) deleteFormula(f *Formula) {
 	}
 }
 
-func (fl *fList) getDepends(oldC Cell, newC Cell) []Coordinate {
+func (fl *FList) getDepends(oldC Cell, newC Cell) []Coordinate {
 	var dep []Coordinate
 	var oldVal, _ = strconv.Atoi(oldC.Value())
 	var newVal, _ = strconv.Atoi(newC.Value())

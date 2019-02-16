@@ -26,7 +26,7 @@ const OPEN_FILE = 0
 //ParseSheet takes a file's path and a channel. It extracts all the Cells from the file and send them
 //Into the channel to another go-routine. It returns error if the controller fails to init
 //Or if NextLine() read all the file
-func ParseSheet(sheet string, fileD *db.FileDescriptor) error {
+func ParseSheet(sheet string, fileD *db.FileDescriptor, chbreak chan int) error {
 	fmt.Println("ParseSheet..")
 	controller, err := db.NewController(sheet, OPEN_FILE)
 	if err != nil {
@@ -53,15 +53,16 @@ func ParseSheet(sheet string, fileD *db.FileDescriptor) error {
 		return err
 	}
 
-	c := make(chan eval.Cell)
+	formulasChan := make(chan eval.Cell)
+	resultChan := make(chan eval.FList)
 
 	for {
 		line, err := controller.NextLine()
 		if err != nil {
-			return err
+			break
 		}
 
-		values, formulas, lineSize := preprocess(string(line), rowID, c)
+		values, formulas, lineSize := preprocess(string(line), rowID, formulasChan)
 		_, err = binaryFile.WriteBytes(values)
 		if err != nil {
 			return err
@@ -76,9 +77,14 @@ func ParseSheet(sheet string, fileD *db.FileDescriptor) error {
 		if err != nil {
 			return err
 		}
-
 		rowID++
 	}
+	close(formulasChan)
+	resultList := <-resultChan
+	fileD.DefineFormulaMap()
+	fileD.DefineUnknownMap()
+	chbreak <- 1
+	return nil
 }
 
 func FormulasList(c chan eval.Formula, mapping map[int]eval.Formula, chbreak chan int) {
@@ -131,6 +137,7 @@ func extractFormulas(formulas *db.Controller) ([]*eval.Formula, error) {
 }
 
 func preprocess(line string, rowID int, c chan eval.Cell) ([]byte, string, int) {
+	var formula eval.Cell
 	cells := strings.Split(string(line[:]), ";")
 	number := make([]byte, len(cells)*2)
 	formulas := ""
@@ -151,18 +158,20 @@ func preprocess(line string, rowID int, c chan eval.Cell) ([]byte, string, int) 
 		case KIND_FORMULA:
 			values := regexp.MustCompile(`\d+`).FindAllString(cell, -1)
 			if len(values) != SIZE_FORMULA {
-				formatedCells[columnID] = eval.NewUnknown(rowID, column)
-				continue
+				formula = eval.NewUnknown(rowID, column)
+			} else {
+				valuesInt, _ := atoiSlice(values)
+				formula = eval.NewFormula(valuesInt[0], valuesInt[1], valuesInt[2], valuesInt[3], valuesInt[4], rowID, column)
+				formulas += strconv.Itoa(rowID) + ";" + strconv.Itoa(column) + ";"
+				formulas += strings.Join(reg.FindAllString(cell, -1), ",") + "\n"
 			}
-			valuesInt, _ := atoiSlice(values)
-			formula := eval.NewFormula(valuesInt[0], valuesInt[1], valuesInt[2], valuesInt[3], valuesInt[4], rowID, column)
 			c <- formula
-			formulas += strconv.Itoa(rowID) + ";" + strconv.Itoa(column) + ";"
-			formulas += strings.Join(reg.FindAllString(cell, -1), ",") + "\n"
 			number[cmp] = byte(0)
 			number[cmp+1] = byte(0)
 			cmp += 2
 		default:
+			formula = eval.NewUnknown(rowID, column)
+			c <- formula
 			number[cmp] = byte(0)
 			number[cmp+1] = byte(0)
 			cmp += 2
