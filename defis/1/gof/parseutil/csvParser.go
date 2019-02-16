@@ -26,18 +26,34 @@ const OPEN_FILE = 0
 //ParseSheet takes a file's path and a channel. It extracts all the Cells from the file and send them
 //Into the channel to another go-routine. It returns error if the controller fails to init
 //Or if NextLine() read all the file
-func ParseSheet(sheet string, c chan eval.Formula) error {
+func ParseSheet(sheet string, fileD *db.FileDescriptor) error {
 	fmt.Println("ParseSheet..")
-	defer close(c)
 	controller, err := db.NewController(sheet, OPEN_FILE)
 	if err != nil {
 		return fmt.Errorf("Error while calling new controller for ParseSheet: %v", err)
 	}
+
 	rowID := 0
 
-	binaryFile, _ := db.NewController(BINARY_FILE, CREATE_FILE)
-	detailsFile, _ := db.NewController(DETAILS, CREATE_FILE)
-	formulasFile, _ := db.NewController(FORMULAS_FILE, CREATE_FILE)
+	binaryFile, err := db.NewController(BINARY_FILE, CREATE_FILE)
+	if err != nil {
+		return err
+	}
+	detailsFile, err := db.NewController(DETAILS, CREATE_FILE)
+	if err != nil {
+		return err
+	}
+	formulasFile, err := db.NewController(FORMULAS_FILE, CREATE_FILE)
+	if err != nil {
+		return err
+	}
+
+	fileD, err = db.NewFileDescriptor()
+	if err != nil {
+		return err
+	}
+
+	c := make(chan eval.Cell)
 
 	for {
 		line, err := controller.NextLine()
@@ -65,32 +81,6 @@ func ParseSheet(sheet string, c chan eval.Formula) error {
 	}
 }
 
-func GetFormulaList(c chan eval.Formula, mapping map[int]eval.Formula, chbreak chan int) {
-	i := 0
-	for element := range c {
-		mapping[i] = element
-		i++
-	}
-	chbreak <- 1
-}
-
-func dependencies(formulas *db.Controller) error {
-	/*	var err error
-		dep, _ := db.NewController(DEPENDENCIES_FILE, CREATE_FILE)
-		for {
-			line, err := formulas.NextLine()
-			if err != nil {
-				break
-			}
-			lineStr := string(line[:])
-			tmpArr := strings.Split(lineStr, ";")
-			pos := strings.Split(tmpArr[2], ",")
-			x, y := pos[0], pos[1]
-		}
-		return err*/
-	return nil
-}
-
 func extractFormulas(formulas *db.Controller) ([]*eval.Formula, error) {
 	l := make([]*eval.Formula, 0)
 	fml, err := formulas.ReadAll()
@@ -114,7 +104,7 @@ func extractFormulas(formulas *db.Controller) ([]*eval.Formula, error) {
 	return l, nil
 }
 
-func preprocess(line string, rowID int, c chan eval.Formula) ([]byte, string, int) {
+func preprocess(line string, rowID int, c chan eval.Cell) ([]byte, string, int) {
 	cells := strings.Split(string(line[:]), ";")
 	number := make([]byte, len(cells)*2)
 	formulas := ""
@@ -135,11 +125,12 @@ func preprocess(line string, rowID int, c chan eval.Formula) ([]byte, string, in
 		case KIND_FORMULA:
 			values := regexp.MustCompile(`\d+`).FindAllString(cell, -1)
 			if len(values) != SIZE_FORMULA {
+				formatedCells[columnID] = eval.NewUnknown(rowID, column)
 				continue
 			}
 			valuesInt, _ := atoiSlice(values)
 			formula := eval.NewFormula(valuesInt[0], valuesInt[1], valuesInt[2], valuesInt[3], valuesInt[4], rowID, column)
-			c <- *formula
+			c <- formula
 			formulas += strconv.Itoa(rowID) + ";" + strconv.Itoa(column) + ";"
 			formulas += strings.Join(reg.FindAllString(cell, -1), ",") + "\n"
 			number[cmp] = byte(0)
