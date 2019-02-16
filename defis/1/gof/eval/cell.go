@@ -55,6 +55,7 @@ type Formula struct {
 	position Coordinate
 	Start    Coordinate
 	End      Coordinate
+	Area     int
 	ToEval   int
 	FinalV   int
 	visited  bool
@@ -65,6 +66,7 @@ func NewFormula(r1 int, c1 int, r2 int, c2 int, v int, x int, y int) *Formula {
 		position: Coordinate{x, y},
 		Start:    Coordinate{r1, c1},
 		End:      Coordinate{r2, c2},
+		Area:     (r2 - r1) * (c2 - c1),
 		ToEval:   v,
 		FinalV:   -1,
 		visited:  false,
@@ -88,6 +90,14 @@ func (f *Formula) MarkVisit() {
 
 func (f *Formula) Visited() bool {
 	return f.visited
+}
+
+func (f *Formula) nbCells() int {
+	return f.Area
+}
+
+func (f *Formula) decrementArea() {
+	f.Area--
 }
 
 type Unknown struct {

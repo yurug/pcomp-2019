@@ -14,18 +14,26 @@ type formList interface {
 }
 
 type fList struct {
-	l list.List
+	l *list.List
+	m map[int]Formula
 }
 
-func (fl *fList) createList() *list.List {
-	return list.New()
+func (fl *fList) create() {
+	fl.l = list.New()
 }
 
-func (fl *fList) getList() list.List {
+func (fl *fList) list() *list.List {
 	return fl.l
 }
 
-func (fl *fList) insertFormula(f *Formula) {
+func (fl *fList) fillList(c chan Formula) {
+	for f:= range c {
+		fl.insert(f)
+	}
+	fl.m = fl.createMap()
+}
+
+func (fl *fList) insert(f Formula) {
 	for e := fl.l.Front(); e != nil; e = e.Next() {
 		if compareCoord(f.Start, e.Value.(Formula).Start) == -1 {
 			continue
@@ -34,7 +42,7 @@ func (fl *fList) insertFormula(f *Formula) {
 	}
 }
 
-func (fl *fList) deleteFormula(f *Formula) {
+func (fl *fList) delete(f Formula) {
 	for e := fl.l.Front(); e != nil; e = e.Next() {
 		if compareCoord(f.position, e.Value.(Formula).position) == 0 {
 			fl.l.Remove(e)
@@ -42,7 +50,7 @@ func (fl *fList) deleteFormula(f *Formula) {
 	}
 }
 
-func (fl *fList) getDepends(oldC Cell, newC Cell) []Coordinate {
+func (fl *fList) dependencies(oldC Cell, newC Cell) []Coordinate {
 	var dep []Coordinate
 	var oldVal, _ = strconv.Atoi(oldC.Value())
 	var newVal, _ = strconv.Atoi(newC.Value())
@@ -50,8 +58,7 @@ func (fl *fList) getDepends(oldC Cell, newC Cell) []Coordinate {
 		if compareCoord(newC.Coordinate(), e.Value.(Formula).Start) == -1 {
 			return dep
 		}
-		// FIX ME
-		if isIn(newC.Coordinate(), e.Value.(Formula)) &&
+		if contains(newC.Coordinate(), e.Value.(Formula)) &&
 			((oldVal == e.Value.(Formula).ToEval) || (newVal == e.Value.(Formula).ToEval)) {
 			dep = append(dep, e.Value.(Formula).position)
 		}
@@ -59,10 +66,22 @@ func (fl *fList) getDepends(oldC Cell, newC Cell) []Coordinate {
 	return dep
 }
 
-func isIn(c Coordinate, f Formula) bool {
+func (fl *fList) createMap() map[int]Formula {
+	var m = make(map[int]Formula)
+	var i = 0
+	for e := fl.l.Front(); e != nil; e = e.Next() {
+		m[i] = e.Value.(Formula)
+		i++
+	}
+	return m
+}
+
+func contains(c Coordinate, f Formula) bool {
 	return compareCoord(c, f.Start) > 1 &&
 		compareCoord(c, f.End) < 1
 }
+
+
 
 // Compare between two coordiantes (first X then Y)
 func compareCoord(c1 Coordinate, c2 Coordinate) int {
