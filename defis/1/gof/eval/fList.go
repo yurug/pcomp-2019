@@ -25,7 +25,13 @@ func (fl *fList) list() list.List {
 	return fl.l
 }
 
-func (fl *fList) insert(f *Formula) {
+func (fl *fList) fillList(c chan Formula) {
+	for f:= range c {
+		fl.insert(f)
+	}
+}
+
+func (fl *fList) insert(f Formula) {
 	for e := fl.l.Front(); e != nil; e = e.Next() {
 		if compareCoord(f.Start, e.Value.(Formula).Start) == -1 {
 			continue
@@ -34,7 +40,7 @@ func (fl *fList) insert(f *Formula) {
 	}
 }
 
-func (fl *fList) delete(f *Formula) {
+func (fl *fList) delete(f Formula) {
 	for e := fl.l.Front(); e != nil; e = e.Next() {
 		if compareCoord(f.position, e.Value.(Formula).position) == 0 {
 			fl.l.Remove(e)
