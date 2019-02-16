@@ -65,7 +65,7 @@ func ParseSheet(sheet string, c chan eval.Formula) error {
 	}
 }
 
-func GetFormulaList(c chan eval.Formula, mapping map[int]eval.Formula, chbreak chan int) {
+func FormulasList(c chan eval.Formula, mapping map[int]eval.Formula, chbreak chan int) {
 	i := 0
 	for element := range c {
 		mapping[i] = element
