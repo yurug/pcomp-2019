@@ -2,86 +2,60 @@ package eval
 
 import (
 	"container/list"
-	"strconv"
 )
 
-type formList interface {
-	createList() *list.List
-	insertFormula(f *Formula)
-	deleteFormula()
-	getList() list.List
-	getDepends(c *Coordinate) []Coordinate
-}
-
 type fList struct {
-	l *list.List
-	m map[int]Formula
+	validF 		map[int]Formula
+	invalidF 	map[int]Unknown
 }
 
-func (fl *fList) create() {
-	fl.l = list.New()
+// Create a fList structure and fill it
+func (fl *fList) create(c chan Cell, r chan *fList) {
+	fl.validF = make(map[int]Formula)
+	fl.invalidF = make(map[int]Unknown)
+	fl.fillList(c, r)
 }
 
-func (fl *fList) list() *list.List {
-	return fl.l
-}
-
-func (fl *fList) fillList(c chan Formula) {
+//	Initialize the fList with cells given through channel c, send a pointer to self to caller through channel r
+func (fl *fList) fillList(c chan Cell, r chan *fList) {
+	var validFlist = list.New()
+	var invalidFlist = list.New()
 	for f:= range c {
-		fl.insert(f)
+		switch f.(type) {
+		case *Formula:
+			insert(f.(*Formula), validFlist)
+		case *Unknown:
+			invalidFlist.PushBack(f)
+		}
 	}
-	fl.m = fl.createMap()
+	fl.createMaps(validFlist, invalidFlist)
+	r <- fl
+	close(r)
 }
 
-func (fl *fList) insert(f Formula) {
-	for e := fl.l.Front(); e != nil; e = e.Next() {
+// Insert Formula into a list, preserving formulas order (Start(X,Y))
+func insert(f *Formula, l *list.List) {
+	for e := l.Front(); e != nil; e = e.Next() {
 		if compareCoord(f.Start, e.Value.(Formula).Start) == -1 {
 			continue
 		}
-		fl.l.InsertBefore(f, e)
+		l.InsertBefore(f, e)
 	}
 }
 
-func (fl *fList) delete(f Formula) {
-	for e := fl.l.Front(); e != nil; e = e.Next() {
-		if compareCoord(f.position, e.Value.(Formula).position) == 0 {
-			fl.l.Remove(e)
-		}
-	}
-}
-
-func (fl *fList) dependencies(oldC Cell, newC Cell) []Coordinate {
-	var dep []Coordinate
-	var oldVal, _ = strconv.Atoi(oldC.Value())
-	var newVal, _ = strconv.Atoi(newC.Value())
-	for e := fl.l.Front(); e != nil; e = e.Next() {
-		if compareCoord(newC.Coordinate(), e.Value.(Formula).Start) == -1 {
-			return dep
-		}
-		if contains(newC.Coordinate(), e.Value.(Formula)) &&
-			((oldVal == e.Value.(Formula).ToEval) || (newVal == e.Value.(Formula).ToEval)) {
-			dep = append(dep, e.Value.(Formula).position)
-		}
-	}
-	return dep
-}
-
-func (fl *fList) createMap() map[int]Formula {
-	var m = make(map[int]Formula)
+// Create maps of valid formulas and unknown cells from given lists
+func (fl *fList) createMaps(validL *list.List, invalidL *list.List) {
 	var i = 0
-	for e := fl.l.Front(); e != nil; e = e.Next() {
-		m[i] = e.Value.(Formula)
+	for e := validL.Front(); e != nil; e = e.Next() {
+		fl.validF[i] = e.Value.(Formula)
 		i++
 	}
-	return m
+	i = 0
+	for e := invalidL.Front(); e != nil; e = e.Next() {
+		fl.invalidF[i] = e.Value.(Unknown)
+		i++
+	}
 }
-
-func contains(c Coordinate, f Formula) bool {
-	return compareCoord(c, f.Start) > 1 &&
-		compareCoord(c, f.End) < 1
-}
-
-
 
 // Compare between two coordiantes (first X then Y)
 func compareCoord(c1 Coordinate, c2 Coordinate) int {
