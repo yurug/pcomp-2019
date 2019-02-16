@@ -134,7 +134,8 @@ let partial_eval computable_formulas filename l0 lf =
     computable_formulas
 
 (* TODO *)
-(* Travail du slave [pos_to_region region_depth pos]. L'esclave envoie aussi de nouvelles tasks au master *)
+(* Travail du slave [pos_to_region region_depth pos]. L'esclave envoie
+   aussi de nouvelles tasks au master. *)
 (*let rec update_cell (type a) region_depth pos (new_cell: a content) graph : Graph.t =
   let fopt = find_formula_opt region_depth pos graph in
   match fopt, new_cell with

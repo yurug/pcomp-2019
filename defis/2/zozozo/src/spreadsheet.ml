@@ -202,11 +202,10 @@ let eval_formulas filename region_depth computable =
     Mint.fold
       (fun region tasks res ->
          let filename = build_name_file_region filename region in
-         Region.partial_eval tasks filename (region*region_depth) ((region+1)*region_depth-1)::res
+         Region.partial_eval tasks filename (region*region_depth) ((region+1)*region_depth-1) @ res
       )
       tasks_list_map
       []
-    |> List.concat
     |> List.sort (fun (p1, _, _) (p2, _, _) -> compare_pos p1 p2)
     |> (fun x -> combine_evals x)
 
