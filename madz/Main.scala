@@ -41,6 +41,19 @@ object Main {
     if (args.length <4) {
         println("4 agrs minimum")
     }
+    
+    val f= new FeuilleSimple("src/big.csv","view0.csv")
+    f.copyF()
+    val dep = new GestionnaireDependance(f)
+    dep.addDependanceToList()
+   
+    dep.MalFormees()
+    println(f.listFormule)
+   
+    println(f.writeRes())
+    
+  }   
+}
     val f= new FeuilleSimple(args(0))
     f.loadCalc()
     val I = new DataInterpreteur(f)
