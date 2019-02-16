@@ -50,7 +50,6 @@ func (fl *fList) dependencies(oldC Cell, newC Cell) []Coordinate {
 		if compareCoord(newC.Coordinate(), e.Value.(Formula).Start) == -1 {
 			return dep
 		}
-		// FIX ME
 		if contains(newC.Coordinate(), e.Value.(Formula)) &&
 			((oldVal == e.Value.(Formula).ToEval) || (newVal == e.Value.(Formula).ToEval)) {
 			dep = append(dep, e.Value.(Formula).position)
@@ -59,10 +58,22 @@ func (fl *fList) dependencies(oldC Cell, newC Cell) []Coordinate {
 	return dep
 }
 
+func (fl *fList) createMap() map[int]Formula {
+	var m = make(map[int]Formula)
+	var i = 0
+	for e := fl.l.Front(); e != nil; e = e.Next() {
+		m[i] = e.Value.(Formula)
+		i++
+	}
+	return m
+}
+
 func contains(c Coordinate, f Formula) bool {
 	return compareCoord(c, f.Start) > 1 &&
 		compareCoord(c, f.End) < 1
 }
+
+
 
 // Compare between two coordiantes (first X then Y)
 func compareCoord(c1 Coordinate, c2 Coordinate) int {
