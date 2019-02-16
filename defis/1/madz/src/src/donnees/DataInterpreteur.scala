@@ -31,8 +31,10 @@ object DataInterpreteur {
     Number(count)
   }
   
-  
-  
+  //def getValueData (c: Case): CaseData = get_FormuleId 
+    
+    
+   // getEvalRegionV0(c,c,v,database)
   /*
   
   def evalCellules() :Unit= {
