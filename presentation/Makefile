@@ -1,5 +1,5 @@
 template: presentation.tex
-	pdftotex $<
+	pdflatex $<
 
 clean:
 	@rm *.aux 2> /dev/null || true
