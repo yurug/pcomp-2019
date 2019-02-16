@@ -5,4 +5,5 @@ trait Interpreteur{
 	def evalCase (i:Int, j:Int): Option[Int]
 	def evalSheet():  Array[Array[Int]]
 	def eval_next_expr(): Option[Int]
+	def getValueData(c:Case): Option[CaseData]
 }

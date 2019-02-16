@@ -8,4 +8,8 @@ trait FeuilleCalque {
   def getdata():String
   def getCaseData(id:Int):CaseData
   
+  /*
+   * get list case that its formules depend case c
+   * */
+  def getDependance(c:Case):List[Case]
 }

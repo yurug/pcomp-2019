@@ -1,38 +1,43 @@
 package donnees
 
 import java.io.File
+
 import java.io.PrintWriter
 
 object DataInterpreteur {
   
-  
   def getEvalRegionV0(c1:Case, c2:Case,v:Int,view0:String):CaseData={
     var count=0
-    val out = new java.io.BufferedWriter( new java.io.FileWriter(view0) );
     var i=0;var j=0
     for(l <- io.Source.fromFile(view0).getLines){
-      if(c1.i<=i && i<=c2.i){
+      if(c1.i<=i && i<=c2.i)
         for(c <- l.split(";")){
-          if(c1.j<=j && j<=c2.j){
-            if (c.equals(v)) count+=1
-          }else j+=1
+          if(c1.j<=j && j<=c2.j)
+            if (c.equals(v+"")) count+=1
+          j+=1
         }
-      }else i+=1
+      i+=1;j=0
+    }
+    println(count)
+    Number(count)
+  }
+  
+  def getEvalRegionV1(id:Int,v:Int):CaseData={
+    var count=0
+    for(l <- io.Source.fromFile(id+"").getLines){
+       val lignelist =l.split(" ")
+       count+=lignelist.filter(_ == v).size
     }
     Number(count)
   }
   
+  //def getValueData (c: Case): CaseData = get_FormuleId 
+    
+    
+   // getEvalRegionV0(c,c,v,database)
   /*
-  def evalData (data: Option[CaseData]): CaseData ={
-    data match  {
-			case Some (Number (n)) => Number(n)
-			case Some (Formule (lt,br,v)) => fs.getEvalRegion(lt, br, v)
-			case _ => P()
-		}
-		
-	}
-
-	def evalCellules() :Unit= {
+  
+  def evalCellules() :Unit= {
 		var i=0;var j=0
     for(l <- fs.getFeuille){
       for(c <- l){
