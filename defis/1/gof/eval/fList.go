@@ -14,14 +14,14 @@ type formList interface {
 }
 
 type fList struct {
-	l list.List
+	l *list.List
 }
 
-func (fl *fList) create() *list.List {
-	return list.New()
+func (fl *fList) create() {
+	fl.l = list.New()
 }
 
-func (fl *fList) list() list.List {
+func (fl *fList) list() *list.List {
 	return fl.l
 }
 
