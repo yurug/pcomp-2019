@@ -15,7 +15,6 @@ class GestionnaireDependance(fs:FeuilleSimple) {
             case _ =>Nil
           }
       }
-      println(id0+"=>"+ll)
       fs.addDep(id0,ll)
     }
   }
@@ -44,36 +43,24 @@ class GestionnaireDependance(fs:FeuilleSimple) {
         remove(id,l,k)
   }
   
-  def BienFormees():Int={
+  def BienFormees():Unit={
     var i=0
-    println("i="+i)
-    println(fs.listFormule)
      for ((id,(Formule(c1,c2,v),l)) <- fs.listFormule)
        if (l==Nil){
-         if(c2.i-c1.i<1000){
-           fs.setCaseData(id,DataInterpreteur.getEvalRegionV0(c1,c2,v,fs.getView))
-         }else{
-           fs.fileRegion(id)
-           fs.setCaseData(id,DataInterpreteur.getEvalRegionV1(id,v))
-         }
+         fs.setCaseData(id,DataInterpreteur.getEvalRegionV0(c1,c2,v,fs.getView))
          SuppDependance(id)
          i+=1
-       }else println(l)
-      println("fin=>"+i)
-     i
+       }
+     if(i!=0) BienFormees()
   }
   
   def MalFormees():Unit={
-    while(BienFormees()!=0){
-      println("MalFormees")
       for ((k,(f,l)) <- fs.listFormule)
         f match{
           case Formule(c1,c2,v) => 
-            println("id=>"+k)
             fs.setCaseData(k,P())
           case _ => Nil
         }
-    }
   }
   
   def getDependance(id:Int):List[Int]={
