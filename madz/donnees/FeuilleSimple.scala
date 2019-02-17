@@ -6,7 +6,7 @@ import java.io.PrintWriter
 
 class FeuilleSimple(data0:String,view0:String) extends FeuilleCalque {
   
-  
+  copyF()
   var listFormule = scala.collection.mutable.Map[Int,(CaseData,List[Int])]()
   var listCoord:Map[Int,(Case)] = Map()
   var listValue=scala.collection.mutable.Map[Int,Value]()
