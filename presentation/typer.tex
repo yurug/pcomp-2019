@@ -1,0 +1,129 @@
+
+\begin{frame}
+  \tableofcontents[currentsection, hideothersubsections]
+\end{frame}
+\subsection{Typage}
+\begin{frame}[fragile]
+  \begin{itemize}
+    \only<1> {
+    \item Typage fort
+    \item Inférence de type
+    \item Transtypage et conversion
+    }
+    \begin{onlyenv}<2>
+    \item Typage fort:
+      \begin{lstlisting}[language=Rust]
+let x:i64 = 5;
+let y:u64 = x;
+      \end{lstlisting}
+      \begin{lstlisting}[language=bash]
+> rustc src/main.rs
+# ...
+--> src/main.rs:3:17
+|
+3 |     let y:u64 = x;
+|                 ^ expected u64, found i64
+
+error: aborting due to previous error
+# ...
+      \end{lstlisting}
+    \end{onlyenv}
+    \begin{onlyenv}<3>
+    \item Inférence de type:
+      \begin{lstlisting}[language=Rust]
+struct Foo {
+  bar: i64,
+}
+fn f(a: Vec<Foo>) -> Foo {
+
+}
+fn g(a: Vec<Foo>) {
+
+}
+fn main() {
+  let v = Vec::new();
+  g(v);
+}
+      \end{lstlisting}
+    \end{onlyenv}
+    \begin{onlyenv}<4>
+    \item Transtypage et conversions:
+      \begin{itemize}
+      \item Conversions d'entier (sans perte):
+      \begin{lstlisting}[language=Rust]
+let x:u32 = 1 << 25;
+let y:u64 = x as u64
+      \end{lstlisting}
+      \item \texttt{From} et \texttt{Into}:
+      \begin{lstlisting}[language=Rust]
+struct Number {value: i32,}
+impl From<i32> for Number {
+    fn from(item: i32) -> Self {
+        Number { value: item }
+    }
+}
+// ...
+let x:i32 = 64;
+let n = Number::from(x);
+let y:i32 = n.into();
+      \end{lstlisting}
+      \end{itemize}
+    \end{onlyenv}
+  \end{itemize}
+\end{frame}
+\subsection{Trait et polymorphisme}
+\subsubsection{Trait}
+\begin{frame}[fragile]
+  trait $\approx$ interfaces de java
+      \begin{lstlisting}[language=Rust]
+pub trait From<T> {
+    fn from(T) -> Self;
+}
+#[derive(Copy, Clone)]
+struct Number {value: i32,}
+impl From<i32> for Number {
+    fn from(item: i32) -> Self {
+        Number { value: item }
+    }
+}
+      \end{lstlisting}
+\end{frame}
+\subsubsection{Polymorphisme}
+\begin{frame}[fragile]
+  Paramètre générique de \texttt{Rust} $\approx$ \texttt{templates} de
+  \texttt{C++} (mais en mieux).\\
+  Nom du type générique en \texttt{CamelCase}.
+      \begin{lstlisting}[language=Rust]
+fn foo<T>(arg: T) {
+  ...
+}
+struct Bar<T>(T) {
+  foo: T,
+}
+impl<T> Bar<T> {
+    fn swap(&mut self) {
+      // ...
+    }
+}
+      \end{lstlisting}
+\end{frame}
+\subsubsection{Polymorphisme contraint}
+\begin{frame}[fragile]
+  Fusion des paramètres génériques et des traits
+      \begin{lstlisting}[language=Rust]
+fn foo<T: From<i32>>(arg: T) { ... }
+      \end{lstlisting}
+      ou
+      \begin{lstlisting}[language=Rust]
+fn foo<T>(arg: T)
+  where T: From<i32> { ... }
+// ...
+struct Char { c:i32, }
+let n = Number::from(64);
+foo(n);             // OK
+foo(Char { c:64 }); // KO
+      \end{lstlisting}
+\end{frame}
+\subsection{\textit{Borrow checker}}
+\begin{frame}
+\end{frame}
