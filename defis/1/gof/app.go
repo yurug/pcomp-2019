@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 	"os"
+	"runtime"
 
-	"github.com/yurug/pcomp-2019/defis/1/gof/parseutil"
+	parserutil "github.com/yurug/pcomp-2019/defis/1/gof/parseutil"
 
 	"github.com/yurug/pcomp-2019/defis/1/gof/db"
-	"github.com/yurug/pcomp-2019/defis/1/gof/eval"
 )
 
 func main() {
@@ -17,35 +17,43 @@ func main() {
 		return
 	}
 	csv := args[0]
-	ch := make(chan []eval.Cell)
 	doneParse := make(chan int)
-	doneEval := make(chan int)
+
+	var fileDescriptor *db.FileDescriptor
+	fileDescriptor, err := db.NewFileDescriptor()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	defer close(doneParse)
-	go parserutil.ParseSheet(csv, ch, doneParse)
-	e, err := eval.NewEvaluator(args[2])
-	if err != nil {
-		fmt.Println(err)
-	}
 
-	go e.Process(ch, doneEval)
+	go parserutil.ParseSheet(csv, fileDescriptor, doneParse)
+
 	<-doneParse
-	<-doneEval
 
-	f, err := db.NewFileModifier(parserutil.BINARY_FILE, parserutil.DETAILS)
-	if err != nil {
-		fmt.Println(err)
-	}
-	g, err := f.GetValue(10, 10)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Printf("Value Read before Write: %v\n", g)
+	runtime.GC()
+	PrintMemUsage()
+	/*
+		g, _ := fileDescriptor.GetValue(1, 1)
+		fmt.Printf("Value Read before Write: %v\n", g)
 
-	f.WriteValue(10, 10, 98, 0)
-	g, err = f.GetValue(10, 10)
-	if err != nil {
-		fmt.Println(err)
-	}
+		fileDescriptor.WriteValue(10, 10, 98, 0)
+		g, _ = fileDescriptor.GetValue(10, 10)
 
-	fmt.Printf("Value Read after Write: %v\n", g)
+		fmt.Printf("Value Read after Write: %v\n", g) */
+}
+
+func PrintMemUsage() {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	// For info on each, see: https://golang.org/pkg/runtime/#MemStats
+	fmt.Printf("Alloc = %v MiB", bToMb(m.Alloc))
+	fmt.Printf("\tTotalAlloc = %v MiB", bToMb(m.TotalAlloc))
+	fmt.Printf("\tSys = %v MiB", bToMb(m.Sys))
+	fmt.Printf("\tNumGC = %v\n", m.NumGC)
+}
+
+func bToMb(b uint64) uint64 {
+	return b / 1024 / 1024
 }

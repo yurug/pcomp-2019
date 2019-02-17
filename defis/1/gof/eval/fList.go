@@ -5,85 +5,89 @@ import (
 	"strconv"
 )
 
-type formList interface {
-	createList() *list.List
-	insertFormula(f *Formula)
-	deleteFormula()
-	getList() list.List
-	getDepends(c *Coordinate) []Coordinate
+/*FormulasMapping is a struct to store formulas and unknown cells
+**formula[key] has an integer as key to iterate through it easily
+**unknown[key] has a string as key representing [x,y]
+ */
+type FormulasMapping struct {
+	formula map[int]*Formula
+	unknown map[string]*Unknown
 }
 
-type fList struct {
-	l *list.List
-	m map[int]Formula
+//CreateList takes as input 2 channelsm create a FormulasMap struct
+//fill it with the cells received in c, then send it to r
+func CreateList(c chan Cell, r chan *FormulasMapping) {
+	fl := newFormulasMapping()
+	fl.fillList(c)
+	r <- fl
 }
 
-func (fl *fList) create() {
-	fl.l = list.New()
+func newFormulasMapping() *FormulasMapping {
+	return &FormulasMapping{formula: make(map[int]*Formula), unknown: make(map[string]*Unknown)}
 }
 
-func (fl *fList) list() *list.List {
-	return fl.l
-}
-
-func (fl *fList) fillList(c chan Formula) {
-	for f:= range c {
-		fl.insert(f)
+func (fl *FormulasMapping) ListID() *list.List {
+	l := list.New()
+	for k := range fl.formula {
+		l.PushFront(k)
 	}
-	fl.m = fl.createMap()
+	return l
 }
 
-func (fl *fList) insert(f Formula) {
-	for e := fl.l.Front(); e != nil; e = e.Next() {
-		if compareCoord(f.Start, e.Value.(Formula).Start) == -1 {
+//Formula returns the formula with id as key
+func (fl *FormulasMapping) Formula(id int) *Formula {
+	return fl.formula[id]
+}
+
+//Unknown returns the unknown with id as key
+func (fl *FormulasMapping) Unknown(id string) *Unknown {
+	return fl.unknown[id]
+}
+
+//Initialize the fList with cells given through channel c,
+//send a pointer to self to caller through channel r
+func (fl *FormulasMapping) fillList(c chan Cell) {
+	var formulaList = list.New()
+	var unknownList = list.New()
+	for f := range c {
+		switch f.(type) {
+		case *Formula:
+			insert(f.(*Formula), formulaList)
+		case *Unknown:
+			unknownList.PushBack(f.(*Unknown))
+		}
+	}
+	fl.createMaps(formulaList, unknownList)
+}
+
+// Insert Formula into a list, preserving formulas order (Start(X,Y))
+func insert(f *Formula, l *list.List) {
+	for e := l.Front(); e != nil; e = e.Next() {
+		if compareCoord(f.Start, e.Value.(*Formula).Start) == -1 {
 			continue
 		}
-		fl.l.InsertBefore(f, e)
+		l.InsertBefore(f, e)
+		return
 	}
+	l.PushBack(f)
 }
 
-func (fl *fList) delete(f Formula) {
-	for e := fl.l.Front(); e != nil; e = e.Next() {
-		if compareCoord(f.position, e.Value.(Formula).position) == 0 {
-			fl.l.Remove(e)
-		}
-	}
-}
-
-func (fl *fList) dependencies(oldC Cell, newC Cell) []Coordinate {
-	var dep []Coordinate
-	var oldVal, _ = strconv.Atoi(oldC.Value())
-	var newVal, _ = strconv.Atoi(newC.Value())
-	for e := fl.l.Front(); e != nil; e = e.Next() {
-		if compareCoord(newC.Coordinate(), e.Value.(Formula).Start) == -1 {
-			return dep
-		}
-		if contains(newC.Coordinate(), e.Value.(Formula)) &&
-			((oldVal == e.Value.(Formula).ToEval) || (newVal == e.Value.(Formula).ToEval)) {
-			dep = append(dep, e.Value.(Formula).position)
-		}
-	}
-	return dep
-}
-
-func (fl *fList) createMap() map[int]Formula {
-	var m = make(map[int]Formula)
+// Create maps of valid formulas and unknown cells from given lists
+func (fl *FormulasMapping) createMaps(validList *list.List, invalidList *list.List) {
 	var i = 0
-	for e := fl.l.Front(); e != nil; e = e.Next() {
-		m[i] = e.Value.(Formula)
+	for e := validList.Front(); e != nil; e = e.Next() {
+		fl.formula[i] = e.Value.(*Formula)
 		i++
 	}
-	return m
+	for e := invalidList.Front(); e != nil; e = e.Next() {
+		element := e.Value.(*Unknown)
+		x := strconv.Itoa(element.Coordinate().X)
+		y := strconv.Itoa(element.Coordinate().Y)
+		fl.unknown[x+","+y] = e.Value.(*Unknown)
+	}
 }
 
-func contains(c Coordinate, f Formula) bool {
-	return compareCoord(c, f.Start) > 1 &&
-		compareCoord(c, f.End) < 1
-}
-
-
-
-// Compare between two coordiantes (first X then Y)
+// Compare between two coordiantes (first X then Y) return 1 if c1 is GT, -1 if c1 is LT
 func compareCoord(c1 Coordinate, c2 Coordinate) int {
 	if c1.X > c2.X {
 		return 1

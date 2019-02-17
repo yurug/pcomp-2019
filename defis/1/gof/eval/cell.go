@@ -43,12 +43,12 @@ func (n *Number) Value() string {
 	return strconv.Itoa(n.value)
 }
 
-func (n *Number) MarkVisit() {
-	n.visited = true
-}
-
 func (n *Number) Visited() bool {
 	return n.visited
+}
+
+func (n *Number) MarkVisit() {
+	n.visited = true
 }
 
 type Formula struct {
@@ -84,12 +84,12 @@ func (f *Formula) Value() string {
 	return "F"
 }
 
-func (f *Formula) MarkVisit() {
-	f.visited = true
-}
-
 func (f *Formula) Visited() bool {
 	return f.visited
+}
+
+func (f *Formula) MarkVisit() {
+	f.visited = true
 }
 
 func (f *Formula) nbCells() int {
