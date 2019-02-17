@@ -4,10 +4,9 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
-)
 
-const THREAD_NUM = 4
-const DEPENDENCY_REPO = "dependencies/"
+	"github.com/yurug/pcomp-2019/defis/1/gof/consts"
+)
 
 type threadChan []chan CellLine
 
@@ -17,7 +16,7 @@ var (
 
 func ThreadChannelsGetInstant() threadChan {
 	if instance == nil {
-		instance = make(threadChan, THREAD_NUM)
+		instance = make(threadChan, consts.THREAD_NUM)
 	}
 
 	return instance
@@ -31,7 +30,7 @@ type CellLine struct {
 
 func WriteLineOnDisk(c chan CellLine) {
 	for line := range c {
-		f, _ := os.Create(DEPENDENCY_REPO + strconv.Itoa(line.LineNum))
+		f, _ := os.Create(consts.DEPENDENCY_REPO + strconv.Itoa(line.LineNum))
 		//		fIndex, err = os.Create(DEPENDENCY_REPO + strconv.Itoa(c.Line) + ".index")
 		for i := range line.Line {
 			f.WriteString(strconv.Itoa(i) + ":" + line.LineFormulas[i])
@@ -41,6 +40,6 @@ func WriteLineOnDisk(c chan CellLine) {
 
 func LineDistribution(globalSize int, c chan CellLine) {
 	for line := range c {
-		ThreadChannelsGetInstant()[rand.Intn(THREAD_NUM-1)] <- line
+		ThreadChannelsGetInstant()[rand.Intn(consts.THREAD_NUM-1)] <- line
 	}
 }

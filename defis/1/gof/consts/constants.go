@@ -15,3 +15,6 @@ const CREATE_FILE = 1
 const OPEN_FILE = 0
 
 const LINE_DELIMITER = '\n'
+
+const THREAD_NUM = 4
+const DEPENDENCY_REPO = "dependencies/"

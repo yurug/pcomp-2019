@@ -7,8 +7,6 @@ import (
 	"os"
 )
 
-const LINE_DELIMITER = '\n'
-
 // Controller is a struct used to access the database and the file associated to it
 type Controller struct {
 	file    *os.File

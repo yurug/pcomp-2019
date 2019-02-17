@@ -3,9 +3,9 @@ package eval
 import (
 	"fmt"
 	"strconv"
-)
 
-const BAD_FORMAT = "P"
+	"github.com/yurug/pcomp-2019/defis/1/gof/consts"
+)
 
 type Cell interface {
 	Coordinate() Coordinate
@@ -125,5 +125,5 @@ func (u *Unknown) Visited() bool {
 }
 
 func (u *Unknown) Value() string {
-	return BAD_FORMAT
+	return consts.BAD_FORMAT
 }
