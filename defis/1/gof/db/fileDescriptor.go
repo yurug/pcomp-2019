@@ -37,11 +37,11 @@ func (fd *FileDescriptor) NextLine() (int, []byte) {
 	return fd.lineNumber - 1, b
 }
 
-func (fd *FileDescriptor) GetLineSize(x int) int {
+func (fd *FileDescriptor) LineSize(x int) int {
 	return fd.lineSize[x]
 }
 
-func (fd *FileDescriptor) GetFormulasMapping() *eval.FormulasMapping {
+func (fd *FileDescriptor) FormulasMapping() *eval.FormulasMapping {
 	return fd.formulasMapping
 }
 
@@ -76,7 +76,7 @@ func (fd *FileDescriptor) CreateFileCursor(path string, desc string) error {
 	return nil
 }
 
-func (fd *FileDescriptor) GetValue(x int, y int) ([]int, error) {
+func (fd *FileDescriptor) Value(x int, y int) ([]int, error) {
 	_, err := fd.file.Seek(int64(fd.coord[y]+(x*2)), 0)
 	if err != nil {
 		fmt.Printf("%v\n", err)

@@ -5,12 +5,17 @@ import (
 	"strconv"
 )
 
+/*FormulasMapping is a struct to store formulas and unknown cells
+**formula[key] has an integer as key to iterate through it easily
+**unknown[key] has a string as key representing [x,y]
+ */
 type FormulasMapping struct {
 	formula map[int]*Formula
 	unknown map[string]*Unknown
 }
 
-// Create a fList structure and fill it
+//CreateList takes as input 2 channelsm create a FormulasMap struct
+//fill it with the cells received in c, then send it to r
 func CreateList(c chan Cell, r chan *FormulasMapping) {
 	formulaMap := make(map[int]*Formula)
 	unknownMap := make(map[string]*Unknown)
