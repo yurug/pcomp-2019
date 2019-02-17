@@ -2,59 +2,70 @@ package eval
 
 import (
 	"container/list"
+	"strconv"
 )
 
-type fList struct {
-	validF 		map[int]Formula
-	invalidF 	map[int]Unknown
+type FormulasMapping struct {
+	formula map[int]*Formula
+	unknown map[string]*Unknown
 }
 
 // Create a fList structure and fill it
-func (fl *fList) create(c chan Cell, r chan *fList) {
-	fl.validF = make(map[int]Formula)
-	fl.invalidF = make(map[int]Unknown)
-	fl.fillList(c, r)
+func CreateList(c chan Cell, r chan *FormulasMapping) {
+	formulaMap := make(map[int]*Formula)
+	unknownMap := make(map[string]*Unknown)
+	fl := FormulasMapping{formulaMap, unknownMap}
+	fl.fillList(c)
+	r <- &fl
+}
+
+func (fl *FormulasMapping) GetFormula() map[int]*Formula {
+	return fl.formula
+}
+
+func (fl *FormulasMapping) GetUnknown() map[string]*Unknown {
+	return fl.unknown
 }
 
 //	Initialize the fList with cells given through channel c, send a pointer to self to caller through channel r
-func (fl *fList) fillList(c chan Cell, r chan *fList) {
-	var validFlist = list.New()
-	var invalidFlist = list.New()
-	for f:= range c {
+func (fl *FormulasMapping) fillList(c chan Cell) {
+	var formulaList = list.New()
+	var unknownList = list.New()
+	for f := range c {
 		switch f.(type) {
 		case *Formula:
-			insert(f.(*Formula), validFlist)
+			insert(f.(*Formula), formulaList)
 		case *Unknown:
-			invalidFlist.PushBack(f)
+			unknownList.PushBack(f.(*Unknown))
 		}
 	}
-	fl.createMaps(validFlist, invalidFlist)
-	r <- fl
-	close(r)
+	fl.createMaps(formulaList, unknownList)
 }
 
 // Insert Formula into a list, preserving formulas order (Start(X,Y))
 func insert(f *Formula, l *list.List) {
 	for e := l.Front(); e != nil; e = e.Next() {
-		if compareCoord(f.Start, e.Value.(Formula).Start) == -1 {
+		if compareCoord(f.Start, e.Value.(*Formula).Start) == -1 {
 			continue
 		}
 		l.InsertBefore(f, e)
-
+		return
 	}
+	l.PushBack(f)
 }
 
 // Create maps of valid formulas and unknown cells from given lists
-func (fl *fList) createMaps(validL *list.List, invalidL *list.List) {
+func (fl *FormulasMapping) createMaps(validList *list.List, invalidList *list.List) {
 	var i = 0
-	for e := validL.Front(); e != nil; e = e.Next() {
-		fl.validF[i] = e.Value.(Formula)
+	for e := validList.Front(); e != nil; e = e.Next() {
+		fl.formula[i] = e.Value.(*Formula)
 		i++
 	}
-	i = 0
-	for e := invalidL.Front(); e != nil; e = e.Next() {
-		fl.invalidF[i] = e.Value.(Unknown)
-		i++
+	for e := invalidList.Front(); e != nil; e = e.Next() {
+		element := e.Value.(*Unknown)
+		x := strconv.Itoa(element.Coordinate().X)
+		y := strconv.Itoa(element.Coordinate().Y)
+		fl.unknown[x+","+y] = e.Value.(*Unknown)
 	}
 }
 

@@ -43,7 +43,6 @@ func (n *Number) Value() string {
 	return strconv.Itoa(n.value)
 }
 
-
 func (n *Number) Visited() bool {
 	return n.visited
 }

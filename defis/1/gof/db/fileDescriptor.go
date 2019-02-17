@@ -2,6 +2,7 @@ package db
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -10,20 +11,21 @@ import (
 )
 
 type FileDescriptor struct {
-	file       *os.File
-	coord      map[int]int
-	formulas   map[int]eval.Formula
-	unknown    map[string]eval.Unknown
-	lineNumber int
+	file            *os.File
+	coord           map[int]int
+	formulasMapping *eval.FormulasMapping
+	lineNumber      int
 }
 
 func NewFileDescriptor() (*FileDescriptor, error) {
 	coord := make(map[int]int)
-	formulas := make(map[int]eval.Formula)
-	unknown := make(map[string]eval.Unknown)
 	lineNumber := 0
-	fd := FileDescriptor{nil, coord, formulas, unknown, lineNumber}
+	fd := FileDescriptor{nil, coord, nil, lineNumber}
 	return &fd, nil
+}
+
+func (fd *FileDescriptor) GetFormulasMapping() *eval.FormulasMapping {
+	return fd.formulasMapping
 }
 
 func (fd *FileDescriptor) CreateFileCursor(path string, desc string) error {
@@ -60,6 +62,7 @@ func (fd *FileDescriptor) CreateFileCursor(path string, desc string) error {
 func (fd *FileDescriptor) GetValue(x int, y int) ([]int, error) {
 	_, err := fd.file.Seek(int64(fd.coord[y]+(x*2)), 0)
 	if err != nil {
+		fmt.Printf("%v\n", err)
 		return nil, err
 	}
 
@@ -93,10 +96,6 @@ func (fd *FileDescriptor) WriteValue(x int, y int, value int, flag int) (int, er
 	return n, nil
 }
 
-func (fd *FileDescriptor) DefineFormulaMap(m map[int]eval.Formula) {
-	fd.formulas = m
-}
-
-func (fd *FileDescriptor) DefineUnknownMap(m map[string]eval.Unknown) {
-	fd.unknown = m
+func (fd *FileDescriptor) DefineFormulasMapping(m *eval.FormulasMapping) {
+	fd.formulasMapping = m
 }

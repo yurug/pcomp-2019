@@ -48,13 +48,10 @@ func ParseSheet(sheet string, fileD *db.FileDescriptor, chbreak chan int) error 
 		return err
 	}
 
-	fileD, err = db.NewFileDescriptor()
-	if err != nil {
-		return err
-	}
-
 	formulasChan := make(chan eval.Cell)
-	resultChan := make(chan eval.FList)
+	resultChan := make(chan *eval.FormulasMapping)
+
+	go eval.CreateList(formulasChan, resultChan)
 
 	for {
 		line, err := controller.NextLine()
@@ -80,9 +77,8 @@ func ParseSheet(sheet string, fileD *db.FileDescriptor, chbreak chan int) error 
 		rowID++
 	}
 	close(formulasChan)
-	resultList := <-resultChan
-	fileD.DefineFormulaMap()
-	fileD.DefineUnknownMap()
+	k := <-resultChan
+	fileD.DefineFormulasMapping(k)
 	fileD.CreateFileCursor(BINARY_FILE, DETAILS)
 	chbreak <- 1
 	return nil
