@@ -182,14 +182,6 @@ const nthreads: i32 = 100;
 fn main() {
     let share_var = Arc::new(Mutex::new(0)) ;
     let mut threads = vec![];
-    // Traitement des threads
-    for child in threads { child.join(); }
-    println!("{}",*share_var.lock().unwrap());
-}
-\end{lstlisting}
-\end{frame}
-\begin{frame}[fragile]
-  \begin{lstlisting}[language=rust, basicstyle=\tiny{}]
     for i in 0..nthreads {
         let share_var = share_var.clone() ;
         if i % 2 == 0 {
@@ -198,6 +190,10 @@ fn main() {
                 *data = 0 ;
             })) ;
         }
+\end{lstlisting}
+\end{frame}
+\begin{frame}[fragile]
+  \begin{lstlisting}[language=rust, basicstyle=\tiny{}]
         else {
             threads.push(thread::spawn(move || {
                 let mut data = share_var.lock().unwrap() ;
@@ -211,6 +207,9 @@ fn main() {
             }));
         }
     }
+    for child in threads { child.join(); }
+    println!("{}",*share_var.lock().unwrap());
+}
   \end{lstlisting}
 \end{frame}
 \begin{frame}[fragile]
