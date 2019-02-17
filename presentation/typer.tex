@@ -125,5 +125,131 @@ foo(Char { c:64 }); // KO
       \end{lstlisting}
 \end{frame}
 \subsection{\textit{Borrow checker}}
+\begin{frame}[fragile]
+  \begin{lstlisting}[language=rust]
+f(c);
+  \end{lstlisting}
+  \begin{onlyenv}<2>
+    \textit{move}:
+  \begin{lstlisting}[language=rust]
+fn f(c: T) { ... }
+  \end{lstlisting}
+  \end{onlyenv}
+  \begin{onlyenv}<3>
+    \textit{move}:
+  \begin{lstlisting}[language=rust, basicstyle=\small]
+let t = T {};
+f(t);
+println!("t: {:?}", t);
+  \end{lstlisting}
+  \begin{lstlisting}[language=bash, basicstyle=\tiny]
+error[E0382]: borrow of moved value: `t`
+  --> src/main.rs:11:25
+   |
+9  |     let t = T {};
+   |         - move occurs because `t` has type `T`,
+                which does not implement the `Copy` trait
+10 |     f(t);
+   |       - value moved here
+11 |     println!("t: {:?}", t);
+   |                         ^ value borrowed here after move
+  \end{lstlisting}
+  \end{onlyenv}
+  \begin{onlyenv}<4>
+    copie:
+  \begin{lstlisting}[language=rust]
+#[derive(Copy)]
+struct T { ... }
+fn f(c: T) { ... }
+  \end{lstlisting}
+  \end{onlyenv}
+  \begin{onlyenv}<5>
+    \textit{borrow} (ou référence):
+  \begin{lstlisting}[language=rust]
+fn f(c: &T) { ... }
+  \end{lstlisting}
+  \end{onlyenv}
+\end{frame}
+\begin{frame}[fragile]
+  \begin{onlyenv}<1>
+    \begin{lstlisting}[language=c++]
+class T {
+  vector<int> vec;
+  void do_something();
+  void f() {
+    for (auto& e : vec) {
+      do_something();
+    }
+  }
+};
+    \end{lstlisting}
+  \end{onlyenv}
+  \begin{onlyenv}<2>
+    \begin{lstlisting}[language=c++]
+class T {
+  vector<int> vec;
+  void do_something() { vec.push_back(3); }
+  void f() {
+    for (auto& e : vec) {
+      do_something();
+    }
+  }
+};
+    \end{lstlisting}
+    \begin{lstlisting}[language=bash]
+> g++ main.cpp
+
+  \end{lstlisting}
+  \end{onlyenv}
+\end{frame}
+\begin{frame}[fragile]
+  \begin{onlyenv}<1>
+    \begin{lstlisting}[language=rust]
+struct T {
+  vec: Vec<i64>,
+}
+
+impl T {
+  fn do_something(&mut self) { self.vec.push(3) }
+  fn f(&mut self) {
+    for e in &self.vec {
+      self.do_something();
+    }
+  }
+}
+    \end{lstlisting}
+  \end{onlyenv}
+  \begin{onlyenv}<2>
+  \begin{lstlisting}[language=bash]
+error[E0502]: cannot borrow `*self` as mutable
+because it is also borrowed as immutable
+--> src/main.rs:11:13
+10 | for e in &self.vec {
+   |          ---------
+   |          |
+   |          immutable borrow occurs here
+   |          immutable borrow used here,
+              in later iteration of loop
+11 |     self.do_something();
+   |     ^^^^^^^^^^^^^^^^^^^ mutable borrow
+                              occurs here
+error: aborting due to previous error
+    \end{lstlisting}
+  \end{onlyenv}
+\end{frame}
 \begin{frame}
+  Règles sur les références (ou \textit{borrowing}):
+  \begin{itemize}
+  \item une référence ne peut pas vivre plus longtemps que l'objet original (pas
+    de \textit{dangling reference})
+  \item on peut avoir:
+    \begin{itemize}
+    \item soit une ou plusieurs références non mutable sur un objet (\texttt{\&T})
+    \item soit une (et seulement une) référence mutable sur un objet (\texttt{\&
+        mut T})
+    \item mais pas les deux en même temps
+    \end{itemize}
+  \end{itemize}
+  $\Rightarrow$ pas de \texttt{dangling reference} et pas de modification
+  concurrent d'un objet
 \end{frame}
