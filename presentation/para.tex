@@ -290,6 +290,9 @@ Avec un modèle de ce type, notre variable fonctionne comme une feuille de papie
 \begin{frame}[fragile]
   \frametitle{Utiliser les channels : thread isolation++}
   Un \textit{channel} consiste en une paire (un récepteur et un émetteur) que l'on construit en faisant appel à la fonction :
+  \begin{lstlisting}[language=rust]
+pub fn channel<T>() -> (Sender<T>, Receiver<T>)
+  \end{lstlisting}
   Ce \texttt{Sender} et ce \texttt{Receiver}, partagés, permettent à plusieurs \textit{threads} de communiquer entre eux.
   \begin{lstlisting}[language=rust]
 pub fn send(&self, t:T) -> Result<(), SendError<T>>
