@@ -180,7 +180,7 @@ use std::sync::{arc, mutex};
 use std::thread;
 const nthreads: i32 = 100;
 fn main() {
-    let share_var = arc::new(mutex::new(0)) ;
+    let share_var = Arc::new(Mutex::new(0)) ;
     let mut threads = vec![];
     // Traitement des threads
     for child in threads { child.join(); }
