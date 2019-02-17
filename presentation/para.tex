@@ -176,7 +176,7 @@ Les \textit{threads} étant statiquement isolés les uns des autres, il est impo
   \frametitle{Passer les fourches caudines du compilateur}
 Spontanément, pour protéger des données partagées, on les verrouille avec un Mutex garantissant l'absence d'accès concurrents :
 \begin{lstlisting}[language=rust, basicstyle=\tiny{}]
-use std::sync::{arc, mutex};
+use std::sync::{Arc, Mutex};
 use std::thread;
 const nthreads: i32 = 100;
 fn main() {
