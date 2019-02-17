@@ -68,6 +68,7 @@ class GestionnaireDependance(fs:FeuilleSimple) {
     val Some((data,l)) = fs.listFormule.get(id)
     l
   }
+      /* Done
   def getDependance(formule:Case):List[Case]={
     fs.get_FormuleId(formule) match{
       case None => Nil
@@ -76,6 +77,17 @@ class GestionnaireDependance(fs:FeuilleSimple) {
         c
       })
     }
+  }
+  * 
+  */
+  /* mock: use above
+   * */
+  def getDependance(formule:Case):List[Case]={
+    val res = formule match{
+      case Case(0,1) => List(Case(1,3))
+      case Case(1,3) => Nil
+    }
+    res
   }
   
   def setDependance(id:Int, idl:Int): Unit = {

@@ -17,17 +17,22 @@ extends Request_change(case_toChange, expression){
     
   def exec():Unit = { 
     val init_val = this.sheet_evalued.evalData(expression)
-    result = update_case(case_toChange,init_val)}
+    val tmp =update_case(case_toChange,init_val)
+    result = tmp  
+  }
   /*
    * list of to update case and its value, then update value of its dependance case*/
   private def update_case(c : Case, value : Value): List[Change] = {     
     val Some(val_current_case) = this.sheet_evalued.getValueData(c) 
     if (value != val_current_case){
-      val changes_dependance = this.sheet_evalued.getDependance(c).map(
-          formule => update_case(formule, 
+      val changes_dependance = {
+        val dependances = this.sheet_evalued.getDependance(c)
+        dependances.map(formule => update_case(formule, 
               sheet_evalued.update_formule(formule, value))
           )
-      changes_dependance.flatten   
+      }
+      val tmp = changes_dependance.flatten
+      Change(c,value):: tmp
     }
     else{Nil}  
   }

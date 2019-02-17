@@ -12,6 +12,7 @@ with Interpreter_expression {
   def getValueData(c : Case): Option[Value] = {
     c match {
       case Case(0,1) => Some(VInt(1))
+      case Case(1,3) => Some(VInt(2))
     }
   }
   
