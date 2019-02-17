@@ -1,4 +1,5 @@
 package test
+
 import org.junit.Assert._;
 import donnees._;
 
@@ -19,6 +20,8 @@ class Test_gestionnaire_dependance extends TestCase {
   def test_dependance_correct() = {
     val dep = new GestionnaireDependance(f)
     dep.addDependanceToList()
-    assertNotNull(f.listFormule)
+
+    val size = f.listFormule.size
+    assertFalse("listFormule size: "+size ,size == 0)
   }
 }
