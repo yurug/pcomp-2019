@@ -95,7 +95,7 @@ On peut définir des tuples de valeurs ayant des types distincts.
 \end{frame}
 
 \begin{frame}[fragile]
-Tableaux
+  \frametitle{Types composés}
   \begin{lstlisting}[language=rust]
 {
     let a: [i32; 5] = [1, 2, 3, 4, 5];
@@ -184,7 +184,7 @@ La boucle \texttt{ loop } inconditionnelle
   \end{lstlisting}
 \end{frame}
 \begin{frame}[fragile]
-  La boucle \texttt{while} et la boucle \texttt{for} classiques
+  \frametitle{Les boucles}
   \begin{lstlisting}[language=rust]
 let a = [10, 20, 30, 40, 50];
 
@@ -220,16 +220,11 @@ let r = Rectangle {
 \end{frame}
 
 \begin{frame}[fragile]
-On définit des méthodes pour une structure dans un bloc \texttt{impl} associé au même nom.
-Chaque méthode a pour premier paramêtre le mot-clé \texttt{self}, ce qui permet d'utiliser les champs de la structure depuis laquelle elle est invoquée.
+  \frametitle{Définition de méthodes}
 \begin{lstlisting}[language=rust, basicstyle=\tiny{}]
 impl Rectangle {
     fn area(&self) -> u32 {
         self.width * self.height
-    }
-    
-    fn can_hold(&self, other: &Rectangle) -> bool {
-        self.width > other.width && self.height > other.height
     }
 }
 
@@ -242,6 +237,7 @@ fn main() {
     );
 }
 \end{lstlisting}
+Chaque méthode a pour premier paramêtre le mot-clé \texttt{self}, ce qui permet d'utiliser les champs de la structure depuis laquelle elle est invoquée.
 \end{frame}
 
 \begin{frame}[fragile]
@@ -261,7 +257,7 @@ let sq = Rectangle::square(3);
 \subsection{Les types énumérés}
 
 \begin{frame}[fragile]
-  \frametitle{Définition}
+  \frametitle{Définition et instanciation}
   \begin{lstlisting}[language=rust]
 enum Message {
     Quit,
@@ -269,12 +265,7 @@ enum Message {
     Write(String),
     ChangeColor(u8, u8, u8),
 }
-  \end{lstlisting}
-\end{frame}
 
-\begin{frame}[fragile]
-  \frametitle{Instanciation}
-  \begin{lstlisting}[language=rust]
 let message = Message::ChangeColor(0,255,255);
   \end{lstlisting}
 \end{frame}
@@ -298,6 +289,7 @@ enum Coin {
     Dime,
     Quarter,
 }
+
 fn value_in_cents(coin: Coin) -> u32 {
     match coin {
         Coin::Penny => 1,
@@ -370,13 +362,13 @@ enum Result<T, E> {
     Ok(T),
     Err(E),
 }
+
 fn main() {
     let f = File::open("hello.txt");
     let f = match f {
         Ok(file) => file,
         Err(error) => {
-            panic!("There was a problem
-            opening the file: {:?}", error)
+            panic!("{:?}", error)
         },
     };
 }
@@ -384,11 +376,12 @@ fn main() {
 \end{frame}
 
 \begin{frame}[fragile]
-  Raccourcis
+  \frametitle{Raccourcis}
   \begin{lstlisting}[language=rust]
 fn main() {
     let f = File::open("hello.txt").unwrap();
 }
+
 fn main() {
     let f = File::open("hello.txt")
         .expect("Failed to open hello.txt");
@@ -398,11 +391,7 @@ fn main() {
 
 \begin{frame}[fragile]
   \frametitle{Propagation des erreurs}
-  \begin{lstlisting}[language=rust, basicstyle=\tiny{}]
-use std::io;
-use std::io::Read;
-use std::fs::File;
-
+  \begin{lstlisting}[language=rust, basicstyle=\small{}]
 fn read_username_from_file() -> Result<String, io::Error> {
     let f = File::open("hello.txt");
 
