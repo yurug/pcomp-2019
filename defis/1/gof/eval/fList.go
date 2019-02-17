@@ -69,7 +69,7 @@ func (fl *FormulasMapping) createMaps(validList *list.List, invalidList *list.Li
 	}
 }
 
-// Compare between two coordiantes (first X then Y)
+// Compare between two coordiantes (first X then Y) return 1 if c1 is GT, -1 if c1 is LT
 func compareCoord(c1 Coordinate, c2 Coordinate) int {
 	if c1.X > c2.X {
 		return 1
