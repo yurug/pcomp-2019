@@ -296,8 +296,6 @@ pub fn channel<T>() -> (Sender<T>, Receiver<T>)
   Ce \texttt{Sender} et ce \texttt{Receiver}, partagés, permettent à plusieurs \textit{threads} de communiquer entre eux.
   \begin{lstlisting}[language=rust]
 pub fn send(&self, t:T) -> Result<(), SendError<T>>
-  \end{lstlisting}
-  \begin{lstlisting}[language=rust]
 pub fn recv(&self) -> Result<T, RecvError>
   \end{lstlisting}
 
