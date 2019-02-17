@@ -18,7 +18,6 @@ object DataInterpreteur {
         }
       i+=1;j=0
     }
-    println(count)
     Number(count)
   }
   
@@ -37,16 +36,7 @@ object DataInterpreteur {
    // getEvalRegionV0(c,c,v,database)
   /*
   
-  def evalCellules() :Unit= {
-		var i=0;var j=0
-    for(l <- fs.getFeuille){
-      for(c <- l){
-         fs.writeCell(Case(i,j), evalData(c.getVal)) 
-         j+=1
-      }
-      i+=1;j=0
-    }
-  }
+  
 	
 	 def writeView(view:String):Unit ={
      val writer = new PrintWriter(new File(view))

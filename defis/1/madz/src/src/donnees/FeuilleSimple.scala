@@ -9,7 +9,7 @@ class FeuilleSimple(data0:String,view0:String) extends FeuilleCalque {
   
   var listFormule = scala.collection.mutable.Map[Int,(CaseData,List[Int])]()
   var listCoord:Map[Int,(Case)] = Map()
-  var listP =List[Int]()
+  var listValue=scala.collection.mutable.Map[Int,Value]()
   
   def get_FormuleId(c: Case) = {
     val res = listCoord.find( 
@@ -68,6 +68,10 @@ class FeuilleSimple(data0:String,view0:String) extends FeuilleCalque {
     val Some((data,l)) = listFormule.get(id)
     data
   }
+  def getCase(id:Int):Case={
+    val Some(c) = listCoord.get(id)
+    c
+  }
   def setCaseData(id:Int,data:CaseData):Unit={
     val Some((data0,l0)) = listFormule.get(id)
     listFormule(id) = (data,l0)
@@ -78,7 +82,7 @@ class FeuilleSimple(data0:String,view0:String) extends FeuilleCalque {
     listFormule(id) = (data,l)
   }
   
-  def fileRegion(id:Int):Unit ={
+  def regionToFile(id:Int):Unit ={
      var Formule(c1,c2,v)=getCaseData(id)
      val writer = new PrintWriter(new File(id+""))
      var i=0;var j=0; var ll=List[String]()
@@ -108,14 +112,26 @@ class FeuilleSimple(data0:String,view0:String) extends FeuilleCalque {
       }
     }
   }
-  def writeDep():String={
-    var l= List[String]()
-    for((id,c) <- listCoord){
-      l =DataParser.formuleToString(getCaseData(id))::l
-    }
-    //normalement il faut cherche la cas X Y dans le view0 mais la juste pour le test
-    l=l.reverse
-    l.mkString(";") 
+  def isFormule(c:String):Boolean = {
+    println(c+" "+c.toInt)
+    return listCoord.contains(c.toInt)
   }
   
+  def writeRes():Unit={
+    val tmp = new File("src/tmp.txt")
+    val w = new PrintWriter(tmp)
+    var i=0
+    for(l <- io.Source.fromFile(view0).getLines){
+      for(c <- l.split(";")){
+        if(isFormule(c)) {
+          w.write(DataParser.formuleToString(getCaseData(i))+";")
+          i+=1
+        }
+        else w.write(c+";")
+      }
+      w.print("\n")
+    }
+    tmp.renameTo(new File(view0))
+    w.close()
+  }
 }

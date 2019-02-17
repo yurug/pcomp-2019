@@ -7,12 +7,12 @@ import scala.collection.JavaConverters._
 object Main {
   
   def main(args: Array[String]): Unit= {
-    val data_file = args(0)
+    /*val data_file = args(0)
     val request_file = args(1)
     val viewOut_file = args(2)
     val changeTODO_file = args(3)
-    
-    val scheduler = load_scheduler(request_file)
+    */
+   /* val scheduler = load_scheduler(request_file)
     scheduler.start_exec()
     write_change(scheduler,changeTODO_file)
   }
@@ -36,31 +36,20 @@ object Main {
     val content = tmp.foldLeft("")((acc,txt) => acc + txt + "\n")    
     output.write(content)
     output.close()
-  }
-  /*{
-    if (args.length <4) {
-        println("4 agrs minimum")
-    }
+  }*/
+  
     
-    val f= new FeuilleSimple("src/big.csv","view0.csv")
+    val f= new FeuilleSimple("src/data.csv","src/view0.csv")
     f.copyF()
     val dep = new GestionnaireDependance(f)
     dep.addDependanceToList()
-   
+    dep.BienFormees()
     dep.MalFormees()
     println(f.listFormule)
+    f.writeRes()
+    
    
-    println(f.writeRes())
-    
-  }   
-}
-    val f= new FeuilleSimple(args(0))
-    f.loadCalc()
-    val I = new DataInterpreteur(f)
-    I.evalCellules()
-    I.writeView(args(2))
-    */
 
-
-    
   }
+    
+ }
