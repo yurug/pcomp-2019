@@ -13,15 +13,32 @@ import (
 type FileDescriptor struct {
 	file            *os.File
 	coord           map[int]int
+	lineSize        map[int]int
 	formulasMapping *eval.FormulasMapping
 	lineNumber      int
+	iterationLine   int
 }
 
 func NewFileDescriptor() (*FileDescriptor, error) {
 	coord := make(map[int]int)
-	lineNumber := 0
-	fd := FileDescriptor{nil, coord, nil, lineNumber}
+	lineSize := make(map[int]int)
+	fd := FileDescriptor{nil, coord, lineSize, nil, 0, 0}
 	return &fd, nil
+}
+
+func (fd *FileDescriptor) NextLine() (int, []byte) {
+	_, err := fd.file.Seek(int64(fd.coord[fd.iterationLine]), 0)
+	b := make([]byte, fd.lineSize[fd.iterationLine]*2)
+	_, err = fd.file.Read(b)
+	if err != nil {
+		return 0, nil
+	}
+	fd.lineNumber++
+	return fd.lineNumber - 1, b
+}
+
+func (fd *FileDescriptor) GetLineSize(x int) int {
+	return fd.lineSize[x]
 }
 
 func (fd *FileDescriptor) GetFormulasMapping() *eval.FormulasMapping {
@@ -51,7 +68,7 @@ func (fd *FileDescriptor) CreateFileCursor(path string, desc string) error {
 		values := strings.Split(string(line), ":")
 		y, _ := strconv.Atoi(values[0])
 		xSize, _ := strconv.Atoi(values[1])
-
+		fd.lineSize[y] = xSize
 		fd.coord[y] = previousX
 		previousX += xSize
 		fd.lineNumber++

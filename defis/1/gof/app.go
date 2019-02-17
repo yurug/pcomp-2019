@@ -32,6 +32,8 @@ func main() {
 
 	<-doneParse
 
+	
+
 	runtime.GC()
 	PrintMemUsage()
 

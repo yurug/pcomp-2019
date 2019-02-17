@@ -19,6 +19,14 @@ func CreateList(c chan Cell, r chan *FormulasMapping) {
 	r <- &fl
 }
 
+func (fl *FormulasMapping) GetFormulaIterationList() *list.List {
+	l := list.New()
+	for k := range fl.formula {
+		l.PushFront(k)
+	}
+	return l
+}
+
 func (fl *FormulasMapping) GetFormula() map[int]*Formula {
 	return fl.formula
 }
