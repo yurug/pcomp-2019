@@ -4,52 +4,62 @@ class GestionnaireDependance(fs:FeuilleSimple) {
   addDependanceToList()
   
   def addDependanceToList():Unit={
-    for ((id0,(f,l)) <- fs.listFormule)
+    for ((id0,(f,l)) <- fs.listFormule){
+      var ll=List[Int]()
       for((id1,Case(x,y))<- fs.listCoord)
-        if(id0!=id1)
+        if(id0!=id1){
           f match {
             case Formule(Case(r1,c1),Case(r2,c2),v) =>
               if(r1<=x && x<=r2 && c1<=y && y<=c2){
-                fs.listFormule + (id0 ->(f,id1::l))
+                ll=id1::ll
               }
             case _ =>Nil
           }
+      }
+      fs.addDep(id0,ll)
+    }
   }
   
   def MalFormeesNaive():Unit={ 
     for ((k,(f,l)) <- fs.listFormule){
       if(l.contains(P())){
         val Some((data,l))=fs.listFormule.get(k)
-        fs.listFormule + (k -> (P(),l))
+        fs.setCaseData(k,P())
       }
     }
   }
   
-  def remove(num: Int, list: List[Int]) = list diff List(num)
-  
-  def SuppDependance(id:Int):Unit={
-    for ((k,(f,l)) <- fs.listFormule){
-      if(l.contains(id)) 
-        remove(id,l)
+  def remove(num:Int, l:List[Int],id:Int):Unit={
+    var ll=List[Int]()
+    for(i <- l){
+      if(i!=num)
+        ll=i::ll
     }
+    fs.addDep(id,ll)
   }
   
-  def BienFormees():Int={
+  def SuppDependance(id:Int):Unit={
+    for ((k,(f,l)) <- fs.listFormule)
+      if(l.contains(id)) 
+        remove(id,l,k)
+  }
+  
+  def BienFormees():Unit={
     var i=0
      for ((id,(Formule(c1,c2,v),l)) <- fs.listFormule)
        if (l==Nil){
-         fs.listFormule + (id -> (DataInterpreteur.getEvalRegionV0(c1,c2,v,fs.getView),l))
+         fs.setCaseData(id,DataInterpreteur.getEvalRegionV0(c1,c2,v,fs.getView))
          SuppDependance(id)
          i+=1
        }
-     i
+     if(i!=0) BienFormees()
   }
   
   def MalFormees():Unit={
-    while(BienFormees()==0)
       for ((k,(f,l)) <- fs.listFormule)
         f match{
-          case Formule(c1,c2,v) => fs.listFormule + (k -> (P(),l))
+          case Formule(c1,c2,v) => 
+            fs.setCaseData(k,P())
           case _ => Nil
         }
   }
@@ -71,7 +81,8 @@ class GestionnaireDependance(fs:FeuilleSimple) {
   def setDependance(id:Int, idl:Int): Unit = {
       val l= getDependance(id)
       val data =fs.getCaseData(id)
-      fs.listFormule + (id ->(data,idl::l))
+      fs.listFormule(id) = (data,idl::l) 
+
   }
   def init = addDependanceToList()
 }
