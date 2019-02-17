@@ -32,17 +32,8 @@ func main() {
 
 	<-doneParse
 
-	
-
 	runtime.GC()
 	PrintMemUsage()
-
-	fmt.Println("Formula size:")
-
-	fmt.Println(len(fileDescriptor.GetFormulasMapping().GetFormula()))
-
-	fmt.Println("now it's done")
-
 	/*
 		g, _ := fileDescriptor.GetValue(1, 1)
 		fmt.Printf("Value Read before Write: %v\n", g)

@@ -42,9 +42,16 @@ func (c *Controller) ReadAll() ([]byte, error) {
 
 //NextLine returns the next line read in the associated file, or an error if EOF
 func (c *Controller) NextLine() ([]byte, error) {
-	token, _, err := c.reader.ReadLine()
-	if err != nil {
-		return nil, fmt.Errorf("Error in GetLine() of %s: %v", c.file.Name(), err)
+	token := make([]byte, 0)
+	for {
+		t, isPrefix, err := c.reader.ReadLine()
+		if err != nil {
+			return nil, fmt.Errorf("Error in GetLine() of %s: %v", c.file.Name(), err)
+		}
+		token = append(token, t...)
+		if !isPrefix {
+			break
+		}
 	}
 	return token, nil
 }
