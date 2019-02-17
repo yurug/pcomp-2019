@@ -84,55 +84,6 @@ func ParseSheet(sheet string, fileD *db.FileDescriptor, chbreak chan int) error 
 	return nil
 }
 
-func FormulasList(c chan eval.Formula, mapping map[int]eval.Formula, chbreak chan int) {
-	i := 0
-	for element := range c {
-		mapping[i] = element
-		i++
-	}
-	chbreak <- 1
-}
-
-func dependencies(formulas *db.Controller) error {
-	/*	var err error
-		dep, _ := db.NewController(DEPENDENCIES_FILE, CREATE_FILE)
-		for {
-			line, err := formulas.NextLine()
-			if err != nil {
-				break
-			}
-			lineStr := string(line[:])
-			tmpArr := strings.Split(lineStr, ";")
-			pos := strings.Split(tmpArr[2], ",")
-			x, y := pos[0], pos[1]
-		}
-		return err*/
-	return nil
-}
-
-func extractFormulas(formulas *db.Controller) ([]*eval.Formula, error) {
-	l := make([]*eval.Formula, 0)
-	fml, err := formulas.ReadAll()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, line := range strings.Split(string(fml), "\n") {
-		arr := strings.Split(line, ";")
-		posArr, err := atoiSlice(arr[:1])
-		if err != nil {
-			return nil, err
-		}
-		arr2 := strings.Split(arr[2], ",")
-		paramArr, err := atoiSlice(arr2)
-		if err != nil {
-			return nil, err
-		}
-		l = append(l, eval.NewFormula(paramArr[0], paramArr[1], paramArr[2], paramArr[3], paramArr[4], posArr[0], posArr[1]))
-	}
-	return l, nil
-}
-
 func preprocess(line string, rowID int, c chan eval.Cell) ([]byte, string, int) {
 	var formula eval.Cell
 	cells := strings.Split(string(line[:]), ";")
@@ -175,30 +126,6 @@ func preprocess(line string, rowID int, c chan eval.Cell) ([]byte, string, int) 
 		}
 	}
 	return number, formulas, len(number)
-}
-
-func constructLine(cells []string, rowID int) []eval.Cell {
-	formatedCells := make([]eval.Cell, len(cells))
-
-	for columnID, cell := range cells {
-		switch checkType(cell) {
-		case KIND_NUMBER:
-			v, _ := strconv.Atoi(cell)
-			number, _ := eval.NewNumber(rowID, columnID, v)
-			formatedCells[columnID] = number
-		case KIND_FORMULA:
-			values := regexp.MustCompile(`\d+`).FindAllString(cell, -1)
-			if len(values) != SIZE_FORMULA {
-				formatedCells[columnID] = eval.NewUnknown(rowID, columnID)
-				continue
-			}
-			valuesInt, _ := atoiSlice(values)
-			formatedCells[columnID] = eval.NewFormula(valuesInt[0], valuesInt[1], valuesInt[2], valuesInt[3], valuesInt[4], rowID, columnID)
-		case KIND_UNKNOWN:
-			formatedCells[columnID] = eval.NewUnknown(rowID, columnID)
-		}
-	}
-	return formatedCells
 }
 
 func atoiSlice(arr []string) ([]int, error) {
