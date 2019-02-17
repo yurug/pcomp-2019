@@ -3,6 +3,9 @@ package donnees
 class Sheet_evalued(data0:String,view0:String) 
 extends FeuilleSimple(data0,view0) 
 with Interpreter_expression {
+  val gestionnaireDependance = 
+    new GestionnaireDependance( this)
+  
   /*
    * mock
    */
@@ -29,5 +32,6 @@ with Interpreter_expression {
     
       
   }
+  def getDependance(formule:Case):List[Case] = gestionnaireDependance.getDependance(formule)
     
 }

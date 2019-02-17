@@ -11,5 +11,5 @@ trait FeuilleCalque {
   /*
    * get list case that its formules depend case c
    * */
-  def getDependance(c:Case):List[Case]
+  //def getDependance(c:Case):List[Case]
 }

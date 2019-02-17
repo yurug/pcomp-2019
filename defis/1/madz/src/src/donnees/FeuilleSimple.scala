@@ -65,6 +65,7 @@ class FeuilleSimple(data0:String,view0:String) extends FeuilleCalque {
     val Some((data,l)) = listFormule.get(id)
     data
   }
+  /*
   def getDependance(c:Case):List[Case] = {
     get_FormuleId(c) match {
       case None => Nil //case c is a int
@@ -76,6 +77,8 @@ class FeuilleSimple(data0:String,view0:String) extends FeuilleCalque {
       }
     }
   }
+  * 
+  */
   def writeDep():String={
     var l= List[String]()
     for((id,c) <- listCoord){
@@ -85,5 +88,5 @@ class FeuilleSimple(data0:String,view0:String) extends FeuilleCalque {
     l=l.reverse
     l.mkString(";") 
   }
-  
+  def init = copyF()
 }

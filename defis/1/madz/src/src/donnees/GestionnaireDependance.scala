@@ -1,6 +1,7 @@
 package donnees
 
 class GestionnaireDependance(fs:FeuilleSimple) {
+  addDependanceToList()
   
   def addDependanceToList():Unit={
     for ((id0,(f,l)) <- fs.listFormule)
@@ -72,4 +73,5 @@ class GestionnaireDependance(fs:FeuilleSimple) {
       val data =fs.getCaseData(id)
       fs.listFormule + (id ->(data,idl::l))
   }
+  def init = addDependanceToList()
 }
