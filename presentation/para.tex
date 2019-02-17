@@ -284,7 +284,7 @@ En effet, on se représente l'interdiction des écritures concurrentes de maniè
 \item  Si on ne peut plus modifier une donnée qu'on a envoyée.
 \end{itemize}
 
-Avec un modèle de ce type, notre variable fonctionne comme une feuille de papier : seul celui qui l'a dans les mains peut agir dessus... Et à nouveau, on devine que le borrow-checker va permettre de rendre ce mécanisme très robuste. C'est de cette manière que fonctionnent les \textit{channels}.
+Avec un modèle de ce type, notre variable fonctionne comme une feuille de papier : seul celui qui l'a dans les mains peut agir dessus\dots C'est de cette manière que fonctionnent les \textit{channels}.
 \end{frame}
 
 \begin{frame}[fragile]
@@ -297,11 +297,9 @@ pub fn channel<T>() -> (Sender<T>, Receiver<T>)
   \begin{lstlisting}[language=rust]
 pub fn send(&self, t:T) -> Result<(), SendError<T>>
   \end{lstlisting}
-  Et on reçoit une variable en utilisant la méthode suivante du \texttt{Receiver}, qui lui en reprend la propriété :
   \begin{lstlisting}[language=rust]
 pub fn recv(&self) -> Result<T, RecvError>
   \end{lstlisting}
-La réception est évidemment bloquante.
 
 Ainsi, la question de la protection de la mémoire partagée ne se pose plus (ou très différemment) : en effet, une telle variable n'existe tout simplement pas du point de vue d'un \textit{thread} tant qu'elle ne lui a pas été transférée via un \textit{channel}.
 \end{frame}
