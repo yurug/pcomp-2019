@@ -17,14 +17,16 @@ type FormulasMapping struct {
 //CreateList takes as input 2 channelsm create a FormulasMap struct
 //fill it with the cells received in c, then send it to r
 func CreateList(c chan Cell, r chan *FormulasMapping) {
-	formulaMap := make(map[int]*Formula)
-	unknownMap := make(map[string]*Unknown)
-	fl := FormulasMapping{formulaMap, unknownMap}
+	fl := newFormulasMapping()
 	fl.fillList(c)
-	r <- &fl
+	r <- fl
 }
 
-func (fl *FormulasMapping) GetFormulaIterationList() *list.List {
+func newFormulasMapping() *FormulasMapping {
+	return &FormulasMapping{formula: make(map[int]*Formula), unknown: make(map[string]*Unknown)}
+}
+
+func (fl *FormulasMapping) ListID() *list.List {
 	l := list.New()
 	for k := range fl.formula {
 		l.PushFront(k)
@@ -32,15 +34,18 @@ func (fl *FormulasMapping) GetFormulaIterationList() *list.List {
 	return l
 }
 
-func (fl *FormulasMapping) GetFormula() map[int]*Formula {
-	return fl.formula
+//Formula returns the formula with id as key
+func (fl *FormulasMapping) Formula(id int) *Formula {
+	return fl.formula[id]
 }
 
-func (fl *FormulasMapping) GetUnknown() map[string]*Unknown {
-	return fl.unknown
+//Unknown returns the unknown with id as key
+func (fl *FormulasMapping) Unknown(id string) *Unknown {
+	return fl.unknown[id]
 }
 
-//	Initialize the fList with cells given through channel c, send a pointer to self to caller through channel r
+//Initialize the fList with cells given through channel c,
+//send a pointer to self to caller through channel r
 func (fl *FormulasMapping) fillList(c chan Cell) {
 	var formulaList = list.New()
 	var unknownList = list.New()
