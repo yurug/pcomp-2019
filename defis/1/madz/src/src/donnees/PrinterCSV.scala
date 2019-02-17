@@ -10,9 +10,8 @@ object PrinterCSV {
   }
     
     def toString (op : Change) : String= { op match {
-      case Change(lt,br,v) => 
-        (PrinterCSV.toString(lt ) 
-        + " "  + PrinterCSV.toString(br) 
+      case Change(c,v) => 
+        (PrinterCSV.toString(c ) 
         + " " + toString_value(v)
          )
         

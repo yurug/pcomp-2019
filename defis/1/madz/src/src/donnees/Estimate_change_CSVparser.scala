@@ -1,6 +1,6 @@
 package donnees
 
-trait Request_parser {
+trait Estimate_change_CSVparser {
   def parser (data: Array[String]) = data match{
 			  case null => null
 			  case _ => if (data.length == 3){
