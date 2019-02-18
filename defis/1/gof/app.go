@@ -5,6 +5,8 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/yurug/pcomp-2019/defis/1/gof/eval"
+
 	parserutil "github.com/yurug/pcomp-2019/defis/1/gof/parseutil"
 
 	"github.com/yurug/pcomp-2019/defis/1/gof/db"
@@ -17,20 +19,17 @@ func main() {
 		return
 	}
 	csv := args[0]
-	doneParse := make(chan int)
 
-	var fileDescriptor *db.FileDescriptor
-	fileDescriptor, err := db.NewFileDescriptor()
+	doneParse := make(chan int)
+	defer close(doneParse)
+	fdChan := make(chan db.FileDescriptor)
+	go parserutil.ParseSheet(csv, fdChan, doneParse)
+	<-doneParse
+	evaluator, err := eval.NewEvaluator()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-
-	defer close(doneParse)
-
-	go parserutil.ParseSheet(csv, fileDescriptor, doneParse)
-
-	<-doneParse
 
 	runtime.GC()
 	PrintMemUsage()
