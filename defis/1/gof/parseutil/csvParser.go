@@ -15,11 +15,16 @@ import (
 //ParseSheet takes a file's path and a channel. It extracts all the Cells from the file and send them
 //Into the channel to another go-routine. It returns error if the controller fails to init
 //Or if NextLine() read all the file
-func ParseSheet(sheet string, fileD *db.FileDescriptor, chbreak chan int) error {
+func ParseSheet(sheet string, ch chan *db.FileDescriptor, chbreak chan int) error {
 	fmt.Println("ParseSheet..")
 	controller, err := db.NewController(sheet, consts.OPEN_FILE)
 	if err != nil {
 		return fmt.Errorf("Error while calling new controller for ParseSheet: %v", err)
+	}
+	fd, err := db.NewFileDescriptor()
+	if err != nil {
+		fmt.Println(err)
+		return err
 	}
 
 	rowID := 0
@@ -67,8 +72,9 @@ func ParseSheet(sheet string, fileD *db.FileDescriptor, chbreak chan int) error 
 	}
 	close(formulasChan)
 	k := <-resultChan
-	fileD.DefineFormulasMapping(k)
-	fileD.CreateFileCursor(consts.BINARY_FILE, consts.DETAILS)
+	fd.DefineFormulasMapping(k)
+	fd.CreateFileCursor(consts.BINARY_FILE, consts.DETAILS)
+	ch <- fd
 	chbreak <- 1
 	return nil
 }
