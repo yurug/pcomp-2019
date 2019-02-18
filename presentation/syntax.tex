@@ -140,7 +140,8 @@ error[E0308]: mismatched types
 7 |   fn plus_one(x: i32) -> i32 {
   |  ____________________________^
 8 | |     x + 1;
-  | |          - help: consider removing this semicolon
+  | |          - help: consider removing this
+                   semicolon
 9 | | }
   | |_^ expected i32, found ()
   |
@@ -185,7 +186,7 @@ La boucle \texttt{ loop } inconditionnelle
 \end{frame}
 \begin{frame}[fragile]
   \frametitle{Les boucles}
-  \begin{lstlisting}[language=rust]
+  \begin{lstlisting}[language=rust, basicstyle=\small{}]
 let a = [10, 20, 30, 40, 50];
 
 let mut index = 0;
@@ -193,7 +194,6 @@ while index < 5 {
     println!("the value is: {}", a[index]);
     index = index + 1;
 }
-
 for element in a.iter() {
     println!("the value is: {}", element);
 }
@@ -289,7 +289,6 @@ enum Coin {
     Dime,
     Quarter,
 }
-
 fn value_in_cents(coin: Coin) -> u32 {
     match coin {
         Coin::Penny => 1,
@@ -391,7 +390,7 @@ fn main() {
 
 \begin{frame}[fragile]
   \frametitle{Propagation des erreurs}
-  \begin{lstlisting}[language=rust, basicstyle=\small{}]
+  \begin{lstlisting}[language=rust, basicstyle=\tiny{}]
 fn read_username_from_file() -> Result<String, io::Error> {
     let f = File::open("hello.txt");
 
