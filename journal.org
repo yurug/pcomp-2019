@@ -96,3 +96,8 @@ Sous Emacs, utiliser [TAB] pour ouvrir ou fermer les différentes sections.
     - Analyse de l'article de Knuth
     - Cours : programmation procédurale
     - Cours : programmation fonctionnellle
+** <2019-02-11>
+*** TODO Discuter avec le groupe fait un cours la prochaine fois
+*** Cours/débat "La programmation fonctionnelle"
+*** Expérience "Expliquer son code"
+*** Défi 3
