@@ -7,14 +7,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yurug/pcomp-2019/defis/1/gof/eval"
+	"github.com/yurug/pcomp-2019/defis/1/gof/cell"
 )
 
 type FileDescriptor struct {
 	file            *os.File
 	coord           map[int]int
 	lineSize        map[int]int
-	formulasMapping *eval.FormulasMapping
+	formulasMapping *cell.FormulasMapping
 	lineNumber      int
 	iterationLine   int
 }
@@ -26,22 +26,23 @@ func NewFileDescriptor() (*FileDescriptor, error) {
 	return &fd, nil
 }
 
-func (fd *FileDescriptor) NextLine() (int, []byte) {
+//NextLine returns the next line read in the associated file and the number of bytes read
+func (fd *FileDescriptor) NextLine() ([]byte, int) {
 	_, err := fd.file.Seek(int64(fd.coord[fd.iterationLine]), 0)
 	b := make([]byte, fd.lineSize[fd.iterationLine]*2)
 	_, err = fd.file.Read(b)
 	if err != nil {
-		return 0, nil
+		return nil, 0
 	}
 	fd.lineNumber++
-	return fd.lineNumber - 1, b
+	return b, fd.lineNumber - 1
 }
 
 func (fd *FileDescriptor) LineSize(x int) int {
 	return fd.lineSize[x]
 }
 
-func (fd *FileDescriptor) FormulasMapping() *eval.FormulasMapping {
+func (fd *FileDescriptor) FormulasMapping() *cell.FormulasMapping {
 	return fd.formulasMapping
 }
 
@@ -113,6 +114,6 @@ func (fd *FileDescriptor) WriteValue(x int, y int, value int, flag int) (int, er
 	return n, nil
 }
 
-func (fd *FileDescriptor) DefineFormulasMapping(m *eval.FormulasMapping) {
+func (fd *FileDescriptor) DefineFormulasMapping(m *cell.FormulasMapping) {
 	fd.formulasMapping = m
 }
