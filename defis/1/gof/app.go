@@ -34,6 +34,11 @@ func main() {
 
 	runtime.GC()
 	PrintMemUsage()
+
+	db.CreateCellDependencies(fileDescriptor)
+
+	runtime.GC()
+	PrintMemUsage()
 	/*
 		g, _ := fileDescriptor.GetValue(1, 1)
 		fmt.Printf("Value Read before Write: %v\n", g)

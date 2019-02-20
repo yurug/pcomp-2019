@@ -59,7 +59,7 @@ func ParseSheet(sheet string, fileD *db.FileDescriptor, chbreak chan int) error 
 			break
 		}
 
-		values, formulas, lineSize := preprocess(string(line), rowID, formulasChan)
+		values, _, lineSize := preprocess(string(line), rowID, formulasChan)
 		_, err = binaryFile.WriteBytes(values)
 		if err != nil {
 			return err
@@ -69,17 +69,16 @@ func ParseSheet(sheet string, fileD *db.FileDescriptor, chbreak chan int) error 
 		if err != nil {
 			return err
 		}
-
-		_, err = formulasFile.WriteLines(formulas)
-		if err != nil {
-			return err
-		}
 		rowID++
 	}
 	close(formulasChan)
 	k := <-resultChan
 	fileD.DefineFormulasMapping(k)
 	fileD.CreateFileCursor(BINARY_FILE, DETAILS)
+	formulasList := fileD.FormulasMapping().ListID()
+	for e := formulasList.Front(); e != nil; e = e.Next() {
+		formulasFile.WriteLines(fileD.FormulasMapping().Formula(e.Value.(int)).PrintCoordinate())
+	}
 	chbreak <- 1
 	return nil
 }

@@ -73,6 +73,10 @@ func NewFormula(r1 int, c1 int, r2 int, c2 int, v int, x int, y int) *Formula {
 	}
 }
 
+func (f *Formula) PrintCoordinate() string {
+	return strconv.Itoa(f.Start.X) + " " + strconv.Itoa(f.Start.Y)
+}
+
 func (f *Formula) Coordinate() Coordinate {
 	return f.position
 }
@@ -92,12 +96,30 @@ func (f *Formula) MarkVisit() {
 	f.visited = true
 }
 
+func (f *Formula) StartAfter(x int, y int) bool {
+	if x < f.Start.X && y < f.Start.Y {
+		return true
+	}
+	return false
+}
+
+func (f *Formula) Contain(x int, y int) bool {
+	if x >= f.Start.X && x <= f.End.X && y >= f.Start.Y && y <= f.End.Y {
+		return true
+	}
+	return false
+}
+
 func (f *Formula) nbCells() int {
 	return f.Area
 }
 
-func (f *Formula) decrementArea() {
+func (f *Formula) DecrementArea() int {
 	f.Area--
+	if f.Area < 0 {
+		return -1
+	}
+	return 0
 }
 
 type Unknown struct {

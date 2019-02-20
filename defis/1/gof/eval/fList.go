@@ -28,8 +28,8 @@ func newFormulasMapping() *FormulasMapping {
 
 func (fl *FormulasMapping) ListID() *list.List {
 	l := list.New()
-	for k := range fl.formula {
-		l.PushFront(k)
+	for i := 0; i < len(fl.formula); i++ {
+		l.PushFront(i)
 	}
 	return l
 }
