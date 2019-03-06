@@ -1,4 +1,4 @@
-package donnees
+package task_scheduler
 
 trait Scheduler [T <: Task] extends java.util.List[T]{
   def start_exec():Unit

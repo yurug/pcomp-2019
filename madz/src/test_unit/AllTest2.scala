@@ -3,6 +3,7 @@ package test_unit
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import _root_.task_scheduler._;
 
 @RunWith(classOf[Suite])
 @SuiteClasses(Array(classOf[Test_scheduler_execution2]))

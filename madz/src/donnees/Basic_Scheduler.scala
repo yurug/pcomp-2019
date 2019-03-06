@@ -1,5 +1,6 @@
 package donnees
 import scala.collection.JavaConverters._
+import _root_.task_scheduler._;
 
 class Basic_Scheduler[T <: Task] extends java.util.ArrayList[T] with Sequential_process[T]{
   private var task_done:List[T] = Nil

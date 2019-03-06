@@ -1,4 +1,5 @@
 package donnees
+import _root_.task_scheduler._;
 
 abstract class Request_change(c: Case, value : CaseData)  extends Task{
   protected var sheet: FeuilleCalque = null
