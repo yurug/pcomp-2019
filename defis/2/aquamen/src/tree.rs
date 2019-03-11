@@ -37,8 +37,6 @@ static NODE_MAX_SIZE: Index = 10;
 
 enum Content {
     Leaf {
-        // Generated when dumping data
-        filename: String,
         // Cell waiting to be dumped on disk
         // Used when filling the node (before dumping variables)
         // or before computation (when we need to load vars)
@@ -48,8 +46,6 @@ enum Content {
     Node {
         left: Rc<Tree>,
         right: Rc<Tree>,
-        // FIXME put id/filename in Tree
-        id: String,
     }
 }
 
@@ -58,11 +54,12 @@ pub struct Tree {
     pub begin: Point,
     pub end: Point,
     content: Content,
+    id: String,
 }
 
 
 fn split_data(data: &Vec<Cell>, b: Point, e: Point) -> Vec<Cell> {
-    trace!("Getting data between {:?} and {:?}", b, e);
+    trace!("Getting data between {:?} and {:?}:\n{:?}", b, e, data);
     data.iter()
         .filter( |c| contained_in(c.loc, b, e) )
         .map(|c| c.clone())
@@ -76,6 +73,7 @@ fn split_content(filename: String, begin: Point, end: Point, data: &Vec<Cell>, m
         left: Rc::new(Tree{
             begin: begin,
             end: mid,
+            id: format!("{}/left", filename),
             content: Content::Leaf {
                 dumped: false,
                 filename: format!("{}/left", filename),
@@ -85,13 +83,13 @@ fn split_content(filename: String, begin: Point, end: Point, data: &Vec<Cell>, m
         right: Rc::new(Tree{
             begin: mid,
             end: end,
+            id: format!("{}/right", filename),
             content: Content::Leaf {
                 dumped: false,
                 filename: format!("{}/right", filename),
                 data: split_data(&data, mid, end)
             }
         }),
-        id: filename,
     }
 }
 
@@ -148,8 +146,8 @@ impl Tree {
         Tree {
             begin: Point{x:0, y:0},
             end: Point{x:0, y:0},
+            id: String::from("data/root"),
             content: Content::Leaf {
-                filename: String::from("data/root"),
                 data: Vec::new(),
                 dumped: false
             }
@@ -164,8 +162,8 @@ impl Tree {
             // or that height > width.
             // Make splits more balanced.
             end: Point{x:size, y:size},
+            id: String::from("data/root"),
             content: Content::Leaf {
-                filename: String::from("data/root"),
                 data: Vec::new(),
                 dumped: false
             }
@@ -175,26 +173,29 @@ impl Tree {
 
 
     pub fn add_cell(&mut self, cell: Cell) {
+        bench::bench::get_sender().send(1);
         let mut need_split = false;
+        let id = self.id.clone();
         let c = match self.content {
-            Content::Leaf{ref filename, ref mut data, ref mut dumped} => {
-                trace!("Adding {:?} to the leaf {}", cell, filename);
+            Content::Leaf{ref mut data, ref mut dumped} => {
+                trace!("Adding {:?} to the leaf {}", cell, id);
 
                 resize(&mut self.begin, &mut self.end, cell.loc);
 
                 if *dumped {
-                    trace!("Reading data from {}", filename);
-                    *data = read_data(self.begin, self.end, filename);
+                    trace!("Reading data from {}", id);
+                    *data = read_data(self.begin, self.end, &id);
                 }
                 data.push(cell);
 
+                trace!("Data in {}: {:?}", id, data);
                 if data.len() > (NODE_MAX_SIZE as usize) {
-                    Some(split_leaf(filename.to_string(), self.begin, self.end, data))
+                    Some(split_leaf(id.to_string(), self.begin, self.end, data))
                 } else {
                     None
                 }
             },
-            Content::Node{ ref mut left, ref mut right, id:_ } => {
+            Content::Node{ref mut left, ref mut right} => {
                 let end = (*left).end;
                 let r = Rc::get_mut(right).unwrap();
                 let l = Rc::get_mut(left).unwrap();
@@ -222,18 +223,21 @@ impl Tree {
 
     fn dump_data(&mut self) {
         trace!("Dumping data");
+        let id = &mut self.id;
         match self.content {
-            Content::Leaf{ ref mut filename, ref mut data, ref mut dumped } => {
+            Content::Leaf{ref mut data, ref mut dumped } => {
                 *dumped = true;
-                trace!("Dumping in {}.cells", filename);
-                create_dir_all(Path::new(filename)
+                trace!("Dumping in {}.cells", id);
+                create_dir_all(Path::new(id)
                                .parent()
                                .unwrap()
                                .to_str()
                                .unwrap()).unwrap();
-                let mut file = File::create(format!("{}.cells",filename)).unwrap(); // FIXME better error management
+                let mut file = File::create(format!("{}.cells",id)).unwrap(); // FIXME better error management
                 let mut res = Vec::new();
+                trace!("Writing data of node {} : {:?} ", id, data);
                 for c in data {
+                    bench::bench::get_sender().send(-1);
                     trace!("Dumping {:?}", c);
                     match c.content {
                         Val(i) => dump_val_to(i, &mut res),
@@ -241,9 +245,10 @@ impl Tree {
                         Wrong  => dump_wrong_to(&mut res),
                     }
                 }
+                trace!("Writing cells of node {} : {:?} ", id, res);
                 file.write_all(&res);
             },
-            Content::Node{ref mut left, ref mut right, ref id} => {
+            Content::Node{ref mut left, ref mut right} => {
                 trace!("Dumping node {}", id);
                 Rc::get_mut(right).unwrap().dump_data();
                 Rc::get_mut(left).unwrap().dump_data();
@@ -252,11 +257,12 @@ impl Tree {
     }
 
     pub fn set_cell(&mut self, pos: Point, cell: Data) {
+        let filename = self.id.clone();
         match self.content {
-            Content::Leaf{ref filename, ref mut data, ref dumped} => {
+            Content::Leaf{ref mut data, ref dumped} => {
                 trace!("Modifying cell at pos {:?}", pos);
                 if *dumped {
-                    *data = read_data(self.begin, self.end, filename);
+                    *data = read_data(self.begin, self.end, &filename);
                 }
                 for c in data {
                     if c.loc == pos {
@@ -268,7 +274,7 @@ impl Tree {
                 // If the cell doesn't exists, add it
                 // add_cell_leaf(self.begin, self.end, data, Cell{loc: pos, content: cell});
             },
-            Content::Node{ref mut left, ref mut right, id:_} => {
+            Content::Node{ref mut left, ref mut right} => {
                 let end = (*left).end;
                 let r = Rc::get_mut(right).unwrap();
                 let l = Rc::get_mut(left).unwrap();
@@ -282,10 +288,11 @@ impl Tree {
     }
 
     pub fn get_cell(&mut self, pos: Point) -> Option<Cell> {
+        let filename = &self.id.clone();
         match self.content {
-            Content::Leaf{ref filename, ref mut data, ref dumped} => {
+            Content::Leaf{ref mut data, ref dumped} => {
                 if *dumped {
-                    *data = read_data(self.begin, self.end, filename);
+                    *data = read_data(self.begin, self.end, &filename);
                 }
                 for c in data {
                     if c.loc == pos {
@@ -294,7 +301,7 @@ impl Tree {
                 }
                 None
             },
-            Content::Node{ref mut left, ref mut right, id:_} => {
+            Content::Node{ref mut left, ref mut right} => {
                 let end = (*left).end;
                 let r = Rc::get_mut(right).unwrap();
                 let l = Rc::get_mut(left).unwrap();
