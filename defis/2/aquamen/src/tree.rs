@@ -6,11 +6,21 @@ use std::rc::Rc;
 use std::path::Path;
 
 use data::Point;
+use area::Rectangle;
+use area::*;
+// use area::Rectangle::*;
+use serialize::read_data;
+use serialize::dump_val_to;
+use serialize::dump_wrong_to;
+use serialize::dump_fun_to;
+use serialize::*;
 use data::Cell;
 use data::Index;
 use data::Data::*;
 use data::Data;
 use data::Function::*;
+
+use bench;
 
 use log::*;
 
@@ -24,8 +34,6 @@ static NODE_MAX_SIZE: Index = 10;
 // FIXME find why nothing is written
 // FIXME check the result of computation
 // FIXME find why the splits are weird => add -> resize ?? FIXED by using with_size ?
-
-type Rectangle = (Point, Point);
 
 enum Content {
     Leaf {
@@ -176,21 +184,6 @@ fn resize(begin: &mut Point, end: &mut Point, new: Point) {
     }
 }
 
-// FIXME put magic value in enum or in cste ?
-fn dump_val_to(i: u8, dest: &mut Vec<u8>) {
-    dest.push(0);
-    dest.push(i);
-}
-
-fn dump_fun_to(dest: &mut Vec<u8>) {
-    dest.push(1);
-    dest.push(0);
-}
-
-fn dump_wrong_to(dest: &mut Vec<u8>) {
-    dest.push(2);
-    dest.push(0);
-}
 
 impl Tree {
 

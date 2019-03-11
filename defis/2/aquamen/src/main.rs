@@ -7,6 +7,7 @@ extern crate env_logger;
 
 mod data;
 mod sched;
+mod serialize;
 mod parser;
 mod printer;
 mod process;
@@ -14,6 +15,7 @@ mod bench;
 mod spreadsheet;
 mod aprinter ;
 mod tree;
+mod area;
 
 use std::env;
 
