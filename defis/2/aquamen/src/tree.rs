@@ -30,6 +30,8 @@ static NODE_MAX_SIZE: Index = 10;
 // and find a way to store them
 // in a cache-friendly way
 
+// FIXME test by hand in may to try to isolate buggy behaviour
+
 // FIXME try to avoid string copy
 // FIXME find why nothing is written
 // FIXME check the result of computation
@@ -69,6 +71,11 @@ fn split_data(data: &Vec<Cell>, b: Point, e: Point) -> Vec<Cell> {
 
 fn split_content(filename: String, begin: Point, end: Point, data: &Vec<Cell>, mid: Point) -> Content {
     trace!("Building the sub leaf of {}: ({:?}; {:?}) & ({:?}; {:?})", filename, begin, mid, mid, end);
+    let l = split_data(&data, begin, mid);
+    let r = split_data(&data, Point{x:mid.x, y:mid.y+1}, end);
+    trace!("Data before: {}, after left {}, after right {}", data.len(), l.len(), r.len());
+    trace!("Data left of node {}: {:?}", filename, l);
+    trace!("Data right of node {}: {:?}", filename, r);
     Content::Node {
         left: Rc::new(Tree{
             begin: begin,
@@ -76,8 +83,7 @@ fn split_content(filename: String, begin: Point, end: Point, data: &Vec<Cell>, m
             id: format!("{}/left", filename),
             content: Content::Leaf {
                 dumped: false,
-                filename: format!("{}/left", filename),
-                data: split_data(&data, begin, mid)
+                data: l, //split_data(&data, begin, mid)
             }
         }),
         right: Rc::new(Tree{
@@ -86,8 +92,7 @@ fn split_content(filename: String, begin: Point, end: Point, data: &Vec<Cell>, m
             id: format!("{}/right", filename),
             content: Content::Leaf {
                 dumped: false,
-                filename: format!("{}/right", filename),
-                data: split_data(&data, mid, end)
+                data: r, //split_data(&data, mid, end)
             }
         }),
     }
