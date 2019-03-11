@@ -175,6 +175,13 @@ impl Tree {
         }
     }
 
+    pub fn size(&self) -> usize {
+        match self.content {
+            Content::Leaf{ref data, ref dumped} => data.len(),
+            Content::Node{ref left, ref right} => left.size() + right.size(),
+        }
+    }
+
 
 
     pub fn add_cell(&mut self, cell: Cell) {
