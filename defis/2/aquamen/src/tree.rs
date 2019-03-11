@@ -61,17 +61,6 @@ pub struct Tree {
 }
 
 
-fn area(b: Point, e: Point) -> Index {
-    (e.x - b.x) * (e.y - b.y)
-}
-
-fn contained_in(p: Point, b: Point, e: Point) -> bool {
-    p.x > b.x
-        && e.x > p.x
-        && p.y > b.y
-        && e.y > p.y
-}
-
 fn split_data(data: &Vec<Cell>, b: Point, e: Point) -> Vec<Cell> {
     trace!("Getting data between {:?} and {:?}", b, e);
     data.iter()
@@ -80,39 +69,6 @@ fn split_data(data: &Vec<Cell>, b: Point, e: Point) -> Vec<Cell> {
         .collect()
 }
 
-fn read_data(begin: Point, end: Point, filename: &String) -> Vec<Cell> {
-    let f = format!("{}.cells", filename);
-    let mut file = File::open(f).unwrap(); // FIXME better error management
-    let mut res: Vec<u8> = Vec::new();
-    file.read(&mut res).unwrap();
-    let mut cpt = 0;
-    let mut x = begin.x;
-    let mut y = begin.y;
-    let mut data = Vec::new();
-    while cpt < res.len() {
-        let t = res[cpt];
-        let v = res[cpt+1];
-        let r = match t {
-            0 => Val(v),
-            1 => Fun(Count(Point{x:0,y:0}, Point{x:0,y:0}, 0)),
-            2 => Wrong,
-            _ => panic!("Unexpected value in data dump")
-        };
-        trace!("Reading cell {:?}", Cell{loc:Point{x:x,y:y},content:r});
-        data.push(Cell{
-            content: r,
-            loc: Point{x: x, y: y},
-        });
-        if x <= end.x {
-            x += 1;
-        } else {
-            x = begin.x;
-            y += 1;
-        }
-        cpt += 2;
-    }
-    data
-}
 
 fn split_content(filename: String, begin: Point, end: Point, data: &Vec<Cell>, mid: Point) -> Content {
     trace!("Building the sub leaf of {}: ({:?}; {:?}) & ({:?}; {:?})", filename, begin, mid, mid, end);
