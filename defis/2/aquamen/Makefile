@@ -9,9 +9,10 @@ TEST          := $(CARGO) test
 CC            := $(CARGO) build
 RUN           := $(CARGO) run
 CLEANER       := $(CARGO) clean
-CP            := $(CP)
+CP            := cp
 EXEC          := ws
 EXECDIR       := debug
+LOGLVL        := trace
 
 #==================================
 # Don't edit below this line
@@ -50,7 +51,7 @@ test:
 	$(TEST)
 
 run:
-	$(RUN) $(FLAGS) tests/$(DATA) tests/$(USER) tests/$(VIEW) tests/$(CHANGE)
+	RUST_LOG="$(LOGLVL)" $(RUN) $(FLAGS) tests/$(DATA) tests/$(USER) tests/$(VIEW) tests/$(CHANGE)
 
 docker:
 	docker build $(CLEAN) -t $(TARGET) .
@@ -58,7 +59,7 @@ docker:
 perf: build # FIXME check /usr/bin/time format string
 	@mkdir -p tests
 	@echo "File size: " `du -sch tests/$(DATA)`
-	RUST_LOG="trace" $(TIME) ./target/$(EXECDIR)/$(TARGET) tests/$(DATA) tests/$(USER) tests/$(VIEW) tests/$(CHANGE)
+	RUST_LOG="$(LOGLVL)" $(TIME) ./target/$(EXECDIR)/$(TARGET) tests/$(DATA) tests/$(USER) tests/$(VIEW) tests/$(CHANGE)
 
 mrproper:
 	$(CLEANER)
