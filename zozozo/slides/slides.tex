@@ -1,0 +1,224 @@
+% -*- ispell-dictionary: french; -*-
+\documentclass[10pt]{beamer}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainlanguage{french}
+\setotherlanguage{english}
+\usepackage{csquotes}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{hyperxmp}
+\usepackage{minted}
+\usetheme[progressbar=frametitle]{metropolis}
+\usepackage{appendixnumberbeamer}
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+\usepackage[backend=biber, style=numeric, maxbibnames=99]{biblatex}
+\bibliography{slides.bib}
+
+\title{OCaml et la programmation fonctionnelle}
+\subtitle{Un fabuleux voyage au cœur de l’informatique}
+\date{\today}
+\author{Antonin Décimo \and Carine Morel \and Pierre Nigron}
+\institute{Université Paris Diderot}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Table des matières}
+  \setbeamertemplate{section in toc}[sections numbered]
+  \tableofcontents[hideallsubsections]
+\end{frame}
+
+\section{OCaml~: un langage multi-paradigmes}
+
+\begin{frame}[fragile]{OCaml~: un langage fonctionnel}
+  \begin{itemize}
+  \item<1-> langage à expressions (et pas à instructions)
+  \item<2-> fonctions d'ordre supérieur
+    \begin{minted}{ocaml}
+      let rec map f l =
+      match l with
+      | [] -> []
+      | h :: t -> f h :: map f t
+
+      let l = map (fun x -> x + 1) [1; 2; 3]
+      (* [2; 3; 4] *)
+    \end{minted}
+  \item<3-> applications partielles
+    \begin{minted}{ocaml}
+      let f x y = x * x + y * y
+      let g = f 2         (* y -> 4 + y * y *)
+      let b = g 3         (* 13 *)
+    \end{minted}
+  \item<4-> filtrage par motifs
+    (\begin{english}pattern-matching\end{english}) et types
+    algébriques
+    \begin{minted}{ocaml}
+      type 'a list = Nil | Cons of 'a * list
+      type 'a tree = Leaf of 'a
+                   | Node of 'a tree * 'a tree
+    \end{minted}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{OCaml~: un langage multi-paradigmes}
+  Un langage impératif~!
+  \begin{minted}{ocaml}
+    let fresh =
+      let c = ref (-1) in
+      fun () ->
+        c := !c + 1;
+        !c
+
+    fresh ()  (* - : int = 0 *)
+    fresh ()  (* - : int = 1 *)
+  \end{minted}
+
+  Un langage à objets~!
+\end{frame}
+
+\begin{frame}[fragile]{OCaml~: du typage}
+  \begin{itemize}
+  \item typage statique (effectué à la compilation)~;
+  \item typage fort (pas de transtypage implicite)~;
+    \begin{minted}{ocaml}
+      let x = 40 + 2.0
+      (* Error: This expression has type float but an
+         expression was expected of type int *)
+      \end{minted}
+  \item inférence de type~;
+    \begin{minted}{ocaml}
+      let l = [1; 2]
+      (* val l : int list = [1; 2] *)
+    \end{minted}
+  \item du polymorphisme.
+    \begin{minted}{ocaml}
+      let rec map f l =
+      match l with
+      | [] -> []
+      | h :: t -> f h :: map f t;;
+      (* val map : ('a -> 'b) -> 'a list -> 'b list = <fun> *)
+    \end{minted}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{OCaml~: et plus encore~!}
+  \begin{itemize}
+  \item compilé ou interprété~;
+  \item ramasse-miettes~;
+  \item un gestionnaire de paquets~;
+  \item possibilité de liaison avec du C.
+  \end{itemize}
+\end{frame}
+
+\section{Le fonctionnel pur}
+
+\begin{frame}[fragile]{Le fonctionnel pur}
+  Un programme fonctionnel pur \emph{n'a pas d'effets de bord}
+  \begin{minted}{ocaml}
+    let x = ref 0
+    let f y = !x * y
+    f 2 (* 0 *)
+    x := 21
+    f 2 (* 42 *)
+  \end{minted}
+
+  Quelques effets de bords~:
+  \begin{itemize}
+  \item entrées et sorties (réseau, fichiers, interactions
+    utilisateurs, …)~;
+  \item les exceptions~;
+  \item affectations sur des données mutables.
+  \end{itemize}
+  Plus généralement~: interaction observable avec le monde extérieur
+\end{frame}
+
+\begin{frame}{Le fonctionnel pur, pourquoi~?}
+  Comme une fonction mathématique~! La sortie de ne dépend que de
+  l'entrée.
+
+  Intérêts principaux~:
+  \begin{itemize}
+  \item facilité à raisonner sur le programme~;
+  \item preuves~! (Coq)
+  \item possibilité d'optimisations.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Effets de bord et pureté}
+  Mais, Carine, comment faire des effets de bord dans un langage
+  fonctionnel pur~?
+\end{frame}
+
+\section{Les Monades}
+
+\begin{frame}{Les Monades}
+  Qu'est-ce~? À quoi ça sert~?
+  \begin{itemize}
+  \item une façon d’ajouter des effets de bord dans des langages purs
+    (monade IO, monade de non-déterminisme)~;
+  \item un style de programmation avancé, efficace, et modulaire
+    (monade d'état, monade liste, monade d'erreur)
+  \end{itemize}
+
+  Des objets mathématiques (monoïdes dans la 2-catégorie des
+  endo-foncteurs)
+\end{frame}
+
+\begin{frame}{Les Monades en théorie}
+  Soient deux types $A$ et $B$, une monade est~:
+  \begin{description}
+  \item[un constructeur de type] $M$ qui construit un type monadique
+    $M A$~;
+  \item[un convertisseur de type]
+    $return$ qui encapsule un objet $x$ dans la monade
+    \[ return\quad x : A \to M A \]
+  \item[un combinateur] $bind$ qui transporte un objet d'une monade à
+    une autre en le transformant
+    \[ bind\quad mx\quad f : (M A, A \to M B) \to M B \]
+  \end{description}
+  … satisfaisant certaines lois.
+\end{frame}
+
+\begin{frame}{Les lois monadiques}
+  % TODO
+\end{frame}
+
+\begin{frame}[fragile]{Monade~: une signature}
+  \begin{minted}{ocaml}
+    module type Monad = sig
+      type 'a t
+      val return : 'a -> 'a t
+      val bind : 'a t -> ('a -> 'b t) -> 'b t
+    end
+  \end{minted}
+\end{frame}
+
+\begin{frame}[fragile]{La Monade identité}
+  \begin{minted}{ocaml}
+    module type Monad = sig
+      type 'a t
+      val return : 'a -> 'a t
+      val bind : 'a t -> ('a -> 'b t) -> 'b t
+    end
+  \end{minted}
+\end{frame}
+
+% \begin{frame}{La programmation fonctionnelle, le retour}
+%   Est-elle réservée aux langages fonctionnels~?
+
+%   \pause{}
+
+%   \begin{itemize}
+%   \item C++ \verb|std::functional|, Java lambdas, …
+%   \item Rust, Golang, Swift, …
+%   % \item C \inputminted{c}{attributes.c}
+%   \end{itemize}
+
+%   ExCamera~\cite{fouladi2017encoding}: un encodeur vidéo VP8 en C++,
+%   fonctionnel pur.
+% \end{frame}
+
+\end{document}
