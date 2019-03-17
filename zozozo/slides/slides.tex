@@ -54,7 +54,7 @@ let l = map (fun x -> x + 1) [1; 2; 3]
   \item<3-> applications partielles
 \begin{minted}{ocaml}
 let f x y = x * x + y * y
-let g = f 2         (* y -> 4 + y * y *)
+let g = f 2         (* fun y -> 4 + y * y *)
 let b = g 3         (* 13 *)
 \end{minted}
   \item<4-> filtrage par motifs
@@ -252,7 +252,7 @@ let divM x y =
 \end{minted}
     \pause{}
 \begin{minted}{ocaml}
-(* (x / (y1 / (y2 / y3))) *)
+(* (((x / y1) / y2) / y3)) *)
 let divM_1 x y1 y2 y3 =
   match divM x y1 with
   | Nothing -> Nothing
@@ -629,7 +629,8 @@ let rand_list () =
   l'algorithme.\\
   De l'expressivité, de la concision.
 
-  Mais à quel prix~?
+  De la puissance pour tous les types de programmeurs, allant du L1 à
+  Yann Régis-Gianas.
 \end{frame}
 
 \begin{frame}{Les Monades}
@@ -637,12 +638,12 @@ let rand_list () =
   burrito).
 
   \begin{itemize}
-  \item sert à s'échapper de la programmation fonctionnelle pure~;
+  \item permet de s'échapper de la programmation fonctionnelle pure~;
   \item mais aussi une sorte de patron de conception aux stéroïdes.
   \end{itemize}
 \end{frame}
 
-\begin{frame}{La programmation fonctionnelle, le retour}
+\begin{frame}{La programmation fonctionnelle à l'horizon}
   Est-elle réservée aux langages fonctionnels~?
   \begin{itemize}
   \item \CXX{} \mintinline{cpp}|std::functional|, Java lambda, Golang, Rust, …
