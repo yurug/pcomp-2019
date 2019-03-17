@@ -362,49 +362,69 @@ let divM_3 x y1 y2 y3 =
 
 \begin{frame}[fragile]{La Monade Random}
   \begin{multicols*}{2}
-\begin{minted}{ocaml}
-type stdGen = Seed of int
+\begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
+type seed = Seed of int
 type 'a monad =
-  stdGen -> 'a * stdGen
+  seed -> 'a * seed
 
+let return a =
+  fun (Seed s)->(a,Seed s)
+
+let bind (step:'a monad)
+      (f:'a -> 'b monad)
+    :'b monad=
+  (fun (Seed s) ->
+    let i, s' = step (Seed s)
+    in f i s')
+
+let (>>=) = bind
+\end{minted}
+    \columnbreak{}
+\begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
 let next (Seed s) =
   Seed (s*23 mod 17+1)
 let rand (Seed s) = s - 1
 
 let random:int monad =
-  (fun (s:stdGen) ->
+  (fun (s:seed) ->
     (rand s, next s))
-
-let return a =
-  fun (Seed s)->(a,Seed s)
-\end{minted}
-    \columnbreak{}
-\begin{minted}{ocaml}
-let bind (step:'a monad)
-      (f:'a -> 'b monad)
-    :'b monad=
-  (fun (Seed s) ->
-    let i, s' = step (Seed s) in
-    f i s')
-
-let (>>=) = bind
 
 let run f =
   let seed = Random.int 17 + 1 in
   fst (f (Seed seed))
 \end{minted}
   \end{multicols*}
+  \begin{center}
+    \begin{tikzpicture}[scale=1]
+      \draw (0.75,1.5) node[above]{\verb|fun s -> (i, s')|};
+      \draw[color=black, fill=cyan!30] (0,0) rectangle (1.5,1.5) ;
+      \draw[color=black, fill=white] (1,1) rectangle (1.5,1.5) ;
+      \node[text centered] at (1.25,1.25) {\footnotesize s'};
+      \node[text centered] at (0.75,0.75) {i};
+      \draw[thick, ->,>=latex] (-0.5,1) to[bend left] (0, 0.75);
+      \draw (-0.5,1) node[left]{s} ;
+    \end{tikzpicture}
+    \begin{tikzpicture}[scale=1]
+      \draw (0.75,1.5) node[above]{random};
+      \draw[color=black, fill=cyan!30] (0,0) rectangle (1.5,1.5) ;
+      \draw[color=black, fill=white] (0.7,1) rectangle (1.5,1.5) ;
+      \node[text centered] at (1.1,1.25) {\footnotesize next s};
+      \node[text centered] at (0.75,0.75) {rand s};
+      \draw[thick, ->,>=latex] (-0.5,1) to[bend left] (0, 0.75);
+      \draw (-0.5,1) node[left]{s} ;
+    \end{tikzpicture}
+  \end{center}
 \end{frame}
 
 \begin{frame}[fragile]{La Monade Random~: les paires}
   \begin{multicols*}{2}
 \begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
-type stdGen = Seed of int
+type seed = Seed of int
 type 'a monad =
-  stdGen -> 'a * stdGen
+  seed -> 'a * seed
 
 let random:int monad =
-  (fun (s:stdGen) ->
+  (fun (s:seed) ->
     (rand s, next s))
 
 let return a =
@@ -414,14 +434,14 @@ let bind (step:'a monad)
       (f:'a -> 'b monad)
     :'b monad=
   (fun (Seed s) ->
-    let i, s' = step (Seed s) in
-    f i s')
+    let i, s' = step (Seed s)
+    in f i s')
 
 let (>>=) = bind
 
 let run f =
-  let seed = Random.int 17 + 1 in
-  fst (f (Seed seed))
+  let seed = Random.int 17 + 1
+  in fst (f (Seed seed))
 \end{minted}
     \columnbreak{}
 \begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
@@ -448,15 +468,71 @@ let rand_pair () = run mk_pair
   \end{multicols*}
 \end{frame}
 
+\begin{frame}[fragile]{La Monade Random~: les paires}
+  \begin{multicols*}{2}
+\begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
+let rand_int () = run random
+
+let mk_pair' =
+  fun seed ->
+  bind
+    random
+    (fun x seed' ->
+      bind
+        random
+        (fun y -> return (x, y))
+        seed')
+    seed
+\end{minted}
+    \columnbreak{}
+\begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
+let mk_pair =
+  random >>= fun x ->
+  random >>= fun y ->
+  return (x, y)
+
+let rand_pair () = run mk_pair
+\end{minted}
+  \end{multicols*}
+  \begin{center}
+    \begin{tikzpicture}[scale=1]
+      \draw[color=black, fill=cyan!30] (0,0) rectangle (1.5,1.5) ;
+      \draw[color=black, fill=white] (1,1) rectangle (1.5,1.5) ;
+      \node[text centered] at (1.25,1.25) {\footnotesize s'};
+      \node[text centered] at (0.75,0.75) {x};
+      \draw[thick, ->,>=latex] (-0.5,1) to[bend left] (0, 0.75);
+      \draw (-0.5,1) node[left]{s} ;
+      \draw (0.75,0) node[below]{random} ;
+      %
+      \draw[color=black, fill=cyan!30] (3,0) rectangle (4.5,1.5) ;
+      \draw[color=black, fill=white] (4,1) rectangle (4.5,1.5) ;
+      \node[text centered] at (4.25,1.25) {\footnotesize s''};
+      \node[text centered] at (3.75,0.75) {y};
+      \draw (3.75,0) node[below]{random} ;
+      %
+      \draw[color=black, fill=cyan!30] (6,0) rectangle (7.5,1.5) ;
+      \draw[color=black, fill=white] (7,1) rectangle (7.5,1.5) ;
+      \node[text centered] at (7.25,1.25) {\footnotesize s''};
+      \node[text centered] at (6.75,0.75) {(x, y)};
+      \draw (6.75,0) node[below]{return} ;
+
+      \draw[thick, ->,>=latex] (0.75,1.5) to[bend left](3.75, 1.5);
+      \draw (2.25,2) node[above]{\verb|>>=|} ;
+      \draw[thick, ->,>=latex] (3.75,1.5) to[bend left] (6.75, 1.5);
+      \draw (5.25,2) node[above]{\verb|>>=|} ;
+    \end{tikzpicture}
+  \end{center}
+\end{frame}
+
 \begin{frame}[fragile]{La Monade Random~: les listes}
   \begin{multicols*}{2}
 \begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
-type stdGen = Seed of int
+type seed = Seed of int
 type 'a monad =
-  stdGen -> 'a * stdGen
+  seed -> 'a * seed
 
 let random:int monad =
-  (fun (s:stdGen) ->
+  (fun (s:seed) ->
     (rand s, next s))
 
 let return a =
@@ -466,14 +542,14 @@ let bind (step:'a monad)
       (f:'a -> 'b monad)
     :'b monad=
   (fun (Seed s) ->
-    let i, s' = step (Seed s) in
-    f i s')
+    let i, s' = step (Seed s)
+    in f i s')
 
 let (>>=) = bind
 
 let run f =
-  let seed = Random.int 17 + 1 in
-  fst (f (Seed seed))
+  let seed = Random.int 17 + 1
+  in fst (f (Seed seed))
 \end{minted}
     \columnbreak{}
 \begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
@@ -488,6 +564,64 @@ let rand_list () =
 \end{minted}
   \end{multicols*}
 \end{frame}
+
+\begin{frame}[fragile]{La Monade Random~: les listes}
+  \begin{center}
+\begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
+let rec mk_list n =
+  if n = 0 then return [] else
+    random >>= fun x ->
+    mk_list (n-1) >>=  fun l ->
+    return (x::l)
+
+let rand_list () =
+  run (random >>= fun l->mk_list l)
+\end{minted}
+    \begin{tikzpicture}[scale=1]
+      \draw[color=black, fill=cyan!30] (-0.25,-0.25) rectangle (1.75,1.75) ;
+      \draw[color=black, fill=white] (1.25,1.25) rectangle (1.75,1.75) ;
+      \node[text centered] at (1.5,1.5) {\footnotesize $s_1$};
+      \node[text centered] at (0.75,0.75) {$x_1$};
+      \draw[thick, ->,>=latex] (-0.75,1.) to[bend left] (-0.25,0.75);
+      \draw (-0.75,1.) node[left]{s} ;
+      \draw (0.75,-0.25) node[below]{random} ;
+      %
+      \draw[color=black] (2.75, -0.7) rectangle (10,2) ;
+      \draw (6,-0.7) node[below]{return} ;
+      \draw[color=black, fill=cyan!30] (3,0) rectangle (4.5,1.5) ;
+      \draw[color=black, fill=white] (4,1) rectangle (4.5,1.5) ;
+      \node[text centered] at (4.25,1.25) {\footnotesize $s_2$};
+      \node[text centered] at (3.75,0.75) {$x_2$};
+      \draw (3.75,0) node[below]{\small random} ;
+      %
+      \draw[color=black] (5.25, -0.25) rectangle (9.75,1.75) ;
+      \draw (7.375,-0.25) node[below]{\small return} ;
+      \draw[color=black, fill=cyan!30] (5.5,0.25) rectangle (6.75,1.5) ;
+      \draw[color=black, fill=white] (6.375,1.125) rectangle (6.75,1.5) ;
+      \node[text centered] at (6.6,1.25) {\footnotesize $s_3$};
+      \node[text centered] at (6.125,0.825) {\small $x_3$};
+      \draw (6.125,0.25) node[below]{\footnotesize random} ;
+
+      \draw[color=black] (7.375, 0.125) rectangle (9.5,1.375) ;
+      \draw (8.4,0.125) node[below]{\footnotesize return} ;
+      \draw[color=black, fill=cyan!30] (7.5, 0.25) rectangle (8.5,1.25) ;
+      \draw[color=black, fill=white] (8.25,1.) rectangle (8.5,1.25) ;
+      \node[text centered] at (8,0.75) {\footnotesize $x_4$};
+      %
+
+      \draw[thick, ->,>=latex] (0.75,1.75) to[bend left](3.75, 2);
+      \draw (2.25,2.25) node[above]{\verb|>>=|} ;
+      \draw[thick, ->,>=latex] (3.75,1.5) to[bend left] (5.75, 1.75);
+      \draw (5,1.9) node[above]{\small\verb|>>=|} ;
+      \draw[thick, ->,>=latex] (6.125,1.5) to[bend left] (8, 1.375);
+      \draw (7.075,1.7) node[above]{\footnotesize\verb|>>=|} ;
+
+      \draw (9,0.6) node[above]{ ...} ;
+
+    \end{tikzpicture}
+  \end{center}
+\end{frame}
+
 \section{Conclusion}
 
 \begin{frame}{La programmation fonctionnelle}
