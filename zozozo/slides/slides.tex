@@ -8,7 +8,7 @@
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{mathtools}
 \usepackage{hyperxmp}
-\usepackage{minted}
+\usepackage[cache=false]{minted}
 \usetheme[progressbar=frametitle]{metropolis}
 \usepackage{appendixnumberbeamer}
 \usepackage{booktabs}
@@ -203,45 +203,53 @@ end
   \end{minted}
 \end{frame}
 
+\section{Exemple 1 : Monade Maybe}
 \begin{frame}[fragile]{La Monade Maybe}
-  \begin{multicols}{2}
-\begin{minted}[fontsize=\small]{ocaml}
+  \begin{minipage}[c]{0.45\linewidth}
+    \begin{minted}[fontsize=\small]{ocaml}
 module type Monad = sig
-  type 'a t
-  val return : 'a -> 'a t
-  val bind :
-    'a t -> ('a -> 'b t) -> 'b t
-  val (>>=) :
-    'a t -> ('a -> 'b t) -> 'b t
-  val _raise : 'a t (* !*)
+ type 'a t
+ val return : 'a -> 'a t
+ val bind :
+ 'a t -> ('a -> 'b t) -> 'b t
+ val (>>=) :
+ 'a t -> ('a -> 'b t) -> 'b t
+ val _raise : 'a t (* !*)
 end
-\end{minted}
-    \begin{tikzpicture}[scale=1]
-      \draw[color=black, fill=cyan!30] (0,0) rectangle (1.5,1.5) ;
-      \draw (0.75,1.5) node[above]{Just x};
-      \node[text centered] at (0.75,0.75) {x};
-
-      \draw[color=black, fill=orange!30] (2,0) rectangle (3.5,1.5) ;
-      \draw (2.75,1.5) node[above]{Nothing};
-    \end{tikzpicture}
-\begin{minted}[fontsize=\small]{ocaml}
+    \end{minted}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[c]{0.45\linewidth}
+  \begin{onlyenv}<3->
+    \begin{minted}[fontsize=\small]{ocaml}
 module Maybe : Monad = struct
   type 'a t = Nothing
             | Just of 'a
+
   let return x = Just x
   let bind x f = match x with
-  | Nothing -> Nothing
-  | Just x -> f x
+    | Nothing -> Nothing
+    | Just x -> f x
   let (>>=) = bind
   let _raise = Nothing (* !*)
 end
-\end{minted}
-  \end{multicols}
+    \end{minted}
+    \end{onlyenv}
+  \end{minipage}
+  \onslide<2->{
+  \begin{tikzpicture}[scale=1]
+    \draw[color=black, fill=cyan!30] (0,0) rectangle (1.5,1.5) ;
+    \draw (0.75,1.5) node[above]{Just x};
+    \node[text centered] at (0.75,0.75) {x};
+
+    \draw[color=black, fill=orange!30] (2,0) rectangle (3.5,1.5) ;
+    \draw (2.75,1.5) node[above]{Nothing};
+  \end{tikzpicture}}
 \end{frame}
 
 \begin{frame}[fragile]{La Monade Maybe~: utilisation}
-  \begin{multicols*}{2}
-\begin{minted}{ocaml}
+  \begin{minipage}[c]{0.45\linewidth}
+    \begin{minted}[fontsize=\small]{ocaml}
 let div x y =
   if y = 0 then Nothing
   else Just (x/y)
@@ -249,9 +257,9 @@ let div x y =
 let divM x y =
   if y = 0 then _raise
   else return (x/y)
-\end{minted}
+    \end{minted}
     \pause{}
-\begin{minted}{ocaml}
+    \begin{minted}[fontsize=\small]{ocaml}
 (* (((x / y1) / y2) / y3)) *)
 let divM_1 x y1 y2 y3 =
   match divM x y1 with
@@ -261,23 +269,24 @@ let divM_1 x y1 y2 y3 =
      | Nothing -> Nothing
      | Just r2 -> divM r2 y3
 \end{minted}
-    \columnbreak{}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[c]{0.45\linewidth}
     \pause{}
-\begin{minted}{ocaml}
+    \begin{minted}[fontsize=\small]{ocaml}
 let divM_2 x y1 y2 y3 =
-  bind (divM x y1)
-    (fun r2 ->
-      bind (divM r2 y2)
-        (fun r3 -> divM r3 y3))
-\end{minted}
+  bind (divM x y1)  (fun r2 ->
+  bind (divM r2 y2) (fun r3 ->
+  divM r3 y3))
+    \end{minted}
     \pause{}
-\begin{minted}{ocaml}
+    \begin{minted}[fontsize=\small]{ocaml}
 let divM_3 x y1 y2 y3 =
   divM x y1
   >>= fun r2 -> divM r2 y2
   >>= fun r3 -> divM r3 y3
-\end{minted}
-  \end{multicols*}
+    \end{minted}
+  \end{minipage}
 \end{frame}
 
 \begin{frame}[fragile]{La Monade Maybe~: explications}
@@ -338,8 +347,8 @@ let divM_4 x y1 y2 y3 =
 \end{frame}
 
 \begin{frame}[fragile]{La Monade Maybe~: le bilan}
-  \begin{multicols*}{2}
-\begin{minted}{ocaml}
+  \begin{minipage}[c]{0.45\linewidth}
+\begin{minted}[fontsize=\small]{ocaml}
 (* style usuel *)
 let divM_1 x y1 y2 y3 =
   match divM x y1 with
@@ -349,16 +358,20 @@ let divM_1 x y1 y2 y3 =
      | Nothing -> Nothing
      | Just r2 -> divM r2 y3
 \end{minted}
-    \columnbreak{}
-\begin{minted}{ocaml}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[c]{0.45\linewidth}
+\begin{minted}[fontsize=\small]{ocaml}
 (* style monadique *)
 let divM_3 x y1 y2 y3 =
   divM x y1
   >>= fun r2 -> divM r2 y2
   >>= fun r3 -> divM r3 y3
 \end{minted}
-  \end{multicols*}
+  \end{minipage}
 \end{frame}
+
+\section{Exemple 2 : Monade Random}
 
 \begin{frame}[fragile]{La Monade Random}
   \begin{multicols*}{2}
@@ -380,7 +393,8 @@ let bind (step:'a monad)
 let (>>=) = bind
 \end{minted}
     \columnbreak{}
-\begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
+    \pause{}
+    \begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
 let next (Seed s) =
   Seed (s*23 mod 17+1)
 let rand (Seed s) = s - 1
@@ -417,7 +431,7 @@ let run f =
 \end{frame}
 
 \begin{frame}[fragile]{La Monade Random~: les paires}
-  \begin{multicols*}{2}
+  \begin{minipage}[l]{0.45\linewidth}
 \begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
 type seed = Seed of int
 type 'a monad =
@@ -443,7 +457,10 @@ let run f =
   let seed = Random.int 17 + 1
   in fst (f (Seed seed))
 \end{minted}
-    \columnbreak{}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[r]{0.45\linewidth}
+  \pause{}
 \begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
 let rand_int () = run random
 
@@ -465,7 +482,7 @@ let mk_pair =
 
 let rand_pair () = run mk_pair
 \end{minted}
-  \end{multicols*}
+  \end{minipage}
 \end{frame}
 
 \begin{frame}[fragile]{La Monade Random~: les paires}
