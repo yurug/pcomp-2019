@@ -42,44 +42,44 @@
   \begin{itemize}
   \item<1-> langage à expressions (et pas à instructions)
   \item<2-> fonctions d'ordre supérieur
-    \begin{minted}{ocaml}
-      let rec map f l =
-      match l with
-      | [] -> []
-      | h :: t -> f h :: map f t
+\begin{minted}{ocaml}
+let rec map f l =
+match l with
+| [] -> []
+| h :: t -> f h :: map f t
 
-      let l = map (fun x -> x + 1) [1; 2; 3]
-      (* [2; 3; 4] *)
-    \end{minted}
+let l = map (fun x -> x + 1) [1; 2; 3]
+(* [2; 3; 4] *)
+\end{minted}
   \item<3-> applications partielles
-    \begin{minted}{ocaml}
-      let f x y = x * x + y * y
-      let g = f 2         (* y -> 4 + y * y *)
-      let b = g 3         (* 13 *)
-    \end{minted}
+\begin{minted}{ocaml}
+let f x y = x * x + y * y
+let g = f 2         (* y -> 4 + y * y *)
+let b = g 3         (* 13 *)
+\end{minted}
   \item<4-> filtrage par motifs
     (\begin{english}pattern-matching\end{english}) et types
     algébriques
-    \begin{minted}{ocaml}
-      type 'a list = Nil | Cons of 'a * list
-      type 'a tree = Leaf of 'a
-                   | Node of 'a tree * 'a tree
-    \end{minted}
+\begin{minted}{ocaml}
+type 'a list = Nil | Cons of 'a * list
+type 'a tree = Leaf of 'a
+             | Node of 'a tree * 'a tree
+\end{minted}
   \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]{OCaml~: un langage multi-paradigmes}
   Un langage impératif~!
-  \begin{minted}{ocaml}
-    let fresh =
-      let c = ref (-1) in
-      fun () ->
-        c := !c + 1;
-        !c
+\begin{minted}{ocaml}
+let fresh =
+  let c = ref (-1) in
+  fun () ->
+    c := !c + 1;
+    !c
 
-    fresh ()  (* - : int = 0 *)
-    fresh ()  (* - : int = 1 *)
-  \end{minted}
+fresh ()  (* - : int = 0 *)
+fresh ()  (* - : int = 1 *)
+\end{minted}
 
   Un langage à objets~!
 \end{frame}
@@ -88,23 +88,23 @@
   \begin{itemize}
   \item typage statique (effectué à la compilation)~;
   \item typage fort (pas de transtypage implicite)~;
-    \begin{minted}{ocaml}
-      let x = 40 + 2.0
-      (* Error: This expression has type float but an
-         expression was expected of type int *)
-      \end{minted}
+\begin{minted}{ocaml}
+let x = 40 + 2.0
+(* Error: This expression has type float but an
+   expression was expected of type int *)
+\end{minted}
   \item inférence de type~;
-    \begin{minted}{ocaml}
-      let l = [1; 2]
-      (* val l : int list = [1; 2] *)
-    \end{minted}
+\begin{minted}{ocaml}
+let l = [1; 2]
+(* val l : int list = [1; 2] *)
+\end{minted}
   \item du polymorphisme.
-    \begin{minted}{ocaml}
-      let rec map f l =
-      match l with
-      | [] -> []
-      | h :: t -> f h :: map f t;;
-      (* val map : ('a -> 'b) -> 'a list -> 'b list = <fun> *)
+\begin{minted}{ocaml}
+let rec map f l =
+  match l with
+  | [] -> []
+  | h :: t -> f h :: map f t;;
+(* val map : ('a -> 'b) -> 'a list -> 'b list = <fun> *)
     \end{minted}
   \end{itemize}
 \end{frame}
@@ -122,13 +122,13 @@
 
 \begin{frame}[fragile]{Le fonctionnel pur}
   Un programme fonctionnel pur \emph{n'a pas d'effets de bord}
-  \begin{minted}{ocaml}
-    let x = ref 0
-    let f y = !x * y
-    f 2 (* 0 *)
-    x := 21
-    f 2 (* 42 *)
-  \end{minted}
+\begin{minted}{ocaml}
+let x = ref 0
+let f y = !x * y
+  f 2 (* 0 *)
+  x := 21
+  f 2 (* 42 *)
+\end{minted}
 
   Quelques effets de bords~:
   \begin{itemize}
@@ -193,40 +193,171 @@
 
 \begin{frame}[fragile]{Monade~: une signature}
   \begin{minted}{ocaml}
-    module type Monad = sig
-      type 'a t
-      val return : 'a -> 'a t
-      val bind : 'a t -> ('a -> 'b t) -> 'b t
-      (* infix operator for bind *)
-      val (>>=) : 'a t -> ('a -> 'b t) -> 'b t
-    end
+module type Monad = sig
+  type 'a t
+  val return : 'a -> 'a t
+  val bind : 'a t -> ('a -> 'b t) -> 'b t
+  (* infix operator for bind *)
+  val (>>=) : 'a t -> ('a -> 'b t) -> 'b t
+end
   \end{minted}
 \end{frame}
 
 \begin{frame}[fragile]{La Monade Maybe}
-  \begin{minted}{ocaml}
-    module type Monad = sig
-      type 'a t
-      val return : 'a -> 'a t
-      val bind : 'a t -> ('a -> 'b t) -> 'b t
-      val (>>=) : 'a t -> ('a -> 'b t) -> 'b t
-      val _raise : 'a t (* ! *)
-    end
-    module Maybe : Monad = struct
-      type 'a t = Nothing | Just of 'a
-      let return x = Just x
-      let bind x f = match x with
-        Nothing -> Nothing | Just x -> f x
-      let (>>=) = bind
-      let _raise = Nothing (* ! *)
-    end
-  \end{minted}
+  \begin{multicols}{2}
+\begin{minted}[fontsize=\small]{ocaml}
+module type Monad = sig
+  type 'a t
+  val return : 'a -> 'a t
+  val bind :
+    'a t -> ('a -> 'b t) -> 'b t
+  val (>>=) :
+    'a t -> ('a -> 'b t) -> 'b t
+  val _raise : 'a t (* !*)
+end
+\end{minted}
+    \begin{tikzpicture}[scale=1]
+      \draw[color=black, fill=cyan!30] (0,0) rectangle (1.5,1.5) ;
+      \draw (0.75,1.5) node[above]{Just x};
+      \node[text centered] at (0.75,0.75) {x};
+
+      \draw[color=black, fill=orange!30] (2,0) rectangle (3.5,1.5) ;
+      \draw (2.75,1.5) node[above]{Nothing};
+    \end{tikzpicture}
+\begin{minted}[fontsize=\small]{ocaml}
+module Maybe : Monad = struct
+  type 'a t = Nothing
+            | Just of 'a
+  let return x = Just x
+  let bind x f = match x with
+  | Nothing -> Nothing
+  | Just x -> f x
+  let (>>=) = bind
+  let _raise = Nothing (* !*)
+end
+\end{minted}
+  \end{multicols}
 \end{frame}
 
 \begin{frame}[fragile]{La Monade Maybe~: utilisation}
+  \begin{multicols*}{2}
+\begin{minted}{ocaml}
+let div x y =
+  if y = 0 then Nothing
+  else Just (x/y)
+
+let divM x y =
+  if y = 0 then _raise
+  else return (x/y)
+\end{minted}
+    \pause{}
+\begin{minted}{ocaml}
+(* x/y1/y2/y3 *)
+let divM_1 x y1 y2 y3 =
+  match divM x y1 with
+  | Nothing -> Nothing
+  | Just r1 ->
+     match divM r1 y2 with
+     | Nothing -> Nothing
+     | Just r2 -> divM r2 y3
+\end{minted}
+    \columnbreak{}
+    \pause{}
+\begin{minted}{ocaml}
+let divM_2 x y1 y2 y3 =
+  bind (divM x y1)
+    (fun r2 ->
+      bind (divM r2 y2)
+        (fun r3 -> divM r3 y3))
+\end{minted}
+    \pause{}
+\begin{minted}{ocaml}
+let divM_3 x y1 y2 y3 =
+  divM x y1
+  >>= fun r2 -> divM r2 y2
+  >>= fun r3 -> divM r3 y3
+\end{minted}
+  \end{multicols*}
+\end{frame}
+
+\begin{frame}[fragile]{La Monade Maybe}
   \begin{multicols}{2}
-    \inputminted{ocaml}{maybe.ml}
+    \scalebox{0.65}{
+      \begin{tikzpicture}[scale=1]
+        %%
+        \draw[color=black] (-0.25,-0.25) rectangle (1.75,3.75) ;
+
+        \draw[color=black, fill=cyan!30] (0,2) rectangle (1.5,3.5) ;
+        \node[text centered] at (0.75,2.75) {r1};
+        \draw (0.75,1.5) node[above]{\small divM\_3 x y1} ;
+        \draw[color=black, fill=orange!30] (0,0) rectangle (1.5,1.5) ;
+
+        \draw[thick, ->,>=latex] (1.5,2.75) -- (3, 2.75);
+        \draw[thick, ->,>=latex] (1.5,2.75) -- (3, 4.75);
+        \draw[thick, ->,>=latex] (1.5,0.75) -- (6, 0.75);
+
+        %%
+        \draw[color=black] (2.75, 1.75) rectangle (4.75,5.75) ;
+
+        \draw[color=black, fill=cyan!30] (3,4) rectangle (4.5,5.5) ;
+        \node[text centered] at (3.75,4.75) {r2};
+        \draw (3.75,3.5) node[above]{\small divM\_3 r1 y2} ;
+        \draw[color=black, fill=orange!30] (3,2) rectangle (4.5,3.5) ;
+
+        \draw[thick, ->,>=latex] (4.5,2.75) -- (6, 2.75);
+        \draw[thick, ->,>=latex] (4.5,4.75) -- (6, 4.75);
+        \draw[thick, ->,>=latex] (4.5,4.75) -- (6, 6.75);
+        %%
+        \draw[color=black] (5.75, 3.75) rectangle (7.75,7.75) ;
+
+        \draw[color=black, fill=cyan!30] (6,6) rectangle (7.5,7.5) ;
+        \node[text centered] at (6.75,6.75) {r3};
+        \draw (6.75,5.5) node[above]{\small divM\_3 r2 y3} ;
+        \draw[color=black, fill=orange!30] (6,4) rectangle (7.5,5.5) ;
+
+        \draw[color=black, fill=orange!30] (6,2) rectangle (7.5,3.5) ;
+
+        \draw[color=black, fill=orange!30] (6,0) rectangle (7.5,1.5) ;
+      \end{tikzpicture}
+    }
+\begin{minted}{ocaml}
+let divM_3 x y1 y2 y3 =
+  divM x y1
+  >>= fun r2 -> divM r2 y2
+  >>= fun r3 -> divM r3 y3
+\end{minted}
+    \pause{}
+\begin{minted}{ocaml}
+let divM_4 x y1 y2 y3 =
+  return x
+  >>= fun r1 -> divM r1 y1
+  >>= fun r2 -> divM r2 y2
+  >>= fun r3 -> divM r3 y3
+\end{minted}
   \end{multicols}
+\end{frame}
+
+\begin{frame}[fragile]{La Monade Maybe~: le bilan}
+  \begin{multicols*}{2}
+\begin{minted}{ocaml}
+(* style usuel *)
+let divM_1 x y1 y2 y3 =
+  match divM x y1 with
+  | Nothing -> Nothing
+  | Just r1 ->
+     match divM r1 y2 with
+     | Nothing -> Nothing
+     | Just r2 -> divM r2 y3
+\end{minted}
+    \columnbreak{}
+\begin{minted}{ocaml}
+(* style monadique *)
+let divM_3 x y1 y2 y3 =
+  divM x y1
+  >>= fun r2 -> divM r2 y2
+  >>= fun r3 -> divM r3 y3
+\end{minted}
+  \end{multicols*}
 \end{frame}
 
 \section{Conclusion}
@@ -244,7 +375,7 @@
   burrito).
 
   \begin{itemize}
-  \item Sert à s'échapper de la programmation fonctionnelle pure~;
+  \item sert à s'échapper de la programmation fonctionnelle pure~;
   \item mais aussi une sorte de patron de conception aux stéroïdes.
   \end{itemize}
 \end{frame}
