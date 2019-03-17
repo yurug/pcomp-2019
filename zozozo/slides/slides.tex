@@ -1,4 +1,4 @@
-% -*- ispell-dictionary: french; -*-
+% -*- ispell-dictionary: fr; -*-
 \documentclass[10pt]{beamer}
 \usepackage{fontspec}
 \usepackage{polyglossia}
@@ -13,8 +13,13 @@
 \usepackage{appendixnumberbeamer}
 \usepackage{booktabs}
 \usepackage[scale=2]{ccicons}
+\usepackage{tikz}
+\usepackage{relsize}
+\usepackage{multicol}
 \usepackage[backend=biber, style=numeric, maxbibnames=99]{biblatex}
 \bibliography{slides.bib}
+
+\newcommand\CXX{C\nolinebreak[4]\hspace{-.05em}\raisebox{.4ex}{\relsize{-3}{\textbf{++}}}}
 
 \title{OCaml et la programmation fonctionnelle}
 \subtitle{Un fabuleux voyage au cœur de l’informatique}
@@ -160,7 +165,11 @@
   \item une façon d’ajouter des effets de bord dans des langages purs
     (monade IO, monade de non-déterminisme)~;
   \item un style de programmation avancé, efficace, et modulaire
-    (monade d'état, monade liste, monade d'erreur)
+    \begin{itemize}
+    \item monade d'état, monade liste, monade d'erreur
+    \item interpréteur monadique, parseur monadique
+    \item monade de continuation, monade d'exception
+    \end{itemize}
   \end{itemize}
 
   Des objets mathématiques (monoïdes dans la 2-catégorie des
@@ -174,16 +183,12 @@
     $M A$~;
   \item[un convertisseur de type]
     $return$ qui encapsule un objet $x$ dans la monade
-    \[ return\quad x : A \to M A \]
+    \[ return : A \to M A \]
   \item[un combinateur] $bind$ qui transporte un objet d'une monade à
     une autre en le transformant
-    \[ bind\quad mx\quad f : (M A, A \to M B) \to M B \]
+    \[ bind : M A \to (A \to M B) \to M B \]
   \end{description}
   … satisfaisant certaines lois.
-\end{frame}
-
-\begin{frame}{Les lois monadiques}
-  % TODO
 \end{frame}
 
 \begin{frame}[fragile]{Monade~: une signature}
@@ -192,33 +197,72 @@
       type 'a t
       val return : 'a -> 'a t
       val bind : 'a t -> ('a -> 'b t) -> 'b t
+      (* infix operator for bind *)
+      val (>>=) : 'a t -> ('a -> 'b t) -> 'b t
     end
   \end{minted}
 \end{frame}
 
-\begin{frame}[fragile]{La Monade identité}
+\begin{frame}[fragile]{La Monade Maybe}
   \begin{minted}{ocaml}
     module type Monad = sig
       type 'a t
       val return : 'a -> 'a t
       val bind : 'a t -> ('a -> 'b t) -> 'b t
+      val (>>=) : 'a t -> ('a -> 'b t) -> 'b t
+      val _raise : 'a t (* ! *)
+    end
+    module Maybe : Monad = struct
+      type 'a t = Nothing | Just of 'a
+      let return x = Just x
+      let bind x f = match x with
+        Nothing -> Nothing | Just x -> f x
+      let (>>=) = bind
+      let _raise = Nothing (* ! *)
     end
   \end{minted}
 \end{frame}
 
-% \begin{frame}{La programmation fonctionnelle, le retour}
-%   Est-elle réservée aux langages fonctionnels~?
+\begin{frame}[fragile]{La Monade Maybe~: utilisation}
+  \begin{multicols}{2}
+    \inputminted{ocaml}{maybe.ml}
+  \end{multicols}
+\end{frame}
 
-%   \pause{}
+\section{Conclusion}
 
-%   \begin{itemize}
-%   \item C++ \verb|std::functional|, Java lambdas, …
-%   \item Rust, Golang, Swift, …
-%   % \item C \inputminted{c}{attributes.c}
-%   \end{itemize}
+\begin{frame}{La programmation fonctionnelle}
+  Un style plus profond de programmation qui se concentre sur
+  l'algorithme.\\
+  De l'expressivité, de la concision.
 
-%   ExCamera~\cite{fouladi2017encoding}: un encodeur vidéo VP8 en C++,
-%   fonctionnel pur.
-% \end{frame}
+  Mais à quel prix~?
+\end{frame}
+
+\begin{frame}{Les Monades}
+  Un outil extrêmement puissant, mais difficile à saisir (comme les
+  burrito).
+
+  \begin{itemize}
+  \item Sert à s'échapper de la programmation fonctionnelle pure~;
+  \item mais aussi une sorte de patron de conception aux stéroïdes.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{La programmation fonctionnelle, le retour}
+  Est-elle réservée aux langages fonctionnels~?
+  \begin{itemize}
+  \item \CXX{} \mintinline{cpp}|std::functional|, Java lambda, Golang, Rust, …
+  \item C \inputminted{c}{./attributes.c}
+  \end{itemize}
+
+  ExCamera~\cite{fouladi2017encoding}: un encodeur vidéo en \CXX{},
+  fonctionnel pur
+\end{frame}
+
+\begin{frame}[allowframebreaks]
+  \nocite{*}
+  \printbibliography{}
+\end{frame}
 
 \end{document}
