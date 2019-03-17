@@ -252,7 +252,7 @@ let divM x y =
 \end{minted}
     \pause{}
 \begin{minted}{ocaml}
-(* x/y1/y2/y3 *)
+(* (x / (y1 / (y2 / y3))) *)
 let divM_1 x y1 y2 y3 =
   match divM x y1 with
   | Nothing -> Nothing
@@ -280,7 +280,7 @@ let divM_3 x y1 y2 y3 =
   \end{multicols*}
 \end{frame}
 
-\begin{frame}[fragile]{La Monade Maybe}
+\begin{frame}[fragile]{La Monade Maybe~: explications}
   \begin{multicols}{2}
     \scalebox{0.65}{
       \begin{tikzpicture}[scale=1]
@@ -360,6 +360,134 @@ let divM_3 x y1 y2 y3 =
   \end{multicols*}
 \end{frame}
 
+\begin{frame}[fragile]{La Monade Random}
+  \begin{multicols*}{2}
+\begin{minted}{ocaml}
+type stdGen = Seed of int
+type 'a monad =
+  stdGen -> 'a * stdGen
+
+let next (Seed s) =
+  Seed (s*23 mod 17+1)
+let rand (Seed s) = s - 1
+
+let random:int monad =
+  (fun (s:stdGen) ->
+    (rand s, next s))
+
+let return a =
+  fun (Seed s)->(a,Seed s)
+\end{minted}
+    \columnbreak{}
+\begin{minted}{ocaml}
+let bind (step:'a monad)
+      (f:'a -> 'b monad)
+    :'b monad=
+  (fun (Seed s) ->
+    let i, s' = step (Seed s) in
+    f i s')
+
+let (>>=) = bind
+
+let run f =
+  let seed = Random.int 17 + 1 in
+  fst (f (Seed seed))
+\end{minted}
+  \end{multicols*}
+\end{frame}
+
+\begin{frame}[fragile]{La Monade Random~: les paires}
+  \begin{multicols*}{2}
+\begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
+type stdGen = Seed of int
+type 'a monad =
+  stdGen -> 'a * stdGen
+
+let random:int monad =
+  (fun (s:stdGen) ->
+    (rand s, next s))
+
+let return a =
+  fun (Seed s)->(a,Seed s)
+
+let bind (step:'a monad)
+      (f:'a -> 'b monad)
+    :'b monad=
+  (fun (Seed s) ->
+    let i, s' = step (Seed s) in
+    f i s')
+
+let (>>=) = bind
+
+let run f =
+  let seed = Random.int 17 + 1 in
+  fst (f (Seed seed))
+\end{minted}
+    \columnbreak{}
+\begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
+let rand_int () = run random
+
+let mk_pair' =
+  fun seed ->
+  bind
+    random
+    (fun x seed' ->
+      bind
+        random
+        (fun y -> return (x, y))
+        seed')
+    seed
+
+let mk_pair =
+  random >>= fun x ->
+  random >>= fun y ->
+  return (x, y)
+
+let rand_pair () = run mk_pair
+\end{minted}
+  \end{multicols*}
+\end{frame}
+
+\begin{frame}[fragile]{La Monade Random~: les listes}
+  \begin{multicols*}{2}
+\begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
+type stdGen = Seed of int
+type 'a monad =
+  stdGen -> 'a * stdGen
+
+let random:int monad =
+  (fun (s:stdGen) ->
+    (rand s, next s))
+
+let return a =
+  fun (Seed s)->(a,Seed s)
+
+let bind (step:'a monad)
+      (f:'a -> 'b monad)
+    :'b monad=
+  (fun (Seed s) ->
+    let i, s' = step (Seed s) in
+    f i s')
+
+let (>>=) = bind
+
+let run f =
+  let seed = Random.int 17 + 1 in
+  fst (f (Seed seed))
+\end{minted}
+    \columnbreak{}
+\begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
+let rec mk_list n =
+  if n = 0 then return [] else
+    random >>= fun x ->
+    mk_list (n-1) >>=  fun l ->
+    return (x::l)
+
+let rand_list () =
+  run (random >>= fun l->mk_list l)
+\end{minted}
+  \end{multicols*}
+\end{frame}
 \section{Conclusion}
 
 \begin{frame}{La programmation fonctionnelle}
