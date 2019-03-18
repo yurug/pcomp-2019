@@ -10,10 +10,6 @@ static CELLS_NUM_MAX: usize = 10;
 
 enum Content {
     Leaf {
-        // FIXME hashmap Point -> Cell
-        // insert in array when dumping
-        // array -> hashmap when reading
-        // data: Vec<Cell>,
         data: HashMap<Point, Cell>,
         dumped: bool,
     },
@@ -35,16 +31,13 @@ pub struct Tree {
     dumper: Dumper,
 }
 
-// fn split_vec(data: &mut Vec<Cell>, b: Point, e: Point) -> Vec<Cell> {
 fn split_vec(data: &mut HashMap<Point, Cell>, b: Point, e: Point) -> HashMap<Point, Cell> {
-    // data.sort_by(|a, b| a.loc.partial_cmp(&b.loc).unwrap());
     data.iter()
         .filter( |c| Rectangle{begin:b, end: e}.contained_in(*c.0) )
         .map(|c| (c.0.clone(), c.1.clone()))
         .collect()
 }
 
-// fn split_data(data: &mut Vec<Cell>, begin: Point, mid: Point, end: Point, id: &String, reader: Reader, dumper: Dumper) -> Content {
 fn split_data(data: &mut HashMap<Point, Cell>, begin: Point, mid: Point,
               end: Point, carea: Rectangle,id: &String, reader: Reader, dumper: Dumper) -> Content {
     Content::Node {
@@ -73,24 +66,6 @@ fn split_data(data: &mut HashMap<Point, Cell>, begin: Point, mid: Point,
     }
 }
 
-// fn dump_data(content: &mut Content, id: &String, dumper: Dumper) {
-//     match content {
-//         Content::Leaf{ref mut data, ref mut dumped} => {
-//             if !(*dumped) {
-//                 *dumped = true;
-//                 (dumper)(id, data.to_vec());
-//                 data.clear();
-//             }
-//         },
-//         Content::Node{ref mut left, ref mut right} => {
-//             let r = Rc::get_mut(right).unwrap();
-//             let l = Rc::get_mut(left).unwrap();
-//             dump_data(&mut left.content, id, dumper);
-//             dump_data(&mut right.content, id, dumper);
-//         }
-//     }
-// }
-
 impl Tree {
 
     pub fn new(size: Index, read: Reader, dump: Dumper) -> Tree {
@@ -107,7 +82,7 @@ impl Tree {
             dumper: dump,
             id: String::from("data/root"),
             content: Content::Leaf {
-                data: HashMap::new(), // Vec::new(),
+                data: HashMap::new(),
                 dumped: false
             }
         }
@@ -132,7 +107,6 @@ impl Tree {
     fn dump_data(&mut self) {
         match self.content {
             Content::Leaf{ref mut data, ref mut dumped} => {
-                // data.sort_by(|a, b| a.loc.partial_cmp(&b.loc).unwrap());
                 let mut vec = Vec::new();
                 for j in self.area.begin.y..(self.area.end.y) {
                     for i in self.area.begin.x..(self.area.end.x) {
@@ -143,7 +117,6 @@ impl Tree {
                 }
                 if !(*dumped) {
                     *dumped = true;
-                    // (self.dumper)(&self.id, data.to_vec());
                     (self.dumper)(&self.id, vec);
                     data.clear();
                     data.shrink_to_fit();
@@ -170,12 +143,6 @@ impl Tree {
                     *dumped = false;
                 }
                 data.get(&pos).map(|c| c.clone())
-                // for c in data {
-                //     if c.loc == pos {
-                //         return Some(*c)
-                //     }
-                // }
-                // None
             },
             Content::Node{ ref mut left, ref mut right } => {
                 let r = Rc::get_mut(right).unwrap();
@@ -201,14 +168,12 @@ impl Tree {
         let new_content = match self.content {
             Content::Leaf{ ref mut data, ref mut dumped } => {
                 if *dumped {
-                    // *data = (self.reader)(self.area.begin, self.area.end, &self.id);
                     let vec = (self.reader)(self.area.begin, self.current_area.end, &self.id);
                     for c in vec {
                         data.insert(c.loc, c);
                     }
                     *dumped = false;
                 }
-                // data.push(Cell{loc: pos, content: cell});
                 data.insert(pos, Cell{loc: pos, content: cell});
                 if data.len() as Index > NODE_MAX_SIZE {
                     let mid = self.area.mid();
