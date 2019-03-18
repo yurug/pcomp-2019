@@ -1,0 +1,7 @@
+  //comment initialiser le tableau??? 
+
+scala> new Array(10) ;;
+res0: Array[Nothing] = Array(null, null, null, null, null, null, null, null, null, null)
+
+  //il y a une erreur que j ai pas compris zen?
+on laisse iterator pour plus tard, c'est une optimisation
