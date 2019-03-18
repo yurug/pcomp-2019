@@ -9,7 +9,7 @@ use data::Function;
 use data::Index;
 use data::new_cell;
 
-use tree::Tree;
+use tree2::Tree;
 
 ///===============================///
 ///========= Spreadsheet =========///

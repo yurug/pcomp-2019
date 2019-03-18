@@ -6,8 +6,8 @@ use std::rc::Rc;
 use std::path::Path;
 
 use data::Point;
-use area::Rectangle;
-use area::*;
+// use area::Rectangle;
+// use area::*;
 // use area::Rectangle::*;
 use serialize::read_data;
 use serialize::dump_val_to;
@@ -36,6 +36,24 @@ static NODE_MAX_SIZE: Index = 10;
 // FIXME find why nothing is written
 // FIXME check the result of computation
 // FIXME find why the splits are weird => add -> resize ?? FIXED by using with_size ?
+
+use data::Point;
+use data::Index;
+
+pub type Rectangle = (Point, Point);
+
+pub fn area(b: Point, e: Point) -> Index {
+    (e.x - b.x) * (e.y - b.y)
+}
+
+pub fn between(p: Index, b: Index, e: Index) -> bool {
+    b <= p && p <= e
+}
+
+pub fn contained_in(p: Point, b: Point, e: Point) -> bool {
+    // between(p.x, b.x, e.x) &&
+    between(p.y, b.y, e.y)
+}
 
 enum Content {
     Leaf {

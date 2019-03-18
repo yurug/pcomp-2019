@@ -2,24 +2,25 @@
 #[cfg(feature="bench")]
 pub mod bench {
     use std::sync::mpsc;
+    use std::sync::*;
     use std::thread;
     use std::sync::mpsc::channel;
     use std::sync::mpsc::Receiver;
     use std::time::{Duration, Instant};
     use separator::Separatable;
-    pub type Sender = mpsc::Sender<u64>;
-    fn count(recv: Receiver<u64>) {
+    pub type Sender = mpsc::Sender<i64>;
+    fn count(recv: Receiver<i64>) {
         let mut before = Instant::now();
         let mut count = 0;
         loop {
             count = match recv.try_recv() {
                 Err(_) => count,
-                Ok(_)  => count + 1,
+                Ok(i)  => count + i,
             };
             let now = Instant::now();
-            if now.duration_since(before) > Duration::from_secs(2) {
-                let c: u64 = count / 2;
-                println!("{} cells processed in 1s", c.separated_string());
+            if now.duration_since(before) > Duration::from_millis(100) {
+                let c: i64 = count;
+                println!("{} cells in memory", c.separated_string());
                 before = now;
                 count = 0;
             }
@@ -33,12 +34,16 @@ pub mod bench {
         thread::spawn(move || {
             count(recv);
         });
-        RESULT_SENDER = Some(Mutex::new(send));
-        send
+        unsafe {
+            RESULT_SENDER = Some(Mutex::new(send));
+            RESULT_SENDER.as_ref().unwrap().lock().unwrap().clone()
+        }
     }
 
     pub fn get_sender() -> Sender {
-        RESULT_SENDER.as_ref().unwrap().lock().unwrap().clone()
+        unsafe {
+            RESULT_SENDER.as_ref().unwrap().lock().unwrap().clone()
+        }
     }
 }
 
@@ -50,7 +55,7 @@ pub mod bench {
     pub struct Sender {}
     unsafe impl Send for Sender {}
     impl Sender {
-        pub fn send(&self, _t: u64) -> Result<(), SendError<u64>> { Ok(()) }
+        pub fn send(&self, _t: i64) -> Result<(), SendError<i64>> { Ok(()) }
     }
     pub fn start_bench() -> Sender {
         Sender {}

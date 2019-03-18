@@ -26,8 +26,8 @@ impl PartialOrd for Point {
 
 impl Ord for Point {
     fn cmp(&self, p: &Point) -> Ordering {
-        match self.x.cmp(&p.x) {
-            Ordering::Equal => self.y.cmp(&p.y),
+        match self.y.cmp(&p.y) {
+            Ordering::Equal => self.x.cmp(&p.x),
             o => o
         }
     }

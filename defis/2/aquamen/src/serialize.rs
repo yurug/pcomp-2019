@@ -16,11 +16,12 @@ pub fn read_data(begin: Point, end: Point, filename: &String) -> Vec<Cell> {
     let f = format!("{}.cells", filename);
     let mut file = File::open(f).unwrap(); // FIXME better error management
     let mut res: Vec<u8> = Vec::new();
-    file.read(&mut res).unwrap();
+    file.read_to_end(&mut res).unwrap();
     let mut cpt = 0;
     let mut x = begin.x;
     let mut y = begin.y;
     let mut data = Vec::new();
+    trace!("{} elements in {}.cells", res.len(), filename);
     while cpt < res.len() {
         let t = res[cpt];
         let v = res[cpt+1];
@@ -36,7 +37,7 @@ pub fn read_data(begin: Point, end: Point, filename: &String) -> Vec<Cell> {
             content: r,
             loc: Point{x: x, y: y},
         });
-        if x <= end.x {
+        if x < end.x-1 {
             x += 1;
         } else {
             x = begin.x;
@@ -44,6 +45,7 @@ pub fn read_data(begin: Point, end: Point, filename: &String) -> Vec<Cell> {
         }
         cpt += 2;
     }
+    println!("read from {}\n{:?}", filename, data);
     data
 }
 
@@ -64,7 +66,8 @@ pub fn dump_wrong_to(dest: &mut Vec<u8>) {
 }
 
 // Consume the data
-pub fn dump_cells(filename: String, data: Vec<Cell>) {
+pub fn dump_cells(filename: &String, data: Vec<Cell>) {
+    println!("dumpimg to {}\n{:?}", filename, data);
     trace!("Dumping in {}.cells", filename);
     create_dir_all(Path::new(&filename)
                    .parent()
@@ -85,4 +88,45 @@ pub fn dump_cells(filename: String, data: Vec<Cell>) {
     }
     trace!("Writing cells of node {} : {:?} ", filename, res);
     file.write_all(&res);
+}
+
+#[cfg(test)]
+mod tests {
+
+    use data::Point;
+    use serialize::*;
+
+    #[test]
+    fn dump_and_read() {
+        let num_cell = 10;
+        let mut cells = Vec::with_capacity((num_cell as usize) * (num_cell as usize));
+        let mut c = Vec::with_capacity((num_cell as usize) * (num_cell as usize));
+
+        for j in 0..num_cell {
+            for i in 0..num_cell {
+                cells.push((i, j))
+            }
+        }
+
+        for (i, j) in &cells {
+            c.push(Cell{
+                loc: Point{x:*i as u64, y:*j as u64},
+                content: Val(*i + *j),
+            });
+        }
+
+        let cp = c.clone();
+
+        let f = "/tmp/data.cells".to_owned();
+        dump_cells(&f, c);
+        let b = Point{x:0, y:0};
+        let e = Point{x:num_cell as u64, y:num_cell as u64};
+        let new = read_data(b, e, &f);
+        assert!(new.len() == cp.len());
+        for (o, n) in cp.iter().zip(new.iter()) {
+            println!("{:?} == {:?}", o, n);
+            assert!(o == n);
+        }
+
+    }
 }

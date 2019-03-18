@@ -8,6 +8,7 @@ combine = "3.6.6"
 separator = "*"
 log = "*"
 env_logger = "*"
+rand = "*"
 
 [features]
 default = []
