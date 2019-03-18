@@ -32,6 +32,9 @@ impl Processor {
     }
     
     pub fn initial_valuation(&mut self,buffer : String, line_offset : Index) {
+
+        /* On parse puis fournit à l'évaluateur le bloc de lignes (1..n)
+           fourni en entrée. */
         let it = buffer.split("\n").filter(|x| x.len() > 0) ;
         let line_num = it.clone().count() ;
         for (i,line) in it.enumerate() {
@@ -40,6 +43,12 @@ impl Processor {
                 self.sheet.add_cell(c) ;
             }
         }
+
+        /* S'il est calculable, on récupère le résultat des lignes qu'on a
+           ajoutées ; sinon, on met la cellule de côté, pour qu'elle soit
+           calculée quand on disposera de plus d'informations (dans une
+           implémentation multithreadée, on écrirait dans le channel pour
+           demander au scheduler de fournir les dépendances requises). */
         for i in 0..line_num {
             for j in 0..self.line_len {
                 let p = Point{x:j as Index,y:i as Index + line_offset};
@@ -52,6 +61,8 @@ impl Processor {
                 }
             }
         }
+
+        /* On réessaie de calculer les cellules jusqu'ici mises de côté. */
         self.try_again();
     }
 
