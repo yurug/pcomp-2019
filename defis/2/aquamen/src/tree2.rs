@@ -185,9 +185,10 @@ impl Tree {
                 if data.len() as Index > NODE_MAX_SIZE {
                     let mid = self.area.mid();
                     Some(split_data(data, self.area.begin, mid, self.area.end, self.current_area,
-                                    &self.id, self.reader, self.dumper));
+                                    &self.id, self.reader, self.dumper))
+                } else {
+                    None
                 }
-                None
             },
             Content::Node{ ref mut left, ref mut right } => {
                 let r = Rc::get_mut(right).unwrap();
