@@ -7,14 +7,14 @@ extern crate env_logger;
 extern crate rand;
 
 mod data;
-// mod sched;
+mod sched;
 mod serialize;
 mod parser;
-// mod printer;
-// mod process;
+mod printer;
+mod process;
 mod bench;
-// mod spreadsheet;
-// mod aprinter ;
+mod spreadsheet;
+mod aprinter ;
 mod tree2;
 mod area;
 
@@ -42,9 +42,9 @@ impl log::Log for MyLogger {
 }
 
 fn main() {
-    log::set_logger(&MY_LOGGER).unwrap();
+    // log::set_logger(&MY_LOGGER).unwrap();
     // FIXME better handling of logging
-    log::set_max_level(LevelFilter::Trace);
+    // log::set_max_level(LevelFilter::Trace);
 
     let bench = bench::bench::start_bench();
 

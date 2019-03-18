@@ -12,7 +12,7 @@ CLEANER       := $(CARGO) clean
 CP            := cp
 EXEC          := ws
 EXECDIR       := debug
-LOGLVL        := trace
+LOGLVL        := error # trace
 
 #==================================
 # Don't edit below this line

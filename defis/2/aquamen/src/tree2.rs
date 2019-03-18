@@ -113,6 +113,13 @@ impl Tree {
         }
     }
 
+    pub fn begin(&self) -> Point {
+        self.area.begin
+    }
+    pub fn end(&self) -> Point {
+        self.area.end
+    }
+
     fn loaded_cells(&self) -> usize {
         match self.content {
             Content::Leaf{ref data, ref dumped} => data.len(),
@@ -184,6 +191,10 @@ impl Tree {
             self.dump_data();
         }
         res
+    }
+
+    pub fn set(&mut self, pos: Point, cell: Data) {
+        self.insert(pos, cell);
     }
 
     pub fn insert(&mut self, pos: Point, cell: Data) {

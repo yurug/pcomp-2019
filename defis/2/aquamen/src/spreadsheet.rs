@@ -9,6 +9,8 @@ use data::Function;
 use data::Index;
 use data::new_cell;
 
+use serialize::{read_data, dump_cells};
+
 use tree2::Tree;
 
 ///===============================///
@@ -28,7 +30,7 @@ impl Spreadsheet {
     pub fn new(n: Index) -> Self {
         Spreadsheet {
             width: n,
-            inner: Tree::with_size(n),
+            inner: Tree::new(n, read_data, dump_cells),
             functions: HashMap::new(),
             bindings: HashMap::new(),
         }
@@ -120,7 +122,7 @@ impl Spreadsheet {
 
     /** Doit être un binding sur eval **/
     pub fn eval_all(&mut self) -> Vec<Vec<Data>> {
-        let height = self.inner.end.y - self.inner.begin.y;
+        let height = self.inner.end().y - self.inner.begin().y;
 
 
         let mut matrix = Vec::with_capacity(height as usize);
