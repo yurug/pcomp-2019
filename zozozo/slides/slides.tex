@@ -188,7 +188,13 @@ let f y = !x * y
     une autre en le transformant
     \[ bind : M A \to (A \to M B) \to M B \]
   \end{description}
-  … satisfaisant certaines lois.
+  \onslide<2->{
+  … satisfaisant les lois :
+  \begin{itemize}
+  \item (return x) >>= f $\equiv$ f x
+  \item m >>= return $\equiv$ m
+  \item (m >>= f) >>= g $\equiv$ m >>= (fun x -> f x >>= g)
+  \end{itemize}}
 \end{frame}
 
 \begin{frame}[fragile]{Monade~: une signature}
@@ -283,8 +289,8 @@ let divM_2 x y1 y2 y3 =
     \begin{minted}[fontsize=\small]{ocaml}
 let divM_3 x y1 y2 y3 =
   divM x y1
-  >>= fun r2 -> divM r2 y2
-  >>= fun r3 -> divM r3 y3
+  >>= (fun r2 -> divM r2 y2
+  >>= fun r3 -> divM r3 y3)
     \end{minted}
   \end{minipage}
 \end{frame}
@@ -488,18 +494,13 @@ let rand_pair () = run mk_pair
 \begin{frame}[fragile]{La Monade Random~: les paires}
   \begin{multicols*}{2}
 \begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
-let rand_int () = run random
+let rand_int () =
+  run random
 
-let mk_pair' =
-  fun seed ->
-  bind
-    random
-    (fun x seed' ->
-      bind
-        random
-        (fun y -> return (x, y))
-        seed')
-    seed
+let run f =
+  let seed =
+  Random.int 17 + 1
+  in fst (f (Seed seed))
 \end{minted}
     \columnbreak{}
 \begin{minted}[baselinestretch=0.8,fontsize=\small]{ocaml}
