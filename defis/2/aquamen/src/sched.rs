@@ -35,7 +35,7 @@ pub fn schedule(sheet_path: &str,
     }
 
     let changes = fs::read_to_string(user_mod_path)
-        .expect("Something went wrong reading the second file");
+        .expect(&format!("Something went wrong while reading {}", user_mod_path));
     proc.changes(changes);
 }
 

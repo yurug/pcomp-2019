@@ -45,7 +45,6 @@ pub fn read_data(begin: Point, end: Point, filename: &String) -> Vec<Cell> {
         }
         cpt += 2;
     }
-    println!("read from {}\n{:?}", filename, data);
     data
 }
 
@@ -67,7 +66,6 @@ pub fn dump_wrong_to(dest: &mut Vec<u8>) {
 
 // Consume the data
 pub fn dump_cells(filename: &String, data: Vec<Cell>) {
-    println!("dumpimg to {}\n{:?}", filename, data);
     trace!("Dumping in {}.cells", filename);
     create_dir_all(Path::new(&filename)
                    .parent()
