@@ -2,6 +2,7 @@ use std::sync::mpsc::Sender;
 
 use aprinter::APrinter ;
 use data::{Cell,Point,Index};
+use data::Data::Wrong ;
 use parser::parse_line;
 use parser::parse_change;
 use spreadsheet::Spreadsheet;
@@ -61,25 +62,42 @@ impl Processor {
                 }
             }
         }
-
-        /* On réessaie de calculer les cellules jusqu'ici mises de côté. */
-        self.try_again();
     }
 
-    fn try_again(&mut self) {
-
-        let mut future = vec![] ;
+    /* Tant qu'il y a des cellules mises de côté faute d'avoir accès à
+       leurs dépendances, on essaie de les résoudre puis de les imprimer.
+       Cette méthode est un "raccourci" dans un contexte monothreadé qui ne
+       devra plus être utilisé avec le parallélisme.
+       Si des cellules sont finalement insolvables, on les marque Wrong. */
+    
+    pub fn try_again(&mut self) {
+       
+        while self.waiting.len() > 0 {
+            
+            let init_len = self.waiting.len() ;
+            let mut future = vec![] ;
         
-        for p in &self.waiting {
-            let v = self.sheet.eval(*p) ;
-            if v.is_none() {
-                future.push(*p) ;
-            } else {
-                let c = Cell{content:v.unwrap(),loc:*p};
-                self.printer.print(c);
+            for p in &self.waiting {
+                let v = self.sheet.eval(*p) ;
+                if v.is_none() {
+                    future.push(*p) ;
+                } else {
+                    let c = Cell{content:v.unwrap(),loc:*p};
+                    self.printer.print(c);
+                }
+            }
+
+            self.waiting = future ;
+
+            if self.waiting.len() == init_len {
+                for p in &self.waiting {
+                    let c = Cell { content : Wrong, loc : *p } ;
+                    self.printer.print(c) ;
+                }
+                self.waiting = vec![] ;
             }
         }
-        self.waiting = future ;
+
     }
     
     pub fn changes(&mut self,buffer : String) {

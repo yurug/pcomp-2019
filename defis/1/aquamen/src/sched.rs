@@ -43,6 +43,8 @@ pub fn schedule(sheet_path: &str,
         line_offset += 1 ;
     }
 
+    proc.try_again() ;
+    
     /* On lit et calcule les changements d'une traite.*/
     let changes = fs::read_to_string(user_mod_path)
         .expect("Something went wrong reading the second file");
