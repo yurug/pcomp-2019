@@ -5,8 +5,10 @@ use std::collections::HashMap;
 use data::{Index, Cell, Point, Data};
 use area::Rectangle;
 
-static NODE_MAX_SIZE: Index = 10;
-static CELLS_NUM_MAX: usize = 10;
+use log::*;
+
+static NODE_MAX_SIZE: Index = 100;
+static CELLS_NUM_MAX: usize = 4 * (NODE_MAX_SIZE as usize);
 
 enum Content {
     Leaf {
@@ -32,6 +34,7 @@ pub struct Tree {
 }
 
 fn split_vec(data: &mut HashMap<Point, Cell>, b: Point, e: Point) -> HashMap<Point, Cell> {
+    trace!("Splitting data between {:?} and {:?}", b, e);
     data.iter()
         .filter( |c| Rectangle{begin:b, end: e}.contained_in(*c.0) )
         .map(|c| (c.0.clone(), c.1.clone()))
@@ -40,6 +43,7 @@ fn split_vec(data: &mut HashMap<Point, Cell>, b: Point, e: Point) -> HashMap<Poi
 
 fn split_data(data: &mut HashMap<Point, Cell>, begin: Point, mid: Point,
               end: Point, carea: Rectangle,id: &String, reader: Reader, dumper: Dumper) -> Content {
+    trace!("Splitting node {}", id);
     Content::Node {
         left: Rc::new(Tree{
             content: Content::Leaf {
@@ -105,6 +109,7 @@ impl Tree {
     }
 
     fn dump_data(&mut self) {
+        trace!("Dumping data for node {}", self.id);
         match self.content {
             Content::Leaf{ref mut data, ref mut dumped} => {
                 let mut vec = Vec::new();
@@ -132,10 +137,11 @@ impl Tree {
     }
 
     pub fn get(&mut self, pos: Point) -> Option<Cell> {
+        // trace!("Retreiving data for {:?}", pos);
         let res = match self.content {
             Content::Leaf{ref mut data, ref mut dumped } => {
                 if *dumped {
-                    // *data = (self.reader)(self.area.begin, self.area.end, &self.id);
+                    trace!("Reading data from {}.cells", self.id);
                     let vec = (self.reader)(self.area.begin, self.current_area.end, &self.id);
                     for c in vec {
                         data.insert(c.loc, c);
@@ -165,6 +171,7 @@ impl Tree {
     }
 
     pub fn insert(&mut self, pos: Point, cell: Data) {
+        trace!("Inserting {:?} at {:?}", cell, pos);
         let new_content = match self.content {
             Content::Leaf{ ref mut data, ref mut dumped } => {
                 if *dumped {
@@ -200,6 +207,7 @@ impl Tree {
             self.current_area.end.y = pos.y+1;
         }
         if let Some(c) = new_content {
+            trace!("Node {} has been splitted", self.id);
             self.content = c;
         }
         if self.loaded_cells() > CELLS_NUM_MAX {
