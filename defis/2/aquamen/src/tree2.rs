@@ -139,6 +139,7 @@ impl Tree {
                     // (self.dumper)(&self.id, data.to_vec());
                     (self.dumper)(&self.id, vec);
                     data.clear();
+                    data.shrink_to_fit();
                 }
             },
             Content::Node{ref mut left, ref mut right} => {
