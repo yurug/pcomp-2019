@@ -18,7 +18,7 @@ pub fn schedule(sheet_path: &str,
                 changes_path: &str,
                 bench: bench::Sender) {
 
-    /* On récupère la largeur du parser (en parsant la première ligne). */
+    /* On récupère la largeur du tableur (en parsant la première ligne). */
     let line_len = guess_line_len(sheet_path) ;
 
     /* On s'en sert pour construire le printer, à partir duquel on peut
