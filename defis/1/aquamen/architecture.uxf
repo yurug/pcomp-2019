@@ -169,13 +169,15 @@ layer=4</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>927</x>
-      <y>414</y>
+      <y>405</y>
       <w>117</w>
-      <h>27</h>
+      <h>45</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
-layer=4</panel_attributes>
-    <additional_attributes>110.0;10.0;10.0;10.0</additional_attributes>
+layer=4
+when
+evaluated</panel_attributes>
+    <additional_attributes>110.0;20.0;10.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
