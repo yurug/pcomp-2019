@@ -1,12 +1,28 @@
-use data::{Index,Cell,Data,Point};
+use data::{Index,Cell,Data};
 use data::Data::{Val,Wrong,Fun};
-use std::fs::{File,OpenOptions,remove_file,read_to_string};
-use std::io::{Write,Seek,SeekFrom,Error};
+use std::fs::{File,OpenOptions,remove_file};
+use std::io::{Write,Seek,SeekFrom};
 
 const NUM_SIZE_IN_BYTES : Index = 3 ;
 const EOL_SEP : u8 = 10 ;
 const REG_SEP : u8 = ';' as u8 ;
 const WRONG_CHAR : u8 = 'p' as u8 ;
+
+/* Le travail du printer consiste essentiellement, du moins pour l'évaluation
+   initiale, à imprimer la cellule qu'on lui fournit dans le fichier cible.
+   Or, pour qu'il puisse être facilement parallélisé, il faut :
+   - que les cellules puissent lui être passées dans le désordre. Il faut
+     donc pouvoir calculer à quel byte du fichier cible il doit imprimer une
+     cellule, en ne disposant que de ses coordonnées dans le tableur. Ainsi,
+     il n'y a jamais besoin d'avoir plus d'une cellule en mémoire à la fois.
+     Le fichier n'est ouvert qu'une fois, et on "saute" là où on veut écrire.
+   - qu'il puisse agrandir le fichier cible en cours d'exécution. Ainsi, il
+     n'a pas besoin qu'un autre fragment du programme l'informe une fois pour
+     toutes de la quantité de données à traiter, et donc ne "bloque" pas en
+     attendant cette information (nécessitant qu'on ait entièrement parcouru
+     -et parsé - le fichier d'entrée). Memmap ne permet pas ce comportement :
+     on doit donc s'en passer. */
+
 
 pub struct APrinter {
     target_path : String,
@@ -19,10 +35,15 @@ pub struct APrinter {
 impl APrinter {
 
     pub fn new(tp : String, cp : String, cells_by_line : Index) -> Self {
+        /* Chaque ligne contient (cellules + séparateurs) bytes, où
+           cellules = nombre de cellules sur la ligne 
+                      * taille d'une cellule (3, dans la mesure où i < 256
+                                              s'écrit en ascii sur 3 bytes)
+           séparateurs = nombre de cellules sur la ligne 
+                         * taille d'un séparateur (1, ';' étant un char ascii)
+        */
         let bbl =
-        // place pour les numéros
             cells_by_line * NUM_SIZE_IN_BYTES
-        // place pour les séparateurs
             + cells_by_line ;
         let t = OpenOptions::new()
             .read(true).write(true).create(true).truncate(true)
@@ -55,32 +76,52 @@ impl APrinter {
     pub fn print(&mut self, cell:Cell) {
         let x = cell.loc.x ;
         let y = cell.loc.y ;
+
+        /* On s'assure qu'on n'essaie pas d'écrire une cellule en-dehors du
+           tableur. */ 
         if x >= self.cells_by_line {
             self.clean();
             panic!("Index out of bounds ^^")
         }
+
+        /* On positionne le curseur au caractère o + c, où
+           o = début de la ligne cible
+             = y * bytes par ligne,
+           c = colonne cible
+             = x * (taille d'une cellule + 1), 1 pour le séparateur ; */
         let bx = x * (NUM_SIZE_IN_BYTES + 1) ;
         let by = self.bytes_by_line * y ;
         let offset = by + bx ;
+
+        /* On choisit le suffixe de la cellule : ; au milieu d'une ligne,
+           \n en fin de ligne. */
         let suffix = if x == self.cells_by_line - 1 {
             EOL_SEP
         } else {
             REG_SEP
         };
+
+        /* On calcule le vecteur de bytes qui doit être écrit. */
         let mut bytes = self.get_val(cell.content) ;
         bytes.push(suffix) ;
+
+        /* Et on l'écrit là où on a calculé le curseur. */
         self.stamp(offset, bytes);
     }
 
     fn stamp(&mut self, offset : Index, text : Vec<u8>) {
-        
+
+        /* On agrandit le fichier si l'écriture doit avoir lieu sur une ligne
+           qui n'existe pas encore. */
         let future_offset = offset + NUM_SIZE_IN_BYTES ;
         let f_len = self.target.metadata().unwrap().len();
         if f_len <= future_offset {
-            self.target.set_len(future_offset + 1) ;
+            let _ = self.target.set_len(future_offset + 1) ;
         }
-        self.target.seek(SeekFrom::Start(offset)) ;
-        self.target.write_all(text.as_slice()) ;
+
+        /* On écrit dans le fichier concret.*/
+        let _ = self.target.seek(SeekFrom::Start(offset)) ;
+        let _ = self.target.write_all(text.as_slice()) ;
     }
 
     pub fn print_changes(&mut self, effects: Vec<(Cell, Vec<Cell>)>) {
@@ -91,29 +132,27 @@ impl APrinter {
         
         for (change, consequences) in effects {
 
+            /* On écrit la cellule modifiée. */
             let mut tmp = "after \"".as_bytes().to_vec() ;
             tmp.append(&mut self.raw_change(change)) ;
             tmp.append(&mut "\":".as_bytes().to_vec()) ;
             tmp.push(EOL_SEP) ;
-            file.write_all(tmp.as_slice());
+            let _ = file.write_all(tmp.as_slice());
 
+            /* Et on écrit les répercussions sur les autres cellules,
+               séparées par newline. */
             for c in consequences {
                 tmp.clear() ;
                 tmp.append(&mut self.raw_change(c)) ;
                 tmp.push(EOL_SEP) ;
-                file.write_all(tmp.as_slice()) ;
+                let _ = file.write_all(tmp.as_slice()) ;
             }
         }
     }
 
-    // fn io_may_crash<F>(&mut self, f:&mut F)
-    // where F: FnMut() -> Result<(),Error> {
-    //     let r = f() ;
-    //     if r.is_err() {
-    //         self.clean() ;
-    //         panic!(r.unwrap_err()) ;
-    //     }
-    // }
+    /* Il ne s'agit ensuite que de fonctions de conversions, pour convertir
+       les structures et les énumérations qu'on manipule en vecteurs de bytes
+       au moment de les écrire. */
     
     fn raw_change(&self, change : Cell) -> Vec<u8> {
         let mut preffix = format!("{} {} ",change.loc.y,change.loc.x)
@@ -164,7 +203,9 @@ impl APrinter {
 mod tests {
 
     use super::*;
-
+    use data::{Point} ;
+    use std::fs::read_to_string ;
+    
     #[test]
     fn test_dummest_output() {
         let mut printer = APrinter::new("u0".to_string(),"c0".to_string(),1);

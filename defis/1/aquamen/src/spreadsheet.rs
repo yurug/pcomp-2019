@@ -43,11 +43,6 @@ impl Spreadsheet {
         self.bind(&cell)
     }
 
-    /** Doit être un binding sur add_cell **/
-    // pub fn add_line(&mut self, cells: Vec<Cell>) {
-    //     cells.into_iter().for_each(|c| self.add_cell(c));
-    // }
-
     pub fn eval(&mut self, p: Point) -> Option<Data> {
         let data = self._eval(p, &mut HashSet::new());
         match data {
@@ -115,26 +110,6 @@ impl Spreadsheet {
             Some(f) => Some(*f),
             None => None
         }
-    }
-
-    /** Doit être un binding sur eval **/
-    pub fn eval_all(&mut self) -> Vec<Vec<Data>> {
-        let height = self.inner.len() as Index / self.width;        
-
-        let mut matrix = Vec::with_capacity(height as usize);
-
-        for y in 0..height {
-            let mut line = Vec::with_capacity(self.width as usize);
-            
-            for x in 0..self.width {
-                line.push(self.eval(Point { x, y })
-                          .expect(&format!("Cell {}-{} doesn't exist", x, y)));
-            }
-
-            matrix.push(line);
-        }
-        
-        matrix
     }
 
     pub fn apply_change(&mut self, cell: Cell) -> (Cell, Vec<Cell>) {
