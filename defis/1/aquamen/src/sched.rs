@@ -43,6 +43,8 @@ pub fn schedule(sheet_path: &str,
         line_offset += 1 ;
     }
 
+    /* On indique au thread qu'il a reçu toutes les données dont il a besoin
+       pour finir. */
     proc.try_again() ;
     
     /* On lit et calcule les changements d'une traite.*/
