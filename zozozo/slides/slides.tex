@@ -289,8 +289,8 @@ let divM_2 x y1 y2 y3 =
     \begin{minted}[fontsize=\small]{ocaml}
 let divM_3 x y1 y2 y3 =
   divM x y1
-  >>= (fun r2 -> divM r2 y2
-  >>= fun r3 -> divM r3 y3)
+  >>= fun r2 -> divM r2 y2
+  >>= fun r3 -> divM r3 y3
     \end{minted}
   \end{minipage}
 \end{frame}
@@ -338,8 +338,8 @@ let divM_3 x y1 y2 y3 =
 \begin{minted}{ocaml}
 let divM_3 x y1 y2 y3 =
   divM x y1
-  >>= fun r2 -> divM r2 y2
-  >>= fun r3 -> divM r3 y3
+  >>= (fun r2 -> divM r2 y2
+  >>= fun r3 -> divM r3 y3)
 \end{minted}
     \pause{}
 \begin{minted}{ocaml}
