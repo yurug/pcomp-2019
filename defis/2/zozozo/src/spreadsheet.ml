@@ -262,3 +262,93 @@ let first_evaluation filename region_depth formulas graph =
   |> List.iter
     (fun (p1, eval) ->
        Format.printf "Formule en %s vaut %d@." (string_of_pos p1) eval)*)
+let get_diff list_values zone value =
+    List.fold_left
+      (fun n (pos_value,(old_v,new_v)) -> (*old_v <> new_v*)
+        if not(Ast.pos_in_area pos_value zone)
+        then n
+        else
+          match old_v,new_v with
+          | Int i, _ when value = i -> n-1
+          | _, Int i when value = i -> n+1
+          | _ -> n
+      ) 0 list_values
+
+let rec value_to_value region_depth data_filename order computables list_values =
+  match computables with
+  | [] -> List.map (fun (p,(_,n)) -> (p,n)) list_values
+  | _ ->
+     let pos_list, list_values =
+       List.fold_left
+         (fun (pos_list,list_val) (pos_compute,Occ(zone,v)) ->
+           match v with
+           | Empty | Undefined -> failwith "On ne compte que des entiers"
+           | Int v ->
+              let diff = get_diff list_values zone v in
+              if diff = 0 then pos_list,list_val
+              else
+                let region = Ast.pos_to_region region_depth pos_compute in
+                let pos_region = Ast.relative_pos region pos_compute in
+                let filename_region = build_name_file_region data_filename region in
+                let data = Data.DataArray.init filename_region in
+                let old_value = Ast.value (Data.DataArray.get pos_region data) in
+                match old_value with
+                | Empty | Undefined -> failwith "C'est pas vrai"
+                | Int old_value ->
+                   (pos_compute :: pos_list),
+                   ((pos_compute,(Int old_value, Int (old_value + diff))) :: list_val)
+         ) ([],list_values) computables in
+     let computables, order = FormulaOrder.get_new_computable_formulas pos_list order in
+     value_to_value region_depth data_filename order computables list_values
+
+
+
+let eval_one_change data_filename change_filename line region_depth graph =
+  let string_list = String.split_on_char ' ' line in
+  match string_list with
+  | [] | [_] | [_;_] -> failwith "Parsing incorrect line"
+  | r :: c :: d :: [] -> (* ajoute un entier d en (r,c) *)
+     let r = int_of_string r in
+     let c = int_of_string c in
+     let d = int_of_string d in
+     let pos = Ast.build_pos r c in
+     let region = Ast.pos_to_region region_depth pos in
+     let pos_region = Ast.relative_pos region pos in
+     let formulas_region = Graph.get_neighbours region graph in
+     let filename_data_region = build_name_file_region data_filename region in
+     let data = Data.DataArray.init filename_data_region in
+     let old_value = Ast.value (Data.DataArray.get pos_region data) in
+     match Mpos.find_opt pos formulas_region with
+     | None -> (*L'ancienne valeur est un entier*)
+        begin
+          match old_value with
+          | Empty -> failwith "Empty n'existe pas"
+          | Undefined -> failwith "Un entier est forcement défini"
+          | Int old_value ->
+             if old_value = d then graph,[]
+             else(*L'ancienne et la nouvelle valeur sont différentes*)
+               let formulas =
+                 Graph.(Mpos.fold
+                          (fun pos {subregion = zone; formula = f} l ->
+                            if Ast.pos_in_area pos zone
+                            then (pos,f) :: l
+                            else l
+                 ) formulas_region []) in
+               let order = FormulaOrder.build_order_from_all region_depth graph formulas in
+               let computables = FormulaOrder.get_computable_formulas order in
+               let fst_change = [(pos,(Int old_value,Int d))] in
+               graph,(value_to_value region_depth data_filename order computables fst_change)
+        end
+     | Some f ->  (*L'ancienne valeur est une formule*)
+        match old_value with
+        | Empty -> failwith "Empty n'existe pas"
+        | Undefined -> graph,[(Ast.build_pos r c,Int d)] (*Ajouter un entier n'ajoute pas de cycle *)
+        | Int i -> graph,[]
+
+
+
+  (* | r :: c :: t ->
+   *    let data_cell = String.concat "" t in
+   *    let data_cell = String.split_on_char ',' data_cell in
+   *    let data_cell = List.map String.trim data_cell in
+   *    data_cell *)
