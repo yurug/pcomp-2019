@@ -180,7 +180,6 @@ let first_evaluation regions formulas graph =
     |> List.map (fun p -> (p, Undefined)) in
   apply_changes regions formulas_indefined
 
-<<<<<<< HEAD
   (*
   let tasks_list_map =
     tasks_by_region region_depth computable in
