@@ -15,6 +15,7 @@ type content = formulas
 
 val empty_content : content
 val empty_graph : t
+val empty_neighbours : neighbours
 
 exception ExistingNode of nodeLabel
 exception NonExistingNode of nodeLabel
@@ -34,6 +35,7 @@ val add_node : nodeLabel -> node -> t -> t
 (** [add_neighbour label_node label_neighbour new_neighbour g] *)
 val add_neighbour : nodeLabel -> neighbourLabel -> neighbour -> t -> t
 val change_neighbours : nodeLabel -> neighbours -> t -> t
+val change_content : nodeLabel -> content -> t -> t
 
 (** [get_neighbours label g] returns the neighbours of node labelled
    [label] in graph [g] or raises [NonExistingNode]. *)

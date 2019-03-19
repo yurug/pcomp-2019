@@ -80,6 +80,15 @@ let change_neighbours label_node neighbours g =
     let new_node = build_node empty_content neighbours in
     Mint.add label_node new_node g
 
+let change_content label_node content g =
+  let new_node =
+    match Mint.find_opt label_node g with
+    | Some node ->
+       {node with content = content}
+    | None ->
+       build_node content empty_neighbours in
+  Mint.add label_node new_node g
+
 let get_neighbours label (graph:t) =
   match Mint.find_opt label graph with
   | None -> raise (NonExistingNode label)
@@ -97,6 +106,7 @@ let get_neighbours_content label graph =
 
 let fold_neighbours f (neighbours:neighbours) =
   Mpos.fold f neighbours
+
 
 let print_graph graph =
   Mint.iter

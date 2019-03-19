@@ -209,7 +209,7 @@ let get_diff list_values zone value =
           | _ -> n
       ) 0 list_values
 
-let rec value_to_value region_depth data_filename order computables list_values =
+let rec value_to_value regions data_filename order computables list_values =
   match computables with
   | [] -> List.map (fun (p,(_,n)) -> (p,n)) list_values
   | _ ->
@@ -222,9 +222,9 @@ let rec value_to_value region_depth data_filename order computables list_values 
               let diff = get_diff list_values zone v in
               if diff = 0 then pos_list,list_val
               else
-                let region = Ast.pos_to_region region_depth pos_compute in
+                let region = pos_to_region regions pos_compute in
                 let pos_region = Ast.relative_pos region pos_compute in
-                let filename_region = build_name_file_region data_filename region in
+                let filename_region = get_region_filename regions region in
                 let data = Data.DataArray.init filename_region in
                 let old_value = Ast.value (Data.DataArray.get pos_region data) in
                 match old_value with
@@ -234,23 +234,23 @@ let rec value_to_value region_depth data_filename order computables list_values 
                    ((pos_compute,(Int old_value, Int (old_value + diff))) :: list_val)
          ) ([],list_values) computables in
      let computables, order = FormulaOrder.get_new_computable_formulas pos_list order in
-     value_to_value region_depth data_filename order computables list_values
+     value_to_value regions data_filename order computables list_values
 
 
 
-let eval_one_change data_filename change_filename line region_depth graph =
+let eval_one_change data_filename change_filename line regions graph =
   let string_list = String.split_on_char ' ' line in
   match string_list with
   | [] | [_] | [_;_] -> failwith "Parsing incorrect line"
   | r :: c :: d :: [] -> (* ajoute un entier d en (r,c) *)
      let r = int_of_string r in
      let c = int_of_string c in
-     let d = int_of_string d in
+     let new_value = int_of_string d in
      let pos = Ast.build_pos r c in
-     let region = Ast.pos_to_region region_depth pos in
+     let region = pos_to_region regions pos in
      let pos_region = Ast.relative_pos region pos in
      let formulas_region = Graph.get_neighbours region graph in
-     let filename_data_region = build_name_file_region data_filename region in
+     let filename_data_region = get_region_filename regions region in
      let data = Data.DataArray.init filename_data_region in
      let old_value = Ast.value (Data.DataArray.get pos_region data) in
      match Mpos.find_opt pos formulas_region with
@@ -260,7 +260,7 @@ let eval_one_change data_filename change_filename line region_depth graph =
           | Empty -> failwith "Empty n'existe pas"
           | Undefined -> failwith "Un entier est forcement défini"
           | Int old_value ->
-             if old_value = d then graph,[]
+             if old_value = new_value then graph,[]
              else(*L'ancienne et la nouvelle valeur sont différentes*)
                let formulas =
                  Graph.(Mpos.fold
@@ -269,16 +269,43 @@ let eval_one_change data_filename change_filename line region_depth graph =
                             then (pos,f) :: l
                             else l
                  ) formulas_region []) in
-               let order = FormulaOrder.build_order_from_all region_depth graph formulas in
+               let order = FormulaOrder.build_order_from_all regions graph formulas in
                let computables = FormulaOrder.get_computable_formulas order in
-               let fst_change = [(pos,(Int old_value,Int d))] in
-               graph,(value_to_value region_depth data_filename order computables fst_change)
+               let fst_change = [(pos,(Int old_value,Int new_value))] in
+               graph,(value_to_value regions data_filename order computables fst_change)
         end
-     | Some f ->  (*L'ancienne valeur est une formule*)
+     | Some {formula = Occ(zone,v); subregion = subzone} ->  (*L'ancienne valeur est une formule*)
+        let content,neighbours = Graph.get_neighbours_content region graph in
+        let content = Mpos.remove pos content in
+        (*TODO : Il faut changer les autres regions en retirant ce voisin si necessaire*)
+        let neighbours =
+          Graph.fold_neighbours
+            (fun lab ({subregion = zone;_} as f) neighbours ->
+              if Mpos.exists (fun pos _ -> Ast.pos_in_area pos zone) content
+              then
+                Mpos.add lab f neighbours
+              else
+                neighbours
+            )
+            neighbours Graph.empty_neighbours in
+        let graph = Graph.change_content region content graph in
+        let graph = Graph.change_neighbours region neighbours graph in
         match old_value with
         | Empty -> failwith "Empty n'existe pas"
-        | Undefined -> graph,[(Ast.build_pos r c,Int d)] (*Ajouter un entier n'ajoute pas de cycle *)
-        | Int i -> graph,[]
+        | Int i when i = new_value ->
+           graph,[(Ast.build_pos r c,Int new_value)] (*Ajouter un entier n'ajoute pas de cycle*)
+        | Undefined | Int _ ->
+           let formulas =
+                 Graph.(Mpos.fold
+                          (fun pos {subregion = zone; formula = f} l ->
+                            if Ast.pos_in_area pos zone
+                            then (pos,f) :: l
+                            else l
+                          ) formulas_region []) in
+           let order = FormulaOrder.build_order_from_all regions graph formulas in
+           let computables = FormulaOrder.get_computable_formulas order in
+           let fst_change = [(pos,(old_value,Int new_value))] in
+           graph,(value_to_value regions data_filename order computables fst_change)
 
 
 
