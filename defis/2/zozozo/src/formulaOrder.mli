@@ -27,17 +27,18 @@
    then can be extracted to set their value to [Undefined].
    *)
 open Ast
+open Partitioner
 
 type order
 
-(** [build_order_from g label] builds the relation order from the node
-   labelled [label] in the graph [g].  *)
-val build_order_from : int -> Graph.t -> (pos * is_formula content) -> order
+(** [build_order_from regions g (pos,formula)] builds the relation
+   order from the node labelled [label] in the graph [g].  *)
+val build_order_from : regions -> Graph.t -> (pos * is_formula content) -> order
 
-(** [build_order_from_all g formulas] builds the relation order which
-   links every formulas in [formulas] using the graph [g]. *)
+(** [build_order_from_all regions formulas] builds the relation order
+   which links every formulas in [formulas] using the graph [g]. *)
 val build_order_from_all :
-  int -> Graph.t -> (pos* is_formula content) list -> order
+  regions -> Graph.t -> (pos* is_formula content) list -> order
 
 
 (** [is_computable label order] returns true if the formula labelled

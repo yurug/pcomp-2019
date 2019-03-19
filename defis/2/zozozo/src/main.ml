@@ -18,21 +18,16 @@ let parse_input argv =
 let main () =
   let data_filename, _, _, _, _ =
     parse_input Sys.argv in
-  let dr = 100 in
+  Format.printf "%s@." data_filename;
+  let max_file_size = 100 in
   let t0 = Unix.gettimeofday () in
-  let () = Spreadsheet.cut_file_into_region data_filename dr in
+  let regions = Partitioner.cut_file_into_regions data_filename max_file_size in
   let t1 = Unix.gettimeofday () in
-  let f, g = Spreadsheet.build_graph data_filename dr in
+  let f, g = Spreadsheet.build_graph data_filename regions in
   let t2 = Unix.gettimeofday () in
-  let _ = Spreadsheet.first_evaluation data_filename dr f g in
+  let _ = Spreadsheet.first_evaluation regions f g in
   let t3 = Unix.gettimeofday () in
   print_execution_time t0 t1 t2 t3
-
- (* Graph.print_graph g ;
-  print_endline " ************************* ";
-    FormulaOrder.print_order o;*)
-
-
 
 
 let () = main ()

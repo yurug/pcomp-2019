@@ -1,72 +1,18 @@
 open Ast
+open Parser
+open Partitioner
 
-(* Optimisation possible : découper le fichier par quantité de travail
-   plutot que par nombre de ligne.
+(** [init_graph regions ic] parses the file [ic] to find all formulas
+   and initiates the dependency graph by adding the found formulas to
+   their corresponding region. Neighbours in [graph] are not taken
+   care by this function. *)
+let init_graph regions ic =
 
-   Difficultés :
-
-   1- l'essentiel du travail consiste à faire les évaluations
-   partielles de formules à l'initialisation ou quand une nouvelle
-   formule est ajoutée. Comme on parallélise sur les données et non
-   sur les tâches, il possible de séparer équitablement le travail
-   pour l'évaluation initiale mais il sera plus difficile de le
-   séparer ensuite dynamiquement quand de nouvelles formules vont
-   s'ajouter.
-
-   2- Beaucoup de fonctions sont paramétrées sur la profondeur des
-   régions + les régions sont identifiées par un unique label
-
-   Solution à 2 : - On peut garder un identifiant entier et ajouter au
-   contenu d'un noeud (= une région) dans le graphe les informations
-   utiles pour savoir découper la région (pos des caractères de début
-   et de fin) puis modifier les fonctions impactées.
-
-*)
-let build_name_file_region filename region =
-  let ext, filename =
-    String.split_on_char '.' filename
-    |> List.rev
-    |> (function | [] -> failwith "Master.build_name_region : empty filename."
-                 | ext :: xs ->
-                   let xs = List.rev xs in
-                   ext, String.concat "." xs) in
-  filename^"_"^(string_of_int region)^"."^ext
-
-let cut_file_into_region filename region_depth =
-  let ic = open_in filename in
-
-  let rec cut file nb_line region =
-    try
-      if nb_line = (region+1)*region_depth then
-        let _ = close_out file in
-        let new_region = region + 1 in
-        let new_name = build_name_file_region filename new_region in
-        let new_file = open_out new_name in
-        cut new_file nb_line new_region
-      else
-        ( input_line ic
-          |> Printf.fprintf file "%s\n" );
-           cut file (nb_line+1) region
-    with End_of_file -> close_out file
-
-  in
-  let first_file = open_out (build_name_file_region filename 0) in
-  cut first_file 0 0; close_in ic
-
-
-
-(** [init_graph dr ic] parses the file [ic] to find all formulas and
-   initiates the dependency graph by adding the found formulas to
-   their corresponding region. Neighbours are not taken care in this
-   function. *)
-let init_graph region_depth ic   =
-
-  let rec aux all_regions all_formulas line_nb region graph =
+  let rec aux all_formulas id graph =
+    let l0, l1 = get_region_area regions id in
 
     let end_of_file, formulas =
-      try
-        false,
-        Region.parse_formulas_in region_depth ic line_nb
+      try false, parse_formulas_in ic l0 l1
       with End formulas -> true, formulas
     in
 
@@ -81,55 +27,51 @@ let init_graph region_depth ic   =
             Mpos.empty
             formulas
         in
-        Graph.(add_node region (build_node_no_neigh mapFormulas) graph) in
+        Graph.(add_node id (build_node_no_neigh mapFormulas) graph)
+    in
 
     if end_of_file
-    then region :: all_regions, graph, (formulas::all_formulas)
+    then graph, (formulas::all_formulas)
     else
-      let regions = region :: all_regions in
-      aux regions
-        (formulas :: all_formulas)
-        (line_nb+region_depth)
-        (region+1)
-        graph
+      aux (formulas :: all_formulas) (id+1) graph
 
   in
-  aux [] [] 0 0 Graph.empty_graph
+  aux [] 0 Graph.empty_graph
 
+(** [add_neighbours formulas g regions] goes through all regions
+   [regions] and add their neigbours to the graph [g] i.e. the
+   formulas whose value are dependant on some part of the region. *)
+let add_neighbours formulas graph regions =
+  let aux id  (l0, l1) g =
+    let neighbours =
+      Region.build_neighbours_map formulas l0 l1 in
+    Graph.change_neighbours id neighbours g
+  in
+  regions_fold aux regions graph
 
-(** [add_neighbours dr f g regions] goes through all regions [regions]
-   and add their neigbours to the graph [g] i.e. the formulas whose
-   value are dependant on some part of the region. *)
-let add_neighbours region_depth formulas graph regions =
-  List.fold_left
-    (fun g rl ->
-       let neighbours =
-         Region.build_neighbours_map region_depth formulas rl in
-       Graph.change_neighbours rl neighbours g)
-      graph
-      regions
-
-
-(** [build_graph filename dr] create the dependency graph from the data file named [filename] and with a region depth (nb of line by region) of [dr]. *)
-let build_graph filename region_depth =
+(** [build_graph filename regions] create the dependency graph from
+   the data file named [filename] and with the regions defined in
+   [regions] as node.*)
+let build_graph filename regions =
   let ic = open_in filename in
-  let regions, graph, formulas = init_graph region_depth ic in
+  let graph, formulas = init_graph regions ic in
   let formulas = List.concat formulas in
-  let _ = Format.printf " nb regions : %d @." (List.length regions) in
+  let _ = Format.printf " nb regions : %d @." (number_regions regions) in
   let _ = Format.printf " formulas : %d @." (List.length formulas) in
   let _= close_in ic in
-  let graph = add_neighbours region_depth formulas graph regions in
+  let graph = add_neighbours formulas graph regions in
   formulas, graph
 
 (* TODO : optimiser ! *)
-(** [tasks_by_region dr c] takes a list of computable formulus [c] and
-   returns a map mapping region label (int) to a list of formulas that
-   has to be partially evaluated in the corresponding region.  *)
-let tasks_by_region region_depth computable =
+(** [tasks_by_region regions c] takes a list of computable formulus
+   [c] and returns a map mapping region label (int) to a list of
+   formulas that has to be partially evaluated in the corresponding
+   region. *)
+let tasks_by_region regions computable =
   let tasks_sorted_by_region =
     List.map
       (fun ((_, Occ ((p1, p2), _)) as formula) ->
-         let regions = regions_within region_depth p1 p2 in
+         let regions = regions_within regions p1 p2 in
          List.map
            (fun r -> (r, formula))
            regions
@@ -183,82 +125,120 @@ let combine_evals sorted_partial =
   aux [] 0 (build_pos (-1) (-1)) sorted_partial
 
 
-let apply_changes filename region_depth evaluated_formulas =
+let apply_changes regions evaluated_formulas =
   List.iter
     (fun (pos, v) ->
-       let region = Ast.pos_to_region region_depth pos in
-       let filename = build_name_file_region filename region in
-       Region.apply_change filename region_depth region pos v
+       let id = pos_to_region regions pos in
+       let l0, _ = get_region_area regions id in
+       let filename = get_region_filename regions id in
+       Region.apply_change filename l0 pos v
     )
     evaluated_formulas
 
-
-let eval_formulas filename region_depth computable =
+let eval_formulas regions computable =
   let tasks_list_map =
-    tasks_by_region region_depth computable in
+    tasks_by_region regions computable in
   (* Les taches sont triées par label de region = label d'esclaves *)
   if tasks_list_map = Mint.empty then []
   else
     Mint.fold
-      (fun region tasks res ->
-         let filename = build_name_file_region filename region in
-         Region.partial_eval tasks filename (region*region_depth) ((region+1)*region_depth-1) @ res
+      (fun id tasks res ->
+         let filename = get_region_filename regions id in
+         let l0, lf = get_region_area regions id in
+         Region.partial_eval tasks filename l0 lf @ res
       )
       tasks_list_map
       []
     |> List.sort (fun (p1, _, _) (p2, _, _) -> compare_pos p1 p2)
     |> (fun x -> combine_evals x)
 
-let rec loop_eval filename region_depth order computable =
-  (* Les taches sont triées par label de region = label d'esclaves *)
-  let formulas_evaluated = eval_formulas filename region_depth computable in
-  let () = apply_changes filename region_depth formulas_evaluated in
-  let pos_evaluated = List.map (fun (p, _) -> p) formulas_evaluated in
+let rec loop_eval regions order computable =
+  let formulas_evaluated = eval_formulas regions computable in
+  let () = apply_changes regions formulas_evaluated in
+  let pos_evaluated =
+    List.map (fun (p, _) -> p) formulas_evaluated in
   let new_computable, order =
     FormulaOrder.get_new_computable_formulas pos_evaluated order in
-  let order = FormulaOrder.remove_evaluated_formula pos_evaluated order in
+  let order =
+    FormulaOrder.remove_evaluated_formula pos_evaluated order in
   match new_computable with
   | [] -> formulas_evaluated, order
   | _  ->
     let fe, order =
-      (loop_eval filename region_depth order new_computable) in
+      (loop_eval regions order new_computable) in
         fe @ formulas_evaluated, order
 
-(** [first_evaluation filename dr f g] *)
-let first_evaluation filename region_depth formulas graph =
+(** [first_evaluation regions f g] *)
+let first_evaluation regions formulas graph =
   let order =
-    FormulaOrder.build_order_from_all region_depth graph formulas in
+    FormulaOrder.build_order_from_all regions graph formulas in
   let computable =
     FormulaOrder.get_computable_formulas order in
-  let formulas_evaluated, order = loop_eval filename region_depth order computable in
+  let _, order = loop_eval regions order computable in
   let formulas_indefined =
     FormulaOrder.get_non_computable_formulas order
     |> List.map (fun p -> (p, Undefined)) in
-  let () = apply_changes filename region_depth formulas_indefined in
-  ()
-  (*List.iter
-    (fun (p1, eval) ->
-       Format.printf "Formule en %s vaut %d@." (string_of_pos p1) eval)
-    formulas_evaluated;
-  List.iter
-    (fun p ->
-       Format.printf "Formule pas calculable en %s" (string_of_pos p))
-    formulas_indefined*)
+  apply_changes regions formulas_indefined
 
-  (*
-  let tasks_list_map =
-    tasks_by_region region_depth computable in
-  (* Les taches sont triées par label de region = label d'esclaves *)
-  Mint.fold
-    (fun region tasks res ->
-       let filename = build_name_file_region filename region in
-       Region.partial_eval tasks filename (region*region_depth) ((region+1)*region_depth-1)::res
-    )
-    tasks_list_map
-    []
-  |> List.concat
-  |> List.sort (fun (p1, _, _) (p2, _, _) -> compare_pos p1 p2)
-  |> (fun x -> combine_evals x)
-  |> List.iter
-    (fun (p1, eval) ->
-       Format.printf "Formule en %s vaut %d@." (string_of_pos p1) eval)*)
+
+(* Probablement à optimiser (linéaire ici). Peut-être construire une
+   map de formulas. A voir en fonction des autres utilisations de
+   formulas. *)
+let find_formulas pos formulas : (pos * is_formula content) option =
+  List.find_opt (fun (p, _) -> p = pos) formulas
+
+(* [read_change err change] return a 3-uplet (b, pos, d) where [pos]
+   is the position of the changed cell and
+
+   - [b] = true if [d] is a string for a formula
+   - [b] = false if [d] is a string for a value
+*)
+let read_change err change : bool * pos * string =
+  let change =
+    String.split_on_char ' ' change in
+  match change with
+  | [] | _ :: [] | _ :: _ :: [] ->
+    failwith err
+  | r :: c :: x1 :: xs ->
+    let r, c = try_int_of_string err r,
+               try_int_of_string err c in
+      let pos = build_pos r c in
+    if is_formula_string x1 then
+      (true, pos, String.concat "" (x1::xs))
+    else
+      match xs with
+      | [] -> false, pos, x1
+      | _ -> failwith err
+
+(* J'ai mis des arguments mais il faut probablement les revoir *)
+let rec apply_one_change regions formulas graph change =
+  let err = "Bad format in user.txt file" in
+  let (is_new_formula, pos, d) = read_change err change
+  in
+  let old_form_opt = find_formulas pos formulas in
+  if is_new_formula then
+    let new_formula = parse_formula err d in
+    match old_form_opt with
+    | None ->
+      change_value_with_formula graph pos new_formula
+    | Some (_, old_formula) ->
+      change_formula_with_formula graph pos old_formula new_formula
+  else
+    let new_value = Val (parse_value err d) in
+    match old_form_opt with
+    | None ->
+      change_value_with_value graph pos new_value
+    | Some (_, old_formula) ->
+      change_formula_with_value graph pos old_formula new_value
+
+and change_formula_with_value graph pos old_formula new_value =
+  failwith "TODO"
+
+and change_formula_with_formula graph pos old_formula new_formula =
+  failwith "TODO"
+
+and change_value_with_value graph pos new_value =
+    failwith "TODO"
+
+and change_value_with_formula graph pos new_formula =
+    failwith "TODO"

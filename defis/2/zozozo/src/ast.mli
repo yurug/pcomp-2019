@@ -27,14 +27,12 @@ val create_cell : value -> cell
 (** [value cell] return the field value of type value from [cell]. *)
 val value : cell -> value
 
-(** *)
 type formula = { fin : is_formula content ;
                  eval : value }
 
 val build_formula : pos -> pos -> value -> formula
 
 type formulas = formula Mpos.t
-
 type fkind = Occurrence
 
 exception End of ((pos * is_formula content) list)
@@ -46,13 +44,9 @@ val build_pos : int -> int -> pos
 
 val pos : pos -> int * int
 
-val pos_to_region : int -> pos -> int
-
 val pos_in_area : pos -> pos*pos -> bool
 
 val relative_pos : int -> pos -> pos
-
-val regions_within : int -> pos -> pos -> int list
 
 val narrowing : pos -> pos -> int -> int -> (pos * pos) option
 

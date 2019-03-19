@@ -1,4 +1,5 @@
 open Ast
+open Partitioner
 
 type color =
   | White
@@ -18,8 +19,8 @@ let build_node nb_depend content neighbours color =
   {nb_depend; content; neighbours; color}
 
 (* Calcul local *)
-let get_dependent_formulas dr pos graph =
-  let region = pos_to_region dr pos in
+let get_dependent_formulas regions pos graph =
+  let region = pos_to_region regions pos in
   let neigh = Graph.get_neighbours region graph in
   Mpos.fold
     ( fun p Graph.{formula ; subregion} formulas ->
@@ -33,12 +34,12 @@ let get_dependent_formulas dr pos graph =
 
 let rec traversal f neigh order = Mpos.fold f neigh order
 
-and add_node region_depth graph pos formula order =
+and add_node regions graph pos formula order =
   let node_opt = Mpos.find_opt pos order in
   let prev_color, node =
     match node_opt with
     | None ->
-      let neighbours = get_dependent_formulas region_depth pos graph in
+      let neighbours = get_dependent_formulas regions pos graph in
       White, build_node 1 formula neighbours Black
     | Some ({color; _} as node) ->
       color, {node with nb_depend = node.nb_depend + 1; color = Black}
@@ -46,18 +47,18 @@ and add_node region_depth graph pos formula order =
   let order = Mpos.add pos node order in
   match prev_color with
   | Black -> order
-  | White -> traversal (add_node region_depth graph) node.neighbours order
+  | White -> traversal (add_node regions graph) node.neighbours order
 
 
-let build_order_from_ region_depth graph (pos, formula) (order : order) =
-  let neighbours = get_dependent_formulas region_depth pos graph in
+let build_order_from_ regions graph (pos, formula) (order : order) =
+  let neighbours = get_dependent_formulas regions pos graph in
   let order = Mpos.add pos (build_node 0 formula neighbours Black) order in
-  traversal (add_node region_depth graph) neighbours order
+  traversal (add_node regions graph) neighbours order
 
-let build_order_from region_depth graph (pos, formula) : order =
-  build_order_from_ region_depth graph (pos, formula) empty_order
+let build_order_from regions graph (pos, formula) : order =
+  build_order_from_ regions graph (pos, formula) empty_order
 
-let build_order_from_all region_depth graph (formulas : (pos * is_formula content) list) =
+let build_order_from_all regions graph (formulas : (pos * is_formula content) list) =
   let rec build_acc order = function
     | [] -> order
     | (pos, formula) :: xs ->
@@ -66,7 +67,7 @@ let build_order_from_all region_depth graph (formulas : (pos * is_formula conten
       | Some {color = White; _} ->
         failwith "FormulaOrder.build_order_from_all_from : WHAT ?"
       | None ->
-        let order = build_order_from_ region_depth graph (pos, formula) order in
+        let order = build_order_from_ regions graph (pos, formula) order in
         build_acc order xs)
   in
   build_acc empty_order formulas
