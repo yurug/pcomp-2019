@@ -5,7 +5,7 @@
 (library
   (name	lib)
   (wrapped false)
-  (modules data ast graph formulaOrder region spreadsheet )
+  (modules data ast graph formulaOrder parser partitioner region spreadsheet )
   (libraries unix))
 
 ; Disable warning as errors

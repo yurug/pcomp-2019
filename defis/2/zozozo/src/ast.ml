@@ -71,7 +71,6 @@ type formulas = formula Mpos.t
 (* différents types de formules *)
 type fkind = Occurrence
 
-
 type cell = {value : value}
 let create_cell v = {value = v}
 let value {value=v} = v
@@ -93,21 +92,10 @@ let relative_pos l0 p =
   let r, c = pos p in
   build_pos (r-l0) c
 
-(** [regions_within rd p1 p2] returns the list of the region that are at least partially in the area described by ([p1], [p2])
- *)
-let regions_within region_depth p1 p2 =
-  let rmin = pos_to_region region_depth p1 in
-  let rmax = pos_to_region region_depth p2 in
-  let rec aux rm rM =
-    if rm > rM then assert false
-    else (if rm = rM then [rm]
-          else rm :: aux (rm+1) rM) in
-  aux rmin rmax
 
 (** [narrowing p1 p2 l0 lf] returns the intersection between the area
    defined by ([p1], [p2]) and the area between lines [l0] and [lf].
-
-*)
+   *)
 let narrowing p1 p2 l0 lf =
   let (r1, c1), (r2, c2) = pos p1, pos p2 in
   let ropt =
