@@ -237,6 +237,39 @@ let rec value_to_value regions data_filename order computables list_values =
      value_to_value regions data_filename order computables list_values
 
 
+let rec value_to_formula regions data_filename order computables list_values graph =
+  match computables with
+  | [] -> List.map (fun (p,(_,n)) -> (p,n)) list_values
+  | _ ->
+     let pos_list, list_values =
+       List.fold_left
+         (fun (pos_list,list_val) (pos_compute,Occ(zone,v)) ->
+           match v with
+           | Empty | Undefined -> failwith "On ne compte que des entiers"
+           | Int v ->
+              let diff = get_diff list_values zone v in
+              if diff = 0 then pos_list,list_val
+              else
+                let region = pos_to_region regions pos_compute in
+                let pos_region = Ast.relative_pos region pos_compute in
+                let filename_region = get_region_filename regions region in
+                let data = Data.DataArray.init filename_region in
+                let old_value = Ast.value (Data.DataArray.get pos_region data) in
+                (pos_compute :: pos_list),
+                (match old_value with
+                | Empty -> failwith "C'est pas ta vrai form"
+                | Undefined ->
+                   let content = Graph.get_content region graph in
+                   let {fin = formula;_} = try Mpos.find pos_compute content
+                                 with _ -> failwith "J'y crois 0" in
+                   let eval = eval_formulas regions [(pos_compute,formula)] in
+                   let eval = List.map (fun (pos,new_val) -> (pos,(Undefined,new_val))) eval in
+                   (eval @ list_values)
+                | Int old_value ->
+                   (pos_compute,(Int old_value, Int (old_value + diff))) :: list_val)
+         ) ([],list_values) computables in
+     let computables, order = FormulaOrder.get_new_computable_formulas pos_list order in
+     value_to_formula regions data_filename order computables list_values graph
 
 let eval_one_change data_filename change_filename line regions graph =
   let string_list = String.split_on_char ' ' line in
@@ -305,7 +338,7 @@ let eval_one_change data_filename change_filename line regions graph =
            let order = FormulaOrder.build_order_from_all regions graph formulas in
            let computables = FormulaOrder.get_computable_formulas order in
            let fst_change = [(pos,(old_value,Int new_value))] in
-           graph,(value_to_value regions data_filename order computables fst_change)
+           graph,(value_to_formula regions data_filename order computables fst_change graph)
 
 
 
