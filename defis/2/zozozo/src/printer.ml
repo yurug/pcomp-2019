@@ -7,7 +7,7 @@ let string_of_value = function
 
 let string_of_pos p =
   let r, c = pos p in
-  "(" ^ string_of_int r ^ "," ^ string_of_int c ^ ")"
+  string_of_int r ^ " " ^ string_of_int c
 
 let string_of_content (type a) (content : a content) =
   match content with
