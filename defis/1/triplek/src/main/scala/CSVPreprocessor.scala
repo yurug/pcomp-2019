@@ -3,11 +3,9 @@ package csv_preprocessor
 import change._
 import utils._
 import cell_parser._
-import scala.util.{Try, Success}
-import scala.math.max
 
 /** Preprocess a CSV file to simplify the future evaluation.
-  * Here, compute the initial value for each formulae couting
+  * Here, compute the initial value for each formulae counting
   * the ACell of the file.
   * For all AChange, its oldValue is replaced by the value at this position
   * in the file.
@@ -17,11 +15,10 @@ import scala.math.max
   * To avoid to check for all the Changes if a cell affects it, we sort the
   * BChanges by the position of their top-left corner. Then, as we go through
   * the cell in the lexicographic order (x, y) (the normal order), for each cell,
-  * ce can't stop to see the BChanges when we reach a BChange with a top-left
+  * we can't stop to see the BChanges when we reach a BChange with a top-left
   * after the position of the cell. And when we reach the cell at the position
   * (x, y), all the BChanges with a bottom-right corner before this position
-  * would not be affected by any cell that we process after
-  *Z
+  * would not be affected by any cell that we process after. */
   */
 object CSVPreProcessor {
 
@@ -35,45 +32,20 @@ object CSVPreProcessor {
     * @param bcs The list of BChange which could be impacted.
     * @return The list of BChange which could be impacted by the following cell.
     */
-  /*private def propagateInB(
+  private def propagateInB(
       p: Position,
       v: Int,
       bcs: List[BChange]): List[BChange] = bcs match {
     case Nil => Nil
     case bc::q =>
-      if(bc.b.topLeft > p) {
+      if(bc.b.isAfter(p))
         return bcs
-      }
-      else if(p > bc.b.bottomRight || p == bc.b.bottomRight)
+      else if(p > bc.b.bottomRight)
         return propagateInB(p, v, q)
       else if(bc.b.contains(p) && bc.counted == v) {
         bc.valueWithInitialA += 1
       }
       return bc :: propagateInB(p, v, q)
-  }*/
-
-  def propagateInB(p: Position, v: Int, l: Array[BChange], minX: Int, topL: Array[Position]): Int = {
-    var min: Int = minX
-    var i: Int = minX
-    while(i < l.size && p > l(i).b.bottomRight) {
-      i += 1
-    }
-    while(i < l.size && p == l(i).b.bottomRight) {
-      if(l(i).counted == v) {
-        l(i).valueWithInitialA += 1
-      }
-      i += 1
-    }
-    min = i
-    for(i <- min until l.size) {
-      if(topL(i) > p) {
-        return min
-      }
-      else if(l(i).b.contains(p) && l(i).counted == v) {
-        l(i).valueWithInitialA += 1
-      }
-    }
-    return min
   }
 
   /** Change the oldValue of AChanges which are at the position of a cell
@@ -85,18 +57,38 @@ object CSVPreProcessor {
     *
     * @return The list of BChange that could be impacted by the following cells.
     */
-  private def propagate(
+  private def propagateInA(
       p: Position,
       v: Int,
-      cs: Array[Change],
-      i_min: Int): Int = {
-    var min: Int = i_min
-    var i: Int = i_min
-    while(i < cs.size && cs(i).p.x == p.x && cs(i).p.y == p.y) {
-      cs(i).oldValue = v
-      i += 1
-    }
-    return i
+      acs: List[Change]): List[Change] = acs match {
+    case Nil => Nil
+    case ac::q =>
+      if(ac.p > p)
+        return acs
+      else if(ac.p.x == p.x && ac.p.y == p.y) {
+        ac.oldValue = v
+      }
+      return propagateInA(p, v, q)
+  }
+
+  /** Propagate the value of a cell in all the changes. Of course, propagate
+    * only the value of the cell of type A.
+    *
+    * @param c The change associeted to the cell.
+    * @param p The position of the cell.
+    * @param bcs The list of BChange which could be affected by `c`.
+    * @param acs The list of AChange which could be affected by `c`.
+    *
+    * @return The list of BChange and AChange that could be impacted by the
+              following cells.
+    */
+  private def propagateCell(
+      c: Change,
+      p: Position,
+      bcs: List[BChange],
+      acs: List[Change]): (List[BChange], List[Change]) = c match {
+    case _: BChange => return (bcs, acs)
+    case _: AChange => (propagateInB(p, c.v, bcs), propagateInA(p, c.v, acs))
   }
 
   /** Propagate all the values of the cells of a line in all the changes.
@@ -112,26 +104,18 @@ object CSVPreProcessor {
               following lines.
     */
   private def processLine(
-      cells: Iterator[String],
+      cellsWithY: Iterator[(String, Int)],
       x: Int,
-      y: Int,
-      bcs: Array[BChange],
-      minX: Int,
-      topL: Array[Position],
-      acs: Array[Change],
-      minA: Int): (Int, Int) = {
-    if((minX >= bcs.size && minA >= acs.size) || cells.isEmpty) {
-      return (minX, minA)
+      bcs: List[BChange],
+      acs: List[Change]): (List[BChange], List[Change]) = {
+    if((bcs.isEmpty && acs.isEmpty) || cellsWithY.isEmpty) {
+      return (bcs, acs)
     }
-    val cell: String = cells.next
+    val (cell, y): (String, Int) = cellsWithY.next
     val p: Position = new Position(x, y)
-    Try(cell.toInt) match {
-      case Success(v) =>
-        val min: Int = propagateInB(p, v, bcs, minX, topL)
-        val min2: Int = propagate(p, v, acs, minA)
-        processLine(cells, x, y + 1, bcs, min, topL, acs, min2)
-      case _ => processLine(cells, x, y + 1, bcs, minX, topL, acs, minA)
-    }
+    val c: Change = CellParser.parse(x, y, cell)
+    val (fr, ar): (List[BChange], List[Change]) = propagateCell(c, p, bcs, acs)
+    processLine(cellsWithY, x, fr, ar)
   }
 
   /** Propagate all the values of the cells of some lines in all the changes.
@@ -141,20 +125,19 @@ object CSVPreProcessor {
     * @param acs The list of AChange which could be affected by the cells.
     */
   private def process(
-      lines: Iterator[String],
-      x: Int,
-      bcs: Array[BChange],
-      minX: Int,
-      topL: Array[Position],
-      acs: Array[Change],
-      minA: Int): Unit = {
-    if((minX >= bcs.size && minA >= acs.size) || lines.isEmpty) {
+      linesWithX: Iterator[(String, Int)],
+      bcs: List[BChange],
+      acs: List[Change]): Unit = {
+    if((bcs.isEmpty && acs.isEmpty) || linesWithX.isEmpty) {
       return
     }
-    val str: String = lines.next
-    val cells: Iterator[String] = str.split(";").iterator
-    val (min, min2): (Int, Int) = processLine(cells, x, 0, bcs, minX, topL, acs, minA)
-    process(lines, x + 1, bcs, min, topL, acs, min2)
+    val (str, x) = linesWithX.next
+    println(x)
+    val cellsWithY: Iterator[(String, Int)] =
+      str.split(";").iterator.zipWithIndex
+    val (fr, ar): (List[BChange], List[Change]) =
+      processLine(cellsWithY, x, bcs, acs)
+    process(linesWithX, fr, ar)
   }
 
   /** Count the initial value of AChanges and BChanges, that is to say,
@@ -169,28 +152,10 @@ object CSVPreProcessor {
       file: io.BufferedSource,
       bcs: List[BChange],
       acs: List[Change]) = {
-    val sortedAcs: Array[Change] = acs.toArray.sortBy(c => (c.p.x, c.p.y))
-    val sortedBcs: Array[BChange] = Change.sortByBlockPosition(bcs.toArray)
-    var topL: Array[Position] = computeTopLeft(sortedBcs)
-    val lines = file.getLines
-    process(lines, 0, sortedBcs, 0, topL, sortedAcs, 0)
-  }
-
-  def computeTopLeft(l: Array[BChange]): Array[Position] = {
-    if(l.isEmpty) {
-      return new Array[Position](0)
-    }
-    val topL: Array[Position] = new Array[Position](l.size)
-    topL(l.size - 1) = l(l.size - 1).b.topLeft
-    for(i <- l.size - 2 to 0 by -1) {
-      if(l(i).b.topLeft > l(i + 1).b.topLeft) {
-        topL(i) = l(i + 1).b.topLeft
-      }
-      else {
-        topL(i) = l(i).b.topLeft
-      }
-    }
-    return topL
+    val sortedAcs: List[Change] = acs.sortBy(c => (c.p.x, c.p.y))
+    val sortedBcs: List[BChange] = Change.sortByBlockPosition(bcs)
+    val linesWithX = file.getLines.zipWithIndex
+    process(linesWithX, sortedBcs, sortedAcs)
   }
 
 }
