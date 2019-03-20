@@ -54,7 +54,9 @@ val narrowing : pos -> pos -> int -> int -> (pos * pos) option
    p1<p2, null if p1 = p2 (in lexigographical order) *)
 val compare_pos : pos -> pos -> int
 
-(* Debug function *)
+(* Fonction d'affichage *)
 val string_of_value : value -> string
 val string_of_pos : pos -> string
+
+(* Debug function *)
 val string_of_content : 'a content -> string

@@ -27,7 +27,7 @@ let string_of_value = function
   | Undefined -> "P"
   | Empty -> " "
 
-let string_of_pos {r; c} = "(" ^ string_of_int r ^ "," ^ string_of_int c ^ ")"
+let string_of_pos {r; c} = string_of_int r ^ " " ^ string_of_int c
 
 let string_of_content (type a) (content : a content) =
   match content with

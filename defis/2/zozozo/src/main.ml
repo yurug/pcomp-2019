@@ -1,4 +1,3 @@
-
 let print_execution_time t0 tcut tgraph teval =
   Format.eprintf "Global execution time (real): @.";
   Format.eprintf "  Cut         : %f s @." (tcut -. t0);
@@ -16,7 +15,7 @@ let parse_input argv =
     exit 1 )
 
 let main () =
-  let data_filename, _, _, _, _ =
+  let data_filename, user_filename, _, change_filename, _ =
     parse_input Sys.argv in
   Format.printf "%s@." data_filename;
   let max_file_size = 100 in
@@ -27,6 +26,7 @@ let main () =
   let t2 = Unix.gettimeofday () in
   let _ = Spreadsheet.first_evaluation regions f g in
   let t3 = Unix.gettimeofday () in
+  let _ = Spreadsheet.eval_changes regions user_filename change_filename g in
   print_execution_time t0 t1 t2 t3
 
 
