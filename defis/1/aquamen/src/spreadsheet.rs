@@ -4,7 +4,6 @@ use std::collections::HashMap;
 use data::{Cell, Data, Point};
 use data::Data::{Val, Fun, Wrong};
 use data::Function::Count;
-use data::PointsListsMap;
 use data::Function;
 use data::Index;
 use data::new_cell;
@@ -17,9 +16,12 @@ use data::new_cell;
 
 pub struct Spreadsheet {
     width: Index,
+    /* Inner representation of the spreadsheet */
     inner: HashMap<Point, Data>,
     functions: HashMap<Point, Function>,
-    bindings: PointsListsMap,
+    /* To each cell is associated the list of cells using it. 
+     * This is useful to apply user changes */
+    bindings: HashMap<Point, HashSet<Point>>,
 }
 
 impl Spreadsheet {
@@ -33,7 +35,8 @@ impl Spreadsheet {
         }
     }
     
-    pub fn add_cell(&mut self, cell: Cell) {                
+    pub fn add_cell(&mut self, cell: Cell) {
+        /* We only know the width of the spreadsheet */
         if cell.loc.x < self.width {
             self.set(cell.loc, cell.content);
         } else {
@@ -52,6 +55,7 @@ impl Spreadsheet {
         data
     }
 
+    /* The set `viewed` is used to detect cycles */
     fn _eval(&mut self, p: Point, viewed: &mut HashSet<Point>) -> Option<Data> {
         if viewed.contains(&p) {
             return Some(Wrong)
@@ -81,7 +85,7 @@ impl Spreadsheet {
         }
     }
 
-    // Used for changes
+    // Used to apply a change
     fn eval_fun(&mut self, p: Point) -> Option<Data> {
         match self.get_fun(&p) {
             Some(Count(Point { x: x1, y: y1 }, Point { x: x2, y: y2 }, n)) => {
@@ -112,6 +116,7 @@ impl Spreadsheet {
         }
     }
 
+    /* Returns the new cell and a vector of changed cells */
     pub fn apply_change(&mut self, cell: Cell) -> (Cell, Vec<Cell>) {
         let mut changes: Vec<Cell> = Vec::new();
         
@@ -131,7 +136,7 @@ impl Spreadsheet {
             }
 
             while !pending.is_empty() {
-                let point = pending.pop().unwrap(); // safe
+                let point = pending.pop().unwrap();
 
                 // All functions using this cell need to be re-evaluated
                 match self.bindings.get(&point) {
@@ -149,7 +154,7 @@ impl Spreadsheet {
 
                 // If the value didn't change, well it's not a change
                 if last_val != new_val {
-                    self.set(point, new_val); // NEEDED ?
+                    self.set(point, new_val);
                     changes.push(new_cell(new_val, point));
                 }
             }
@@ -182,11 +187,15 @@ impl Spreadsheet {
 
     fn bind_function(&mut self, f: Function, p: Point) {
         self.functions.insert(p, f);
+
+        /* Each time a function is found, it is bound to all cells used by it.
+         * This is useful to apply user changes.
+         */
         match f {
             Count(Point { x: x1, y: y1 }, Point { x: x2, y: y2 }, _) =>
                 for y in y1..(y2 + 1) {
                     for x in x1..(x2 + 1) {
-                        let pcell = Point { x, y };                        
+                        let pcell = Point { x, y };                       
                         self.bind_cell(pcell, p);
                     }
                 }

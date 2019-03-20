@@ -1,6 +1,4 @@
 use std::cmp::Ordering;
-use std::collections::HashSet;
-use std::collections::HashMap;
 
 pub type Num = u8;
 pub type Index = u64;
@@ -20,10 +18,6 @@ impl Point {
         }
     }
 }
-
-pub type PointsList = HashSet<Point>;
-
-pub type PointsListsMap = HashMap<Point, PointsList>;
 
 
 #[derive(Debug,Clone,Copy,PartialEq)]
