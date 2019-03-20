@@ -1,4 +1,5 @@
 open Ast
+open Printer
 
 (* Label *)
 type nodeLabel = int

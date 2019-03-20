@@ -1,4 +1,5 @@
 open Ast
+open Printer
 
 module type DATA = sig
   type t
@@ -174,7 +175,7 @@ module DataArray : DATA = struct
     for i = 0 to rows do
       for j = 0 to cols do
         let c = get (Ast.build_pos i j) data in
-        let s = Ast.string_of_value (Ast.value c) in
+        let s = string_of_value (Ast.value c) in
         if j != cols
         then Printf.fprintf file "%s;" s
         else Printf.fprintf file "%s" s

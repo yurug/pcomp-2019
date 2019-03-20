@@ -1,4 +1,5 @@
 open Ast
+open Parser
 
 type id = int
 
@@ -27,16 +28,60 @@ let build_name_file_region filename id =
           ext, String.concat "." xs) in
   filename^"_"^(string_of_int id)^"."^ext
 
+
+let add_map key q map =
+  match Mint.find_opt key map with
+  | None -> Mint.add key q map
+  | Some w -> Mint.add key (q+w) map
+
+let add_work formulas wbl =
+  let rec aux q l0 lf wbl =
+    if l0 > lf then
+      wbl
+    else
+      let w = add_map l0 q wbl in
+      aux q (l0+1) lf w
+  in
+  List.fold_left
+    (fun w (p, formulas) ->
+       (* quantité de travail pour une formule = 2 (arbitraire) *)
+       let rf, _ = pos p in
+       let w = add_map rf 2 w in
+
+       (* pour chaque ligne i nécessaire pour calculer une formule on
+          ajoute (c2-c1) en travail à la ligne i*)
+       match formulas with
+       | Occ ((p1, p2), _) ->
+         let (r1, c1) = pos p1 in
+         let (r2, c2) = pos p2 in
+         if c2 >= c1 then
+           let q = c2 - c1 + 1 in
+           aux q r1 r2 w
+         else w
+    )
+    wbl
+    formulas
+
 let compute_cuts filename file_max_size =
   let ic = open_in filename in
-  let rec count ic i =
-    let _ =
-      try input_line ic
-      with End_of_file -> raise (Endfile i)
-    in count ic (i+1)
+  let work_by_line = Mint.empty in
+
+  let rec prepos ic i wbl all_formulas =
+    let end_of_file, formulas =
+      try false, parse_formulas_in ic 0 1
+      with End formulas -> true, formulas
     in
-  let lmax = try count ic 0 with Endfile lmax -> lmax in
-    let _ = close_in ic in
+    let wbl = add_work formulas wbl in
+    if end_of_file
+    then i+1, wbl, (formulas::all_formulas)
+    else prepos ic (i+1) wbl (formulas::all_formulas)
+  in
+
+  let lmax, wbl, formulas =
+    prepos ic 0 work_by_line [] in
+
+  let _ = close_in ic in
+  (*LA*)
   let rec aux l acc =
     if l >= lmax then acc
     else
@@ -52,6 +97,9 @@ let compute_f_to_pos (regs: region R.t) : pos -> id =
   fun p ->
   let r, _ = pos p in
   let bindings = R.bindings regs in
+  let id, _ = List.find (fun (_,{area=(l0, l1);_}) -> l0 <= r && r <= l1) bindings in
+  id
+(*
   let rec find = function
     | [] ->
       let err =  "Partitionner.compute_f_to_pos: pos "^(string_of_pos p)^" not in file." in
@@ -62,7 +110,7 @@ let compute_f_to_pos (regs: region R.t) : pos -> id =
       else
         find xs
   in
-  find bindings
+  find bindings*)
 
 let compute_regions filename file_max_size  =
   let cuts =
@@ -113,9 +161,6 @@ let get_region_area regions id =
 let pos_to_region regions p =
   regions.r_to_pos p
 
-(** [regions_within regions p1 p2] returns the list of the regions in
-   [regions] that are at least partially in the area described by
-   ([p1], [p2]) *)
 let regions_within regions p1 p2 =
   let rmin = pos_to_region regions p1 in
   let rmax = pos_to_region regions p2 in
@@ -126,7 +171,6 @@ let regions_within regions p1 p2 =
 
 let number_regions regions =
   R.cardinal regions.regs
-
 
 let regions_fold f regions =
   R.fold (fun id {area;_} -> f id area)

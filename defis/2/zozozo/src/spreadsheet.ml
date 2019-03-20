@@ -429,6 +429,7 @@ let eval_changes regions filename_user filename_change graph =
 
 
 
+(*
 (* Probablement à optimiser (linéaire ici). Peut-être construire une
    map de formulas. A voir en fonction des autres utilisations de
    formulas. *)
@@ -490,3 +491,4 @@ and change_value_with_value graph pos new_value =
 
 and change_value_with_formula graph pos new_formula =
     failwith "TODO"
+    *)

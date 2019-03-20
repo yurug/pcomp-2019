@@ -1,5 +1,6 @@
 open Ast
 open Partitioner
+open Printer
 
 type color =
   | White
