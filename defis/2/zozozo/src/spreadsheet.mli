@@ -6,10 +6,10 @@ open Partitioner
    name of the cut file is [filename_x.[ext]].  *)
 (*val cut_file_into_region : string -> int -> unit*)
 
-(** [build_graph filename regions] create the dependency graph from
+(** [build_graph filename regions formulas] create the dependency graph from
    the data file named [filename] and with the regions defined in
    [regions] as node.*)
-val build_graph : string -> regions -> (pos * is_formula content) list * Graph.t
+val build_graph : string -> regions -> (pos * is_formula content) list -> Graph.t
 
 (** [first_evaluation filename dr f g] *)
 val first_evaluation : regions -> (pos * is_formula content) list -> Graph.t -> unit

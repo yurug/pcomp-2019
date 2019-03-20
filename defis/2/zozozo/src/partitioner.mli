@@ -22,4 +22,6 @@ val number_regions : regions -> int
 
 val regions_fold : (id -> area -> 'b -> 'b) -> regions -> 'b -> 'b
 
-val cut_file_into_regions : string -> int -> regions
+val compute_regions : string -> int -> ((pos * is_formula content) list * regions)
+
+val cut_file_into_regions : string -> regions -> int -> unit

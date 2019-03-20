@@ -43,39 +43,47 @@ let parse_formula err fstr =
 let is_formula_string string =
   String.sub (String.trim string) 0 1 = "="
 
-(** [parse_formulas_in_line formulas row line] returns all the
-   formulas parsed from [line] and adds then to the accumulator
-   [formulas].*)
+(** [parse_formulas_in_line formulas row line] returns a pair with the
+   nb of cells of the line and all the formulas parsed from [line] and
+   adds then to the accumulator [formulas].*)
 let parse_formulas_in_line formulas row line =
   let bad_format_err = "Bad format in user.txt file" in
-  String.split_on_char ';' line
-  |> List.fold_left
-    (fun (i, l) cell  ->
-       if is_formula_string cell
-       then (i+1, (i, cell)::l)
-       else (i+1, l)
-    )
-    (0, [])
-  |> snd
-  |> List.fold_left
-    (fun fs (i, fstr) ->
-       let formula = parse_formula bad_format_err fstr
-       in
-       (build_pos row i, formula) :: fs)
-    formulas
+  let cells = String.split_on_char ';' line in
+  let nb_cells = List.length cells in
+  let f =
+    List.fold_left
+      (fun (i, l) cell  ->
+         if is_formula_string cell
+         then (i+1, (i, cell)::l)
+         else (i+1, l)
+      )
+      (0, [])
+      cells
+    |> snd
+    |> List.fold_left
+      (fun fs (i, fstr) ->
+         let formula = parse_formula bad_format_err fstr
+         in
+         (build_pos row i, formula) :: fs)
+      formulas in
+  nb_cells, f
 
-(** [parse_formulas_in file l0 lf] parses the region of the
-   file [file] between line [l0] and [l0+lf] and outputs
-   the list of formulas with their positions in this region.  *)
+(** [parse_formulas_in file l0 lf] parses the region of the file
+   [file] between line [l0] and [l0+lf] and outputs a pair composed
+   of
+    - the maximum cells in a line of the region
+    - the list of formulas with their positions in this region.  *)
 let parse_formulas_in file l0 lf =
-  let rec aux i formulas =
-    if i > lf then
-      formulas
+  let rec aux i formulas max_c =
+    if i > lf-l0 then
+      max_c, formulas
     else
-      let formulas =
+      let nb_cells, formulas =
         try (input_line file
              |> parse_formulas_in_line formulas (l0+i))
         with End_of_file -> raise (End formulas)
-      in aux (i+1) formulas
+      in
+      let max_c = if max_c < nb_cells then nb_cells else max_c in
+      aux (i+1) formulas max_c
   in
-  aux 0 []
+  aux 0 [] 0

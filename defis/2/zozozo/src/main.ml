@@ -20,9 +20,10 @@ let main () =
   Format.printf "%s@." data_filename;
   let max_file_size = 100 in
   let t0 = Unix.gettimeofday () in
-  let regions = Partitioner.cut_file_into_regions data_filename max_file_size in
+  let f, regions = Partitioner.compute_regions data_filename max_file_size in
+  let _ = Partitioner.cut_file_into_regions data_filename regions max_file_size in
   let t1 = Unix.gettimeofday () in
-  let f, g = Spreadsheet.build_graph data_filename regions in
+  let g = Spreadsheet.build_graph data_filename regions f in
   let t2 = Unix.gettimeofday () in
   let _ = Spreadsheet.first_evaluation regions f g in
   let t3 = Unix.gettimeofday () in

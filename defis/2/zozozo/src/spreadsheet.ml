@@ -1,42 +1,31 @@
 open Ast
 open Parser
 open Partitioner
+open Printer
 
-(** [init_graph regions ic] parses the file [ic] to find all formulas
-   and initiates the dependency graph by adding the found formulas to
-   their corresponding region. Neighbours in [graph] are not taken
-   care by this function. *)
-let init_graph regions ic =
+(** [init_graph regions formulas] parses the file [ic] and initiates
+   the dependency graph by adding the formulas to their corresponding
+   region. Neighbours in [graph] are not taken care by this
+   function. *)
+let init_graph regions formulas =
 
-  let rec aux all_formulas id graph =
-    let l0, l1 = get_region_area regions id in
-
-    let end_of_file, formulas =
-      try false, parse_formulas_in ic l0 l1
-      with End formulas -> true, formulas
-    in
-
-    let graph =
-      match formulas with
-      | [] -> graph
-      | _  ->
-        let mapFormulas =
-          List.fold_left
-            (fun map (pos, formula) ->
-               Mpos.add pos {fin=formula; eval= Undefined} map)
-            Mpos.empty
-            formulas
-        in
-        Graph.(add_node id (build_node_no_neigh mapFormulas) graph)
-    in
-
-    if end_of_file
-    then graph, (formulas::all_formulas)
+  let rec aux (graph, curr_id, map) (pos, formulas)  =
+    let id = pos_to_region regions pos in
+    if id = curr_id then
+      let map = Mpos.add pos {fin=formulas; eval= Undefined} map in
+      graph, id, map
     else
-      aux (formulas :: all_formulas) (id+1) graph
-
+      let graph = Graph.(add_node curr_id (build_node_no_neigh map) graph) in
+      let map = Mpos.add pos {fin=formulas; eval= Undefined} Mpos.empty in
+      graph, id, map
   in
-  aux [] 0 Graph.empty_graph
+  let graph, last_id, map =
+  List.fold_left
+    aux
+    (Graph.empty_graph, 0, Mpos.empty) formulas in
+
+  Graph.(add_node last_id (build_node_no_neigh map) graph)
+
 
 (** [add_neighbours formulas g regions] goes through all regions
    [regions] and add their neigbours to the graph [g] i.e. the
@@ -52,15 +41,12 @@ let add_neighbours formulas graph regions =
 (** [build_graph filename regions] create the dependency graph from
    the data file named [filename] and with the regions defined in
    [regions] as node.*)
-let build_graph filename regions =
-  let ic = open_in filename in
-  let graph, formulas = init_graph regions ic in
-  let formulas = List.concat formulas in
+let build_graph filename regions formulas =
+  let graph = init_graph regions formulas in
   let _ = Format.printf " nb regions : %d @." (number_regions regions) in
   let _ = Format.printf " formulas : %d @." (List.length formulas) in
-  let _= close_in ic in
   let graph = add_neighbours formulas graph regions in
-  formulas, graph
+  graph
 
 (* TODO : optimiser ! *)
 (** [tasks_by_region regions c] takes a list of computable formulus
