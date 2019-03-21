@@ -19,7 +19,7 @@ let main () =
     parse_input Sys.argv in
   Format.printf "%s@." data_filename;
   let max_nb_regions = 1000 in
-  let min_region_size = 25 in (* line nb *)
+  let min_region_size = 10 in (* line nb *)
   let t0 = Unix.gettimeofday () in
   let f, regions, g = Spreadsheet.preprocessing data_filename min_region_size max_nb_regions in
   let t1 = Unix.gettimeofday () in
@@ -28,7 +28,7 @@ let main () =
   let t2 = Unix.gettimeofday () in
   let _ = Partitioner.free_all regions in
   let t3 = Unix.gettimeofday () in
-  (*let _ = Spreadsheet.eval_changes regions user_filename change_filename g in*)
+  let _ = Spreadsheet.eval_changes regions user_filename change_filename g in
   print_execution_time t0 t1 t2 t3
 
 

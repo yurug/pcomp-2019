@@ -98,7 +98,10 @@ let compute_cuts filename min_region_size max_regions_nb =
   let total_work = Mint.fold (fun _ q acc -> q + acc) wbl 0 in
   let line_by_region = max min_region_size (rows/max_regions_nb) in
   let regions_nb = rows/line_by_region in
-  let work_by_region = total_work / regions_nb + 1 in
+  let work_by_region =
+    if regions_nb <> 0
+    then total_work / regions_nb + 1
+    else total_work in
 
   let rec aux l0 lcurr acc current_q =
     if lcurr >= rows then (l0, lcurr)::acc
