@@ -391,3 +391,6 @@ tags
 [._]*.un~
 
 # End of https://www.gitignore.io/api/c,c++,go,java,ocaml,python,ruby,rust,scala,emacs,vim
+defis/2/gof/binaries/binary
+defis/2/gof/binaries/details
+defis/2/gof/binaries/formulas

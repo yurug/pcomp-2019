@@ -400,7 +400,7 @@ let input_of_formulas formulas =
             with Not_found -> Printf.fprintf cout "%d" (Random.int 256)
           end;
           Printf.fprintf cout "%c"
-            (if col = used_area.col_max then '\n' else ',')
+            (if col = used_area.col_max then '\n' else ';')
         done
       done
     in
