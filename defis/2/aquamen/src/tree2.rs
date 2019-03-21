@@ -10,6 +10,9 @@ use log::*;
 static NODE_MAX_SIZE: Index = 100;
 static CELLS_NUM_MAX: usize = 4 * (NODE_MAX_SIZE as usize);
 
+// La structure de l'arbre est séparée en deux parties:
+//  - le type de somme qui différencie un noeud d'une feuille (enum Content)
+//  - les données communes aux noeuds et feuilles (struct Tree)
 enum Content {
     Leaf {
         data: HashMap<Point, Cell>,
@@ -25,10 +28,14 @@ type Reader = fn(Point, Point, &String) -> Vec<Cell>;
 type Dumper = fn(&String, Vec<Cell>);
 
 pub struct Tree {
+    // On différencie la taille max d'un noeud (area) et
+    // la taille réelle du noeud (current_area). Ça permet d'avoir
+    // des meilleurs découpages de l'arbre
     area: Rectangle,
     current_area: Rectangle,
     content: Content,
     id: String,
+    // Les fonctions d'écriture et lecture sont passées en paramètres de l'arbre
     reader: Reader,
     dumper: Dumper,
 }
@@ -137,7 +144,6 @@ impl Tree {
     }
 
     pub fn get(&mut self, pos: Point) -> Option<Cell> {
-        // trace!("Retreiving data for {:?}", pos);
         let res = match self.content {
             Content::Leaf{ref mut data, ref mut dumped } => {
                 if *dumped {
@@ -172,6 +178,9 @@ impl Tree {
 
     pub fn insert(&mut self, pos: Point, cell: Data) {
         trace!("Inserting {:?} at {:?}", cell, pos);
+        // On ne peut pas modifier self.content dans le match.
+        // Pour diviser la feuille, on "retourne" le nouveau noeud
+        // et on modifie self.contentn hors du match
         let new_content = match self.content {
             Content::Leaf{ ref mut data, ref mut dumped } => {
                 if *dumped {
@@ -183,6 +192,8 @@ impl Tree {
                 }
                 data.insert(pos, Cell{loc: pos, content: cell});
                 if data.len() as Index > NODE_MAX_SIZE {
+                    // On prend comme hypothèse qu'une ligne tiendra toujours en mémoire.
+                    // Les découpages des feuilles se font donc toujours à l'horizontale
                     let mid = self.area.mid();
                     Some(split_data(data, self.area.begin, mid, self.area.end, self.current_area,
                                     &self.id, self.reader, self.dumper))
