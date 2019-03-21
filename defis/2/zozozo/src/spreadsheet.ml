@@ -48,8 +48,9 @@ let build_graph regions formulas =
   graph
 
 
-let preprocessing data_filename min_region_size max_nb_regions =
-  let f, regions = Partitioner.compute_regions data_filename min_region_size max_nb_regions in
+let preprocessing data_filename user_filename min_region_size max_nb_regions =
+  let f, regions =
+    Partitioner.compute_regions data_filename user_filename min_region_size max_nb_regions in
   Format.printf "Nb regions : %d@." (Partitioner.number_regions regions);
   Format.printf "Nb formulas : %d@." (List.length f);
   let _ = Partitioner.cut_file_into_regions data_filename regions in
@@ -413,28 +414,6 @@ let eval_changes regions filename_user filename_change graph =
 let find_formulas pos formulas : (pos * is_formula content) option =
   List.find_opt (fun (p, _) -> p = pos) formulas
 
-(* [read_change err change] return a 3-uplet (b, pos, d) where [pos]
-   is the position of the changed cell and
-
-   - [b] = true if [d] is a string for a formula
-   - [b] = false if [d] is a string for a value
-*)
-let read_change err change : bool * pos * string =
-  let change =
-    String.split_on_char ' ' change in
-  match change with
-  | [] | _ :: [] | _ :: _ :: [] ->
-    failwith err
-  | r :: c :: x1 :: xs ->
-    let r, c = try_int_of_string err r,
-               try_int_of_string err c in
-      let pos = build_pos r c in
-    if is_formula_string x1 then
-      (true, pos, String.concat "" (x1::xs))
-    else
-      match xs with
-      | [] -> false, pos, x1
-      | _ -> failwith err
 
 (* J'ai mis des arguments mais il faut probablement les revoir *)
 let rec apply_one_change regions formulas graph change =

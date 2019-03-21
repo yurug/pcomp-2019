@@ -23,7 +23,13 @@ let free {fd; name; _} =
 
 let get {array; _} pos =
   let r, c = Ast.pos pos in
-  let v = Array2.get array r c in
+  let v = try Array2.get array r c
+    with Invalid_argument err ->
+      let mess =
+        err^" at pos : ("^(string_of_int r)^", "^(string_of_int c)^") with array of size "^
+        (string_of_int (Array2.dim1 array))^"x"^(string_of_int (Array2.dim2 array))^"." in
+
+      raise (Invalid_argument mess) in
   create_cell (if v = undefined then Undefined else Int v)
 
 let set {array; _} pos {value} =

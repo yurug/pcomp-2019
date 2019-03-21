@@ -71,7 +71,34 @@ let add_work formulas wbl =
     wbl
     formulas
 
-let preproc_file filename =
+(* On prend aussi en compte des futurs changements
+   pour ne pas avoir de débordements plus tard *)
+let preproc_user filename_user max_rows max_cols wbl =
+  let future_values, future_formulas = Parser.parse_changes filename_user in
+  let wbl = add_work future_formulas wbl in
+  let update_maxs =
+    fun (rows, cols) (p, _) ->
+      let r, c = pos p in
+      let rows =
+        if r > rows then r else rows in
+      let cols =
+        if c > cols then c else cols in
+      (rows, cols)
+  in
+  let max_rows, max_cols =
+    List.fold_left
+      update_maxs
+      (max_rows, max_cols)
+      future_values in
+  let max_rows, max_cols =
+    List.fold_left
+      update_maxs
+      (max_rows, max_cols)
+      future_formulas
+  in
+  max_rows, max_cols, wbl
+
+let preproc_data filename =
   let rec preproc row wbl all_formulas max_col ic =
     let end_of_file, nb_col, formulas =
       try
@@ -91,9 +118,12 @@ let preproc_file filename =
   let formulas = List.flatten formulas in
   formulas, max_row, max_col, wbl
 
-let compute_cuts filename min_region_size max_regions_nb =
+let compute_cuts data_filename user_filename min_region_size max_regions_nb =
   let formulas, rows, cols, wbl =
-    preproc_file filename in
+    preproc_data data_filename in
+
+  let rows, cols, wbl = preproc_user user_filename rows cols wbl in
+  Format.printf "rows : %d cols %d @." rows cols;
 
   let total_work = Mint.fold (fun _ q acc -> q + acc) wbl 0 in
   let line_by_region = max min_region_size (rows/max_regions_nb) in
@@ -129,13 +159,13 @@ let compute_f_to_pos (regs: region R.t) : pos -> id =
     | None -> failwith "Partitioner.compute_f_to_pos "
     | Some (id, _) -> id
 
-let compute_regions filename min_region_size max_regions_nb  =
+let compute_regions data_filename user_filename min_region_size max_regions_nb  =
   let formulas, cuts, max_col =
-    compute_cuts filename min_region_size max_regions_nb in
-  Format.printf "nbfile : %d@." (List.length cuts);
+    compute_cuts data_filename user_filename min_region_size max_regions_nb in
   let regs =
     List.fold_left
       (fun (i, map) ((l0, lf) as cut) ->
+         Format.printf "id %d cut : %d %d@." i l0 lf;
          let r = { area = cut ;
                    data = Regiondata.init (string_of_id i) (lf-l0+1) max_col } in
          (i+1, R.add i r map)

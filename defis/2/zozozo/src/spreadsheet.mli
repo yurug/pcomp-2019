@@ -1,7 +1,7 @@
 open Ast
 open Partitioner
 
-val preprocessing : string -> int -> int -> (pos * is_formula content) list * regions * Graph.t
+val preprocessing : string -> string -> int -> int -> (pos * is_formula content) list * regions * Graph.t
 
 (** [first_evaluation filename dr f g] *)
 val first_evaluation : regions -> (pos * is_formula content) list -> Graph.t -> unit

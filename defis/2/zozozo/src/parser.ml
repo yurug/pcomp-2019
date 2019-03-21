@@ -130,3 +130,17 @@ let parse_change err change : bool * pos * string =
       match xs with
       | [] -> false, pos, x1
       | _ -> failwith err
+
+
+let parse_changes filename : (pos*value) list * (pos*is_formula content) list =
+  let err = "Bad format error in "^filename in
+  let ic = open_in filename in
+  let rec aux ic values formulas =
+    try
+      let line = input_line ic in
+      let is_formula, pos, d = parse_change err line in
+      if is_formula
+      then aux ic values ((pos, parse_formula err d)::formulas)
+      else aux ic ((pos, parse_value err d)::values) formulas
+    with End_of_file -> values, formulas in
+  aux ic [] []

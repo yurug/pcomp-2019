@@ -22,3 +22,5 @@ val parse_formulas_in : in_channel -> int -> int -> int * (pos * is_formula cont
 val parse_and_write_value_in_region : in_channel -> Regiondata.t -> int -> int -> unit
 
 val parse_change : string -> string -> bool * pos * string
+
+val parse_changes : string ->(pos*value) list * (pos*is_formula content) list
