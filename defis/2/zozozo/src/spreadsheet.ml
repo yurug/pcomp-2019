@@ -412,7 +412,7 @@ let eval_changes regions filename_user filename_change graph =
       let line = input_line channel_in in
       let graph, changes = eval_one_change line regions graph in
       let changes = List.sort (fun (p1,_) (p2,_) -> Ast.compare_pos p1 p2) changes in
-      output_string channel_out ("after \""^line^"\"\n");
+      output_string channel_out ("after \""^line^"\":\n");
       List.iter (fun (pos,v) ->
           output_string channel_out ((Printer.string_of_pos pos)^" "^(Printer.string_of_value v)^"\n")
         ) changes;
