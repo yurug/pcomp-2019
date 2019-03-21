@@ -2,13 +2,10 @@ use std::fs::File;
 use std::fs::create_dir_all;
 use std::io::Write;
 use std::io::Read;
-use bench;
 use log::*;
 use std::path::Path;
 use data::Cell;
-use data::Data::*;
-use data::*;
-use data::Index;
+use data::Data::{Val, Fun, Wrong};
 use data::Point;
 use data::Function::*;
 
@@ -83,7 +80,7 @@ pub fn dump_cells(filename: &String, data: Vec<Cell>) {
         }
     }
     trace!("Writing cells of node {} : {:?} ", filename, res);
-    file.write_all(&res);
+    file.write_all(&res).unwrap();
 }
 
 #[cfg(test)]

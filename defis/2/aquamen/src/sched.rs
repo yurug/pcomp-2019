@@ -7,16 +7,10 @@ use process::Processor;
 use parser::parse_line;
 use aprinter::APrinter;
 
-
-use bench::bench;
-
-// FIXME test!!!!
-
 pub fn schedule(sheet_path: &str,
                 user_mod_path: &str,
                 view0_path: &str,
-                changes_path: &str,
-                bench: bench::Sender) {
+                changes_path: &str) {
     let line_len = guess_line_len(sheet_path) ;
     let mut sheet = BufReader::new(File::open(sheet_path).unwrap());
     let printer =  APrinter::new(view0_path.to_string(),

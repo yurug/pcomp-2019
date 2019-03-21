@@ -90,24 +90,3 @@ pub enum Function {
 /// to split sheets
 // pub type Requirements = Vec<Cell>;
 pub enum Requirements { Empty }
-
-// pub struct Matrix<T: Copy + Clone> {
-//     inner: Vec<Vec<T>>
-// }
-
-// impl<T: Copy + Clone> Matrix<T> {
-//     pub fn from_2d_vec(v: Vec<Vec<T>>) -> Matrix<T> {
-//         Matrix {
-//             inner: v
-//         }
-//     }
-//     // Assume that the ordering of cell is conserved
-//     // aka mat.get(p).loc == p
-//     pub fn get(&self, c: Point) -> T {
-//         self.inner[c.x as usize][c.y as usize].clone()
-//     }
-
-//     pub fn lines(&self) -> &Vec<Vec<T>> {
-//         &self.inner
-//     }
-// }

@@ -108,7 +108,7 @@ impl Tree {
 
     fn loaded_cells(&self) -> usize {
         match self.content {
-            Content::Leaf{ref data, ref dumped} => data.len(),
+            Content::Leaf{ref data, dumped: _} => data.len(),
             Content::Node{ref right, ref left} => {
                 left.loaded_cells() + right.loaded_cells()
             }
@@ -235,7 +235,6 @@ mod test {
     use data::Data;
     use data::Point;
     use data::Cell;
-    use data::Data::Val;
     use tree2::Tree;
     use rand::Rng;
 
@@ -252,7 +251,7 @@ mod test {
         let mut x = 0;
         let mut y = 0;
 
-        for i in 0..num {
+        for _i in 0..num {
             let n1: u8 = rng.gen();
             r.push(Cell{
                 loc: Point{x: x, y: y},

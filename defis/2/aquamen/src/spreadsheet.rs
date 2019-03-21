@@ -5,7 +5,6 @@ use data::{Cell, Data, Point};
 use data::Data::{Val, Fun, Wrong};
 use data::Function::Count;
 use data::PointsListsMap;
-use data::PointsList;
 use data::Function;
 use data::Index;
 use data::new_cell;
@@ -27,7 +26,6 @@ pub struct Spreadsheet {
     /* To each cell is associated the list of cells using it. 
      * This is useful to apply user changes */
     bindings: PointsListsMap,
-    changes: PointsList
 }
 
 impl Spreadsheet {
@@ -38,7 +36,6 @@ impl Spreadsheet {
             inner: Tree::new(n, read_data, dump_cells),
             functions: HashMap::new(),
             bindings: HashMap::new(),
-            changes: HashSet::new()
         }
     }
 

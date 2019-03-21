@@ -45,9 +45,9 @@ fn main() {
     log::set_logger(&MY_LOGGER).unwrap();
     log::set_max_level(LevelFilter::Trace);
 
-    let bench = bench::bench::start_bench();
+    let _bench = bench::bench::start_bench();
 
     let args: Vec<String> = env::args().collect();
 
-    schedule(&args[1], &args[2], &args[3], &args[4], bench);
+    schedule(&args[1], &args[2], &args[3], &args[4]);
 }
