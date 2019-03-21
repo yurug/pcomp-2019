@@ -36,8 +36,8 @@ let set {array; _} pos {value} =
 let fold_rect f a (tl, br) region =
   let acc = ref a in
   let (r1, c1), (r2, c2) = pos tl, pos br in
-  for i = r1 to c1 do
-    for j = r2 to c2 do
+  for i = r1 to r2 do
+    for j = c1 to c2 do
       acc := f !acc (get region (build_pos i j))
     done
   done;

@@ -1,5 +1,16 @@
-open Ast
+(* This module is a quite classical Graph module.
 
+   It is used here as a way to keep track on the global dependency
+   between formula.
+
+   A node described the content of a region, i.e,
+
+   - the formulas in the region
+
+   - the neighbours i.e. the formulas that need the value in the
+   region to be computed *)
+
+open Ast
 
 type t
 

@@ -9,19 +9,11 @@ type neighbourLabel = pos
 type neighbour = { formula : is_formula content;
                    subregion : pos*pos }
 
-
-
 type neighbours = neighbour Mpos.t
 
 let empty_neighbours = Mpos.empty
 let cons_neighbour = Mpos.add
 let singleton_neighbour pos x = cons_neighbour pos x empty_neighbours
-(*let union_neighbours = Spos.union
-let cons_neighbour = Spos.add
-let fold_neighbours = Spos.fold
-let remove_neighbours = Spos.remove
-let ( @@ ) = union_neighbours
-  let ( ++ ) = cons_neighbour*)
 
 (* Content *)
 type content = formulas

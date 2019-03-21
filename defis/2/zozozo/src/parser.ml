@@ -43,9 +43,6 @@ let parse_formula err fstr =
 let is_formula_string string =
   String.sub (String.trim string) 0 1 = "="
 
-(** [parse_formulas_in_line formulas row line] returns a pair with the
-   nb of cells of the line and all the formulas parsed from [line] and
-   adds then to the accumulator [formulas].*)
 let parse_formulas_in_line formulas row line =
   let bad_format_err = "Bad format in user.txt file" in
   let cells = String.split_on_char ';' line in
@@ -75,15 +72,38 @@ let parse_formulas_in_line formulas row line =
     - the list of formulas with their positions in this region.  *)
 let parse_formulas_in file l0 lf =
   let rec aux i formulas max_c =
-    if i > lf-l0 then
+    if i > lf then
       max_c, formulas
     else
       let nb_cells, formulas =
         try (input_line file
-             |> parse_formulas_in_line formulas (l0+i))
+             |> parse_formulas_in_line formulas i)
         with End_of_file -> raise (End formulas)
       in
       let max_c = if max_c < nb_cells then nb_cells else max_c in
       aux (i+1) formulas max_c
   in
-  aux 0 [] 0
+  aux l0 [] 0
+
+let parse_value_in_line data l0 line =
+  let err = "Bad format in user.txt file" in
+  let cells = String.split_on_char ';' line |> List.map String.trim in
+  List.iteri
+    (fun i cell ->
+       let p = build_pos l0 i in
+       if is_formula_string cell
+       then Regiondata.set data p (create_cell Undefined)
+       else
+         let v = parse_value err cell in
+         Regiondata.set data p (create_cell v)
+    )
+    cells
+
+let parse_and_write_value_in_region file data l0 lf : unit =
+  let rec aux i =
+    if i <= lf then
+      try input_line file
+          |> parse_value_in_line data (i - l0); aux (i+1)
+      with End_of_file -> ()
+  in
+  aux l0

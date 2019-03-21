@@ -1,7 +1,6 @@
 open Ast
-open Parser
 open Partitioner
-open Printer
+module D = Regiondata
 
 (** [init_graph regions formulas] parses the file [ic] and initiates
    the dependency graph by adding the formulas to their corresponding
@@ -9,15 +8,17 @@ open Printer
    function. *)
 let init_graph regions formulas =
 
-  let rec aux (graph, curr_id, map) (pos, formulas)  =
+  let aux (graph, curr_id, map) (pos, formulas)  =
     let id = pos_to_region regions pos in
     if id = curr_id then
       let map = Mpos.add pos {fin=formulas; eval= Undefined} map in
       graph, id, map
     else
-      let graph = Graph.(add_node curr_id (build_node_no_neigh map) graph) in
-      let map = Mpos.add pos {fin=formulas; eval= Undefined} Mpos.empty in
-      graph, id, map
+      begin
+        let graph = Graph.(add_node curr_id (build_node_no_neigh map) graph) in
+        let map = Mpos.add pos {fin=formulas; eval= Undefined} Mpos.empty in
+        graph, id, map
+      end
   in
   let graph, last_id, map =
   List.fold_left
@@ -41,12 +42,20 @@ let add_neighbours formulas graph regions =
 (** [build_graph filename regions] create the dependency graph from
    the data file named [filename] and with the regions defined in
    [regions] as node.*)
-let build_graph filename regions formulas =
+let build_graph regions formulas =
   let graph = init_graph regions formulas in
-  let _ = Format.printf " nb regions : %d @." (number_regions regions) in
-  let _ = Format.printf " formulas : %d @." (List.length formulas) in
   let graph = add_neighbours formulas graph regions in
   graph
+
+
+let preprocessing data_filename min_region_size max_nb_regions =
+  let f, regions = Partitioner.compute_regions data_filename min_region_size max_nb_regions in
+  Format.printf "Nb regions : %d@." (Partitioner.number_regions regions);
+  Format.printf "Nb formulas : %d@." (List.length f);
+  let _ = Partitioner.cut_file_into_regions data_filename regions in
+  let g = build_graph regions f in
+  f, regions, g
+
 
 (* TODO : optimiser ! *)
 (** [tasks_by_region regions c] takes a list of computable formulus
@@ -116,8 +125,8 @@ let apply_changes regions evaluated_formulas =
     (fun (pos, v) ->
        let id = pos_to_region regions pos in
        let l0, _ = get_region_area regions id in
-       let filename = get_region_filename regions id in
-       Region.apply_change filename l0 pos v
+       let data = get_region_data regions id in
+       Region.apply_change data l0 pos v
     )
     evaluated_formulas
 
@@ -129,9 +138,9 @@ let eval_formulas regions computable =
   else
     Mint.fold
       (fun id tasks res ->
-         let filename = get_region_filename regions id in
+         let data = get_region_data regions id in
          let l0, lf = get_region_area regions id in
-         Region.partial_eval tasks filename l0 lf @ res
+         Region.partial_eval tasks data l0 lf @ res
       )
       tasks_list_map
       []
@@ -212,10 +221,8 @@ let rec something_to_value regions order computables list_values graph =
               else
                 let region = pos_to_region regions pos_compute in
                 let pos_region = Ast.relative_pos region pos_compute in
-                let filename_region = get_region_filename regions region in
-                let data = Data.DataArray.init filename_region in
-                let old_value =
-                  Ast.value (Data.DataArray.get pos_region data) in
+                let data = get_region_data regions region in
+                let old_value = Ast.value (D.get data pos_region) in
                 (pos_compute :: pos_list),
                 (match old_value with
                 | Empty -> failwith "C'est pas ta vrai form"
@@ -247,9 +254,8 @@ let eval_one_change line regions graph =
      let region = pos_to_region regions pos in
      let pos_region = Ast.relative_pos region pos in
      let formulas_region = Graph.get_content region graph in
-     let filename_data_region = get_region_filename regions region in
-     let data = Data.DataArray.init filename_data_region in
-     let old_value = Ast.value (Data.DataArray.get pos_region data) in
+     let data = get_region_data regions region in
+     let old_value = Ast.value (D.get data pos_region) in
      match t with
      | [d] ->
         let new_value = int_of_string d in

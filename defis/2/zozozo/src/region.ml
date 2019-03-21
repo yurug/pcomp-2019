@@ -1,7 +1,7 @@
 open Ast
 open Partitioner
 
-module D = Data.DataArray
+module D = Regiondata
 
 (** [build_neighbours l0 lf map formula] *)
 let build_neighbours l0 lf map formula =
@@ -29,24 +29,20 @@ let find_formula_opt region_depth pos graph =
   |> Mpos.find_opt pos
   |> (function | None -> None |Some f -> Some f)
 
-let apply_change filename l0 pos v =
+let apply_change data l0 pos v =
   let prel = relative_pos l0 pos in
-  let data = D.init filename in
-  let data = D.set prel (create_cell v) data in
-  D.output_init data filename
-
+  D.set data prel (create_cell v)
 
 let eval_occ data p p' v =
   D.fold_rect
-    (fun acc cell -> if Ast.value cell = v then acc + 1 else acc)
+    (fun acc cell ->
+       if Ast.value cell = v then acc + 1 else acc)
     0
     (p, p')
     data
 
-(* TODO : pour l'instant on construit data ici *)
 (** [partial_eval computable filename]*)
-let partial_eval computable_formulas filename l0 lf =
-  let data = D.init filename in
+let partial_eval computable_formulas data l0 lf =
   List.map
     (fun f ->
        match f with

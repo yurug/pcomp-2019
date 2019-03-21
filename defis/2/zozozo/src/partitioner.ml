@@ -1,6 +1,5 @@
 open Ast
 open Parser
-open Printer
 
 type id = int
 
@@ -10,24 +9,35 @@ module R =
     let compare = compare end)
 
 type area = int * int
-type region = {filename : string ; area : area }
-
+type region = {area : area ; data : Regiondata.t}
 type regs = region R.t
-
 type regions = {regs : regs ; r_to_pos : pos -> id}
 
-exception Endfile of int
+let string_of_id = string_of_int
 
-let build_name_file_region filename id =
-  let ext, filename =
-    String.split_on_char '.' filename
-    |> List.rev
-    |> (function
-        | [] -> failwith "Master.build_name_region : empty filename."
-        | ext :: xs ->
-          let xs = List.rev xs in
-          ext, String.concat "." xs) in
-  filename^"_"^(string_of_int id)^"."^ext
+let number_regions regions =
+  R.cardinal regions.regs
+
+let get_region_area regions id =
+  (R.find id regions.regs).area
+
+let get_region_data regions id =
+  (R.find id regions.regs).data
+
+let pos_to_region regions p =
+  regions.r_to_pos p
+
+let regions_within regions p1 p2 =
+  let rmin = pos_to_region regions p1 in
+  let rmax = pos_to_region regions p2 in
+  let rec aux rm rM =
+    if rm = rM then [rm]
+    else rm :: aux (rm+1) rM in
+  aux rmin rmax
+
+let regions_fold f regions =
+  R.fold (fun id {area;_} -> f id area)
+    regions.regs
 
 let add_map key q map =
   match Mint.find_opt key map with
@@ -47,7 +57,6 @@ let add_work formulas wbl =
        (* quantité de travail pour une formule = 2 (arbitraire) *)
        let rf, _ = pos p in
        let w = add_map rf 2 w in
-
        (* pour chaque ligne i nécessaire pour calculer une formule on
           ajoute (c2-c1) en travail à la ligne i*)
        match formulas with
@@ -73,7 +82,7 @@ let preproc_file filename =
     let wbl = add_work formulas wbl in
     let max_col = if nb_col > max_col then nb_col else max_col in
     if end_of_file
-    then (close_in ic ; row, max_col, wbl, (formulas::all_formulas))
+    then (close_in ic ; row-1, max_col, wbl, (formulas::all_formulas))
     else preproc (row+1) wbl (formulas::all_formulas) max_col ic
   in
   let max_row, max_col, wbl, formulas =
@@ -82,39 +91,31 @@ let preproc_file filename =
   let formulas = List.flatten formulas in
   formulas, max_row, max_col, wbl
 
-
-let compute_cuts filename file_max_size =
-
-  let formulas, max_row, max_col, wbl =
+let compute_cuts filename min_region_size max_regions_nb =
+  let formulas, rows, cols, wbl =
     preproc_file filename in
 
   let total_work = Mint.fold (fun _ q acc -> q + acc) wbl 0 in
-  let max_lines_by_reg =
-    if max_col = 0 then file_max_size else file_max_size / max_col + 1 in
-  (* Nombre minimal de region : au mieux les régions ont toute la
-     taille max = la taille optimale.*)
-  let min_nb_reg = max_row / max_lines_by_reg + 1 in
-  (* Travail max par region : idéalement, on veut *)
-  let max_q = total_work / min_nb_reg + 1 in
-  (*Format.printf "maxline : %d minreg : %d max_q : %d" max_lines_by_reg min_nb_reg max_q ;*)
+  let line_by_region = max min_region_size (rows/max_regions_nb) in
+  let regions_nb = rows/line_by_region in
+  let work_by_region = total_work / regions_nb + 1 in
+
   let rec aux l0 lcurr acc current_q =
-    if lcurr >= max_row then (l0, lcurr)::acc
-    else if lcurr - l0 + 1 >= max_lines_by_reg then
-      aux (lcurr+1) (lcurr+1) ((l0, lcurr)::acc) 0
+    if lcurr >= rows then (l0, lcurr)::acc
     else
       let work =
         match Mint.find_opt lcurr wbl with
         | None -> 0+current_q
         | Some w -> w+current_q
       in
-      if current_q >= max_q then
+      if current_q >= work_by_region then
         aux lcurr (lcurr+1) ((l0, lcurr-1)::acc) (current_q - work)
       else
         aux l0 (lcurr+1) acc work
   in
   match aux 0 0 [] 0 with
   | [] -> failwith "Empty data.csv file."
-  | (l0, _) :: xs -> formulas, List.rev ((l0, max_row) :: xs)
+  | (l0, _) :: xs -> List.rev formulas, List.rev ((l0, rows) :: xs), cols
 
 let compute_f_to_pos (regs: region R.t) : pos -> id =
   fun p ->
@@ -125,14 +126,15 @@ let compute_f_to_pos (regs: region R.t) : pos -> id =
     | None -> failwith "Partioner.compute_f_to_pos "
     | Some (id, _) -> id
 
-let compute_regions filename file_max_size  =
-  let formulas, cuts =
-    compute_cuts filename file_max_size in
+let compute_regions filename min_region_size max_regions_nb  =
+  let formulas, cuts, max_col =
+    compute_cuts filename min_region_size max_regions_nb in
+  Format.printf "nbfile : %d@." (List.length cuts);
   let regs =
     List.fold_left
-      (fun (i, map) cut ->
-         let r = {filename = build_name_file_region filename i;
-                  area = cut} in
+      (fun (i, map) ((l0, lf) as cut) ->
+         let r = { area = cut ;
+                   data = Regiondata.init (string_of_id i) (lf-l0+1) max_col } in
          (i+1, R.add i r map)
       )
       (0, R.empty)
@@ -141,47 +143,26 @@ let compute_regions filename file_max_size  =
   in
   formulas, {regs; r_to_pos = compute_f_to_pos regs }
 
-(* to redo *)
-let cut_file_into_regions filename regions max_file_size =
+let cut_file_into_regions filename regions =
   let ic = open_in filename in
-  let rec cut file nb_line region =
-    try
-      if nb_line = (region+1)*max_file_size then
-        let _ = close_out file in
-        let new_region = region + 1 in
-        let new_name = build_name_file_region filename new_region in
-        let new_file = open_out new_name in
-        cut new_file nb_line new_region
-      else
-        ( input_line ic
-          |> Printf.fprintf file "%s\n" );
-           cut file (nb_line+1) region
-    with End_of_file -> close_out file
+  R.iter
+    (fun _ { area = (l0, lf) ; data} ->
+       parse_and_write_value_in_region ic data l0 lf
+    )
+    regions.regs ; close_in ic
 
-  in
-  let first_file = open_out (build_name_file_region filename 0) in
-  cut first_file 0 0; close_in ic
+(* Defi programmation fonctionnelle pure, vous avez dit ? oups ...*)
+let free_all regions : unit =
+  R.iter
+    (fun _ {data;_} ->
+       Regiondata.free data
+    )
+     regions.regs
 
-let get_region_filename regions id =
-  (R.find id regions.regs).filename
-
-let get_region_area regions id =
-  (R.find id regions.regs).area
-
-let pos_to_region regions p =
-  regions.r_to_pos p
-
-let regions_within regions p1 p2 =
-  let rmin = pos_to_region regions p1 in
-  let rmax = pos_to_region regions p2 in
-  let rec aux rm rM =
-    if rm = rM then [rm]
-    else rm :: aux (rm+1) rM in
-  aux rmin rmax
-
-let number_regions regions =
-  R.cardinal regions.regs
-
-let regions_fold f regions =
-  R.fold (fun id {area;_} -> f id area)
+let recombine_regions filename regions : unit =
+  let oc = open_out filename in
+  R.iter
+    (fun _ {data;_} ->
+       Regiondata.output data oc
+    )
     regions.regs
