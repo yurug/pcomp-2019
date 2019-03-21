@@ -8,6 +8,10 @@ class Position(val x: Int, val y: Int) {
   override def toString = s"(${x}, ${y})"
 
   def >(other: Position): Boolean = (x, y) > (other.x, other.y)
+
+  def equals(other: Position): Boolean = x == other.x && y == other.y
+
+  def <(other: Position): Boolean = (x, y) < (other.x, other.y)
 }
 
 class Block(val topLeft: Position, val bottomRight: Position) {

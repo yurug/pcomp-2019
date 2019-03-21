@@ -2,7 +2,7 @@
     List?). But, we keep itbecause some ideas use for the algorithm are good and
     change be used to improve the CSVPreProcessor if necesary. However, with
     around 1000 formulas and a file of 1.5 Go, it does not take too much time
-    (a little less than ten minutes). 
+    (a little less than ten minutes).
 
  */
 
@@ -179,7 +179,7 @@ object CSVPreProcessor {
       bcs: List[BChange],
       acs: List[Change]) = {
     val sortedAcs: Array[Change] = acs.toArray.sortBy(c => (c.p.x, c.p.y))
-    val sortedBcs: Array[BChange] = Change.sortByBlockPosition(bcs.toArray)
+    val sortedBcs: Array[BChange] = Change.sortByBlockPosition(bcs).toArray
     var topL: Array[Position] = computeTopLeft(sortedBcs)
     val lines = file.getLines
     process(lines, 0, sortedBcs, 0, topL, sortedAcs, 0)

@@ -1,4 +1,6 @@
 
+package main
+
 import user_file_parser._
 import change._
 import utils._
@@ -10,15 +12,40 @@ import csv_parser._
 
 object Main {
 
+
   def applyUserCommands(
       bw: java.io.BufferedWriter,
-      applied: List[Change],
-      toApply: List[Change]): Unit = toApply match {
-    case Nil => ()
-    case c::t =>
-      val newApplied: List[Change] = Modifier.applyNewChange(c, applied)
-      CommandEffectsPrinter.printEffect(bw, c, newApplied)
-      applyUserCommands(bw, newApplied, t)
+      csvName: String,
+      commands: Iterator[String],
+      formulae: List[BChange],
+      oldAChanges: List[AChange]): Unit = {
+    if(commands.isEmpty)
+      return
+    val str: String = commands.next
+    val c: Change = UserFileParser.parseCommand(str)
+    Reader.interpret(csvName) { csv =>
+      c.oldValue = CSVParser.computeOldValue(c, csv, oldAChanges, formulae)
+    }
+    c match {
+      case c: BChange =>
+        Reader.interpret(csvName) { csv =>
+          CSVPreProcessor.computeInitialValue(c, csv, oldAChanges)
+        }
+      case _ => ()
+    }
+
+    val newApplied: List[Change] = Modifier.applyNewChange(c, formulae)
+
+    CommandEffectsPrinter.printEffect(bw, c, newApplied)
+    val (_, newFormulae) = Change.split(newApplied)
+    val newAC = oldAChanges.filter { ac => ac.p.equals(c.p) }
+    c match {
+      case c: BChange =>
+        applyUserCommands(bw, csvName, commands, newFormulae, newAC)
+      case c: AChange =>
+        applyUserCommands(bw, csvName, commands, newFormulae, c::newAC)
+    }
+
   }
 
   def main(args: Array[String]): Unit = {
@@ -27,13 +54,20 @@ object Main {
       return
     }
 
-    val ucs: List[Change] = Reader.interpret(args(1)) { UserFileParser.parse(_) }
-    val (uacs, ubcs): (List[AChange], List[BChange]) = Change.split(ucs)
     val fbcs: List[BChange] = Reader.interpret(args(0)) { CSVParser.parse(_) }
-    println("Reader fini")
     Reader.interpret(args(0)) {
-      CSVPreProcessor.countInitialValues(_, fbcs ::: ubcs, ucs)
+      CSVPreProcessor.countInitialValues(_, fbcs)
     }
+    println("Terminé")
+    /*val actorSystem = ActorSystem("PreprocessSystem")
+    val actorList: List[ActorRef] =
+      fbcs.map { c =>
+        actorSystem.actorOf(Props(new PreprocessActor(c, args(0))))
+      }
+    actorList.foreach { a => a ! Start}
+    actorList.foreach { a => grafec}
+    actorSystem.terminate()*/
+
     Dependencies.compute(fbcs)
     Evaluator.evaluateChanges(fbcs)
 
@@ -42,6 +76,11 @@ object Main {
         CSVPrinter.printCSVWithChanges(input, output, fbcs)
       }
     }
-    Writer.write(args(3)) { applyUserCommands(_, fbcs, ucs) }
+
+    Reader.interpret(args(1)) { commandsFile =>
+      Writer.write(args(3)) { bw =>
+        applyUserCommands(bw, args(2), commandsFile.getLines, fbcs, List())
+      }
+    }
   }
 }

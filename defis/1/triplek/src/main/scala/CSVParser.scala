@@ -11,22 +11,30 @@ object CSVParser {
     * @param x The x position of the change.
     * @return A list of BChange corresponding to the formulae in `str`.
     */
-  private def searchFormulaeInLine(cells: Array[String], x: Int, y: Int, l: List[BChange]): List[BChange] = {
-    if(y >= cells.size) {
+  private def searchFormulaeInLine(
+      cellsWithY: Iterator[(String, Int)],
+      x: Int,
+      l: List[BChange]): List[BChange] = {
+    if(cellsWithY.isEmpty) {
       return l
     }
-    CellParser.parse(x, y, cells(y)) match {
-      case bc: BChange => searchFormulaeInLine(cells, x, y + 1, bc::l) 
-      case _: AChange => searchFormulaeInLine(cells, x, y + 1, l)
+    val (cell, y) = cellsWithY.next
+    CellParser.parse(x, y, cell) match {
+      case bc: BChange => bc :: searchFormulaeInLine(cellsWithY, x, l)
+      case _           => searchFormulaeInLine(cellsWithY, x, l)
     }
   }
 
-  private def process(lines: Iterator[String], x: Int, returned: List[BChange]): List[BChange] = {
-    if(lines.isEmpty) {
+  private def process(
+      linesWithX: Iterator[(String, Int)],
+      returned: List[BChange]): List[BChange] = {
+    if(linesWithX.isEmpty) {
       return returned
     }
-    val line: String = lines.next
-    process(lines, x + 1, searchFormulaeInLine(line.split(";"), x, 0, returned))
+    val (line, x): (String, Int) = linesWithX.next
+    val cellsWithY: Iterator[(String, Int)] =
+      line.split(";").toIterator.zipWithIndex
+    process(linesWithX, searchFormulaeInLine(cellsWithY, x, returned))
   }
 
   /** Parse a CSV file.
@@ -35,8 +43,26 @@ object CSVParser {
     * @return A list of BChange corresponding to the formulae in file.
     */
   def parse(file: scala.io.BufferedSource): List[BChange] = {
-    var lines = file.getLines
-    process(lines, 0, List())
+    var linesWithX = file.getLines.zipWithIndex
+    process(linesWithX, List())
   }
 
+  def computeOldValue(
+      c: Change,
+      file: scala.io.BufferedSource,
+      oldA: List[AChange],
+      oldB: List[BChange]): Int = oldB.find(_.p.equals(c.p)) match {
+    case Some(elem) =>
+      println("Fuck!")
+      return elem.v
+    case None =>
+      oldA.find(_.p.equals(c.p)) match {
+        case Some(elem) =>
+          println("The")
+          return elem.v
+        case None =>
+          println("What")
+          file.getLines.drop(c.p.x).next.split(";")(c.p.y).toInt
+      }
+  }
 }

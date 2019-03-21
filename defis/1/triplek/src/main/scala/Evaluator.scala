@@ -29,7 +29,7 @@ object Modifier {
   }
 
   private def addChange(c: Change, l: List[Change]): List[Change] = {
-    l.find { c1 => c1.p.x == c.p.x && c1.p.y == c.p.y } match {
+    l.find { c1 => c1.p.equals(c.p) } match {
       case None =>
         c::l
       case Some(oldC) => {

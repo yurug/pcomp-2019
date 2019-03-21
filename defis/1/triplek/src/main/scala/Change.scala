@@ -97,12 +97,6 @@ extends Change(pos, value) {
 }
 
 object Change {
-  def sortByBlockPosition(l: Array[BChange]): Array[BChange] = {
-    l.sortBy { c =>
-      (c.b.bottomRight.x, c.b.bottomRight.y, c.b.topLeft.x, c.b.topLeft.y)
-    }
-  }
-
   def sortByBlockPosition(l: List[BChange]): List[BChange] = {
     l.sortBy { c =>
       (c.b.bottomRight.x, c.b.bottomRight.y, c.b.topLeft.x, c.b.topLeft.y)
