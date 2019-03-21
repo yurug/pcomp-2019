@@ -12,7 +12,7 @@ import (
 
 func main() {
 	args := os.Args[1:]
-	if len(args) < 4 {
+	if len(args) < 1 {
 		fmt.Printf("Not enough arguments\n")
 		return
 	}
