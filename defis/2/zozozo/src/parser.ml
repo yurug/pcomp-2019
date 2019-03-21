@@ -107,3 +107,26 @@ let parse_and_write_value_in_region file data l0 lf : unit =
       with End_of_file -> ()
   in
   aux l0
+
+(* [parse_change err change] parse a change (ex : 1 1 =#(0,0, 0, 1,
+   1)) and returns a 3-uplet (b, pos, d) where [pos] is the position of
+   the changed cell and
+
+   - [b] = true if [d] is a string for a formula - [b] = false if [d]
+   is a string for a value *)
+let parse_change err change : bool * pos * string =
+  let change =
+    String.split_on_char ' ' change in
+  match change with
+  | [] | _ :: [] | _ :: _ :: [] ->
+    failwith err
+  | r :: c :: x1 :: xs ->
+    let r, c = try_int_of_string err r,
+               try_int_of_string err c in
+      let pos = build_pos r c in
+    if is_formula_string x1 then
+      (true, pos, String.concat "" (x1::xs))
+    else
+      match xs with
+      | [] -> false, pos, x1
+      | _ -> failwith err
