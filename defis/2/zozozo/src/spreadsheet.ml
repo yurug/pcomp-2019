@@ -301,25 +301,24 @@ let string_to_pos r c =
   let c = int_of_string c in
   Ast.build_pos r c
 
-let add_formula data_cell regions graph formulas_region pos region old_value =
-  let ((Occ((p1,p2),_)) as formula) = Parser.parse_formula "Erreur ajout formule" data_cell in
-  let graph = Graph.add_content region pos {fin = formula; eval = Undefined} graph in
+let rec complete_eval regions computable order changes =
+  match computable with
+  | [] ->
+     let non_comput = FormulaOrder.get_non_computable_formulas order in
+     List.fold_left (fun changes pos -> (pos,Undefined) :: changes) changes non_comput
+  | _ ->
+     let new_changes = eval_formulas regions computable in
+     let pos_list = List.map fst new_changes in
+     let computable,order = FormulaOrder.get_new_computable_formulas pos_list order in
+     complete_eval regions computable order (new_changes @ changes)
+
+let add_formula ((Occ((p1,p2),_)) as formula) regions graph formulas_region pos region old_value =
   match Mpos.find_opt pos formulas_region with
   | Some {fin = (Occ((p1',p2'),_));_} -> (*formule -> formule*)
      let graph = remove_formula_content regions p1' p2' graph pos in
      let graph = add_formula_neighbours regions p1 p2 graph pos formula in
      let order = FormulaOrder.build_order_from regions graph (pos,formula) in
-     let rec aux computable order changes =
-       match computable with
-       | [] ->
-          let non_comput = FormulaOrder.get_non_computable_formulas order in
-          List.fold_left (fun changes pos -> (pos,Undefined) :: changes) changes non_comput
-       | _ ->
-          let new_changes = eval_formulas regions computable in
-          let pos_list = List.map fst new_changes in
-          let computable,order = FormulaOrder.get_new_computable_formulas pos_list order in
-          aux computable order (new_changes @ changes)
-     in graph, aux (FormulaOrder.get_computable_formulas order) order []
+     graph, complete_eval regions (FormulaOrder.get_computable_formulas order) order []
   | None -> (* entier -> formule *)
      let graph = add_formula_neighbours regions p1 p2 graph pos formula in
      let order = FormulaOrder.build_order_from regions graph (pos,formula) in
@@ -327,7 +326,7 @@ let add_formula data_cell regions graph formulas_region pos region old_value =
      | [] ->
         let non_computable = FormulaOrder.get_non_computable_formulas order in
         graph,(List.map (fun pos -> (pos,Undefined)) non_computable)
-     | [(pos_form,f)] when pos_form = pos ->
+     | [(pos_form,f)] when pos_form = pos -> (* car ne retire pas de cycle*)
         let eval = eval_formulas regions [(pos,f)] in
         begin
           match eval with
@@ -379,7 +378,9 @@ let eval_one_change line regions graph =
 
      | _ :: _ :: _ :: _ :: _ :: [] ->
         let data_cell = String.concat "," t in
-        add_formula data_cell regions graph formulas_region pos region old_value
+        let formula = Parser.parse_formula "Erreur ajout formule" data_cell in
+        let graph = Graph.add_content region pos {fin = formula; eval = Undefined} graph in
+        add_formula formula regions graph formulas_region pos region old_value
      | _ -> failwith "changes incorrect"
 
 
