@@ -405,22 +405,22 @@ let eval_one_change line regions graph =
 
 
 let eval_changes regions filename_user filename_change graph =
-  let channel_in = open_in filename_user in
-  let channel_out = open_out filename_change in
+  let ic = open_in filename_user in
+  let oc = open_out filename_change in
   let rec aux graph =
     try
-      let line = input_line channel_in in
+      let line = input_line ic in
       let graph, changes = eval_one_change line regions graph in
       let changes = List.sort (fun (p1,_) (p2,_) -> Ast.compare_pos p1 p2) changes in
-      output_string channel_out ("after \""^line^"\":\n");
+      output_string oc ("after \""^line^"\":\n");
       List.iter (fun (pos,v) ->
-          output_string channel_out ((Printer.string_of_pos pos)^" "^(Printer.string_of_value v)^"\n")
+          output_string oc ((Printer.string_of_pos pos)^" "^(Printer.string_of_value v)^"\n")
         ) changes;
       apply_changes regions changes;
       aux graph
     with End_of_file ->
-      close_in channel_in;
-      close_out channel_out;
+      close_in ic;
+      close_out oc;
       graph
   in aux graph
 

@@ -126,7 +126,7 @@ let compute_f_to_pos (regs: region R.t) : pos -> id =
   let bindings = R.bindings regs in
   let tmp = List.find_opt  (fun (_,{area=(l0, l1);_}) -> l0 <= r && r <= l1) bindings in
   match tmp with
-    | None -> failwith "Partioner.compute_f_to_pos "
+    | None -> failwith "Partitioner.compute_f_to_pos "
     | Some (id, _) -> id
 
 let compute_regions filename min_region_size max_regions_nb  =
