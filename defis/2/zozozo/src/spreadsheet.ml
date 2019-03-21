@@ -216,26 +216,26 @@ let rec something_to_value regions order computables list_values graph =
            match v with
            | Empty | Undefined -> failwith "On ne compte que des entiers"
            | Int v ->
-              let diff = get_diff list_values zone v in
-              if diff = 0 then (pos_compute :: pos_list),list_val
-              else
-                let region = pos_to_region regions pos_compute in
-                let pos_region = Ast.relative_pos region pos_compute in
-                let data = get_region_data regions region in
-                let old_value = Ast.value (D.get data pos_region) in
-                (pos_compute :: pos_list),
-                (match old_value with
-                | Empty -> failwith "C'est pas ta vrai form"
-                | Undefined ->
-                   let content = Graph.get_content region graph in
-                   let {fin = formula;_} = try Mpos.find pos_compute content
-                                 with _ -> failwith "J'y crois 0" in
-                   let eval = eval_formulas regions [(pos_compute,formula)] in
-                   let eval = List.map
-                                (fun (pos,new_val) -> (pos,(Undefined,new_val)))
-                                eval in
-                   (eval @ list_values)
-                | Int old_value ->
+              let region = pos_to_region regions pos_compute in
+              let pos_region = Ast.relative_pos region pos_compute in
+              let data = get_region_data regions region in
+              let old_value = Ast.value (D.get data pos_region) in
+              (pos_compute :: pos_list),
+              (match old_value with
+               | Empty -> failwith "C'est pas ta vrai form"
+               | Undefined ->
+                  let content = Graph.get_content region graph in
+                  let {fin = formula;_} = try Mpos.find pos_compute content
+                                          with _ -> failwith "J'y crois 0" in
+                  let eval = eval_formulas regions [(pos_compute,formula)] in
+                  let eval = List.map
+                               (fun (pos,new_val) -> (pos,(Undefined,new_val)))
+                               eval in
+                  (eval @ list_values)
+               | Int old_value ->
+                  let diff = get_diff list_values zone v in
+                  if diff = 0 then list_val
+                  else
                    (pos_compute,
                     (Int old_value, Int (old_value + diff))) :: list_val)
          ) ([],list_values) computables in
@@ -269,25 +269,27 @@ let eval_one_change line regions graph =
              let content = Mpos.remove pos content in
              let graph = Graph.change_content region content graph in
              let list_region = Partitioner.regions_within regions p1 p2 in
-             List.fold_left
+             let graph = List.fold_left
                (fun graph region ->
                  let neighbours = Graph.get_neighbours region graph in
                  let neighbours = Mpos.remove pos neighbours in
                  Graph.change_neighbours region neighbours graph
-               ) graph list_region
+               ) graph list_region in
+             graph
         in
         begin
           match old_value with
           | Empty -> failwith "Empty n'existe pas"
           | Int old_v when old_v = new_value -> graph,[]
           | _ ->
+             let neighbours = Graph.get_neighbours region graph in
              let formulas =
                Graph.(Mpos.fold
                         (fun pos_formula {subregion = zone; formula = f} l ->
                           if Ast.pos_in_area pos zone
                           then (pos_formula,f) :: l
                           else l
-                        ) (Graph.get_neighbours region graph) []) in
+                        ) neighbours []) in
              let order =
                FormulaOrder.build_order_from_all regions graph formulas in
              let computables = FormulaOrder.get_computable_formulas order in
