@@ -217,28 +217,29 @@ let rec something_to_value regions order computables list_values graph =
            match v with
            | Empty | Undefined -> failwith "On ne compte que des entiers"
            | Int v ->
-              let region = pos_to_region regions pos_compute in
-              let pos_region = Ast.relative_pos region pos_compute in
-              let data = get_region_data regions region in
-              let old_value = Ast.value (D.get data pos_region) in
-              (pos_compute :: pos_list),
-              (match old_value with
-               | Empty -> failwith "C'est pas ta vrai form"
-               | Undefined ->
-                  let content = Graph.get_content region graph in
-                  let {fin = formula;_} = try Mpos.find pos_compute content
-                                          with _ -> failwith "J'y crois 0" in
-                  let eval = eval_formulas regions [(pos_compute,formula)] in
-                  let eval = List.map
-                               (fun (pos,new_val) -> (pos,(Undefined,new_val)))
-                               eval in
-                  (eval @ list_values)
-               | Int old_value ->
-                  let diff = get_diff list_values zone v in
-                  if diff = 0 then list_val
-                  else
-                   (pos_compute,
-                    (Int old_value, Int (old_value + diff))) :: list_val)
+             let region = pos_to_region regions pos_compute in
+             let l0, _ = get_region_area regions region in
+             let pos_region = Ast.relative_pos l0 pos_compute in
+             let data = get_region_data regions region in
+             let old_value = Ast.value (D.get data pos_region) in
+             (pos_compute :: pos_list),
+             (match old_value with
+              | Empty -> failwith "C'est pas ta vrai form"
+              | Undefined ->
+                let content = Graph.get_content region graph in
+                let {fin = formula;_} = try Mpos.find pos_compute content
+                  with _ -> failwith "J'y crois 0" in
+                let eval = eval_formulas regions [(pos_compute,formula)] in
+                let eval = List.map
+                    (fun (pos,new_val) -> (pos,(Undefined,new_val)))
+                    eval in
+                (eval @ list_values)
+              | Int old_value ->
+                let diff = get_diff list_values zone v in
+                if diff = 0 then list_val
+                else
+                  (pos_compute,
+                   (Int old_value, Int (old_value + diff))) :: list_val)
          ) ([],list_values) computables in
      let computables, order =
        FormulaOrder.get_new_computable_formulas pos_list order in
@@ -293,7 +294,8 @@ let add_int regions region graph pos old_value new_value =
      snd (something_to_value regions order computables fst_change graph)
 
 let get_old_value regions region pos =
-  let pos_region = Ast.relative_pos region pos in
+  let l0, _ = get_region_area regions region in
+  let pos_region = Ast.relative_pos l0 pos in
   let data = get_region_data regions region in
   Ast.value (D.get data pos_region)
 
