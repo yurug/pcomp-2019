@@ -11,29 +11,42 @@ object Main {
     val request_file = args(1)
     val viewOut_file = args(2)
     val changeTODO_file = args(3)
-    
-    val sheet = new Sheet_evalued(data_file,viewOut_file)  
-    val scheduler = CSV_IO_Scheduler.load_scheduler(request_file,sheet)
-    scheduler.start_exec()
-    CSV_IO_Scheduler.write_change(scheduler,changeTODO_file)
+    generate_view0(data_file,viewOut_file)
+    generate_change(request_file,changeTODO_file)
+  
+  }
+  def load_scheduler(file : String) ={
+    import scala.collection.mutable.MutableList
+    import scala.collection.JavaConverters._
+
+    val tmp = new FileCSV_DAO[Estimate_change](file," ") 
+    with Request_parser
+    tmp.init
+    val scheduler = new Basic_Scheduler[Estimate_change]
+    tmp.foreach {e => scheduler.add(e)}
+    scheduler
+  }
+  def write_change(scheduler: Scheduler[Estimate_change],changeTODO_file : String)={
+        val output = new BufferedWriter(
+        new FileWriter(
+            new File(changeTODO_file)))
+    val result  = scheduler.get_task_done()
+    val tmp = result.map(elt => elt.get_result.map(Printer.toString))
+    val content = tmp.foldLeft("")((acc,txt) => acc + txt + "\n")    
+    output.write(content)
+    output.close()
+  }
+
+  def generate_view0(data:String, view:String) = {
+    val f= new Sheet_evalued_Impl(data, view)
+    f.start_evaluation
+    f.export()    
   }
   
-
-  /*{
-    if (args.length <4) {
-        println("4 agrs minimum")
-    }
-    val f= new FeuilleSimple(args(0))
-    f.loadCalc()
-    val I = new DataInterpreteur(f)
-    I.evalCellules()
-    I.writeView(args(2))
-    */
-/*    def test_load_scheduler() = {
-      val scheduler = load_scheduler("test/data.txt")
-      
-    }
-*/
-
-    
+  def generate_change(request: String,change: String) = {
+     val scheduler = load_scheduler(request)
+    scheduler.start_exec()
+    write_change(scheduler,change)
   }
+    
+ }

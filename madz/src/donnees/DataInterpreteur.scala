@@ -4,8 +4,10 @@ import java.io.File
 
 import java.io.PrintWriter
 
+/*
+ * count nomber occurence of 1 int in a region of data file
+ */
 object DataInterpreteur {
-  val database = "view0.txt"
   
   def getEvalRegionV0(c1:Case, c2:Case,v:Int,view0:String):CaseData={
     var count=0
@@ -31,26 +33,7 @@ object DataInterpreteur {
     Number(count)
   }
   
-  //def getValueData (c: Case): CaseData = get_FormuleId 
-  def evalData(data :CaseData) = data match {
-    case Number(n) =>  Number(n)
-    case Formule(lt,br,v) => getEvalRegionV0(lt, br, v,database)
-			case _ => P()
-  }
+
     
-   // getEvalRegionV0(c,c,v,database)
-  /*
-  
-  
-	
-	 def writeView(view:String):Unit ={
-     val writer = new PrintWriter(new File(view))
-     for(l <- fs.getFeuille){
-       var list= l.map (c => DataParser.formuleToString(c.getVal))
-        writer.write(list.mkString(";"))
-        writer.write("\n")
-     }
-    writer.close()
-   }
-				*/
+
 }

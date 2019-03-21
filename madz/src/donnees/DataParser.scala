@@ -1,5 +1,8 @@
 package donnees
 
+/*
+ * parse data file
+ */
 object DataParser{
   
   
@@ -13,7 +16,7 @@ object DataParser{
         data match{
           case dateREGX(r1,c1,r2,c2,v)=>
             Formule (Case(r1.toInt,c1.toInt),Case(r2.toInt,c2.toInt),v.toInt)
-          case _ =>P()
+          case _ => P()
         }
     }
   }
