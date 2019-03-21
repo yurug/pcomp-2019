@@ -3,7 +3,7 @@
 
 ```Bash
 $ make
-$ ./scripts/run.sh data.csv user.txt view0.txt changes.txt
+$ ./ws data.csv user.txt view0.txt changes.txt
 ```
 
 # Makefile
