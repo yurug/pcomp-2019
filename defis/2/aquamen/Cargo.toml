@@ -1,0 +1,15 @@
+[package]
+name = "aquamen"
+version = "0.1.0"
+authors = ["n3f4s <tiv.crb@gmail.com>"]
+
+[dependencies]
+combine = "3.6.6"
+separator = "*"
+log = "*"
+env_logger = "*"
+rand = "*"
+
+[features]
+default = []
+bench = []
