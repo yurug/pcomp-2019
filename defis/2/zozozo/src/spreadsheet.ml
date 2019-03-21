@@ -243,19 +243,126 @@ let rec something_to_value regions order computables list_values graph =
        FormulaOrder.get_new_computable_formulas pos_list order in
      something_to_value regions order computables list_values graph
 
+let add_formula_neighbours regions p1 p2 graph pos formula =
+  let list_region = Partitioner.regions_within regions p1 p2 in
+  List.fold_left
+    ( fun graph region ->
+      let l0, lf = Partitioner.get_region_area regions region in
+      let subregion = Ast.narrowing p1 p2 l0 lf in
+      match subregion with
+      | None ->
+         failwith "region_within et narrowing sont pas d'accord"
+      | Some subregion ->
+         let neighbour = {Graph.formula = formula; subregion = subregion} in
+         Graph.add_neighbour region pos neighbour graph
+    ) graph list_region
+
+let remove_formula_content regions p1 p2 graph pos =
+  let list_old_reg = Partitioner.regions_within regions p1 p2 in
+  List.fold_left
+    (fun graph region ->
+      Graph.remove_content region pos graph
+    ) graph list_old_reg
+
+let remove_formula_neighbours regions p1 p2 graph pos =
+  let list_region = Partitioner.regions_within regions p1 p2 in
+  List.fold_left
+    (fun graph region ->
+      Graph.remove_neighbour region pos graph
+    ) graph list_region
+
+let add_int regions region graph pos old_value new_value =
+  match old_value with
+  | Empty -> failwith "Empty n'existe pas"
+  | Int old_v when old_v = new_value -> graph,[]
+  | _ ->
+     let neighbours = Graph.get_neighbours region graph in
+     let formulas =
+       Graph.(Mpos.fold
+                (fun pos_formula {subregion = zone; formula = f} l ->
+                  if Ast.pos_in_area pos zone
+                  then (pos_formula,f) :: l
+                  else l
+                ) neighbours []) in
+     let order =
+       FormulaOrder.build_order_from_all regions graph formulas in
+     let computables = FormulaOrder.get_computable_formulas order in
+     let fst_change = [(pos,(old_value,Int new_value))] in
+     graph,
+     snd (something_to_value regions order computables fst_change graph)
+
+let get_old_value regions region pos =
+  let pos_region = Ast.relative_pos region pos in
+  let data = get_region_data regions region in
+  Ast.value (D.get data pos_region)
+
+let string_to_pos r c =
+  let r = int_of_string r in
+  let c = int_of_string c in
+  Ast.build_pos r c
+
+let add_formula data_cell regions graph formulas_region pos region old_value =
+  let ((Occ((p1,p2),_)) as formula) = Parser.parse_formula "Erreur ajout formule" data_cell in
+  let graph = Graph.add_content region pos {fin = formula; eval = Undefined} graph in
+  match Mpos.find_opt pos formulas_region with
+  | Some {fin = (Occ((p1',p2'),_));_} -> (*formule -> formule*)
+     let graph = remove_formula_content regions p1' p2' graph pos in
+     let graph = add_formula_neighbours regions p1 p2 graph pos formula in
+     let order = FormulaOrder.build_order_from regions graph (pos,formula) in
+     let rec aux computable order changes =
+       match computable with
+       | [] ->
+          let non_comput = FormulaOrder.get_non_computable_formulas order in
+          List.fold_left (fun changes pos -> (pos,Undefined) :: changes) changes non_comput
+       | _ ->
+          let new_changes = eval_formulas regions computable in
+          let pos_list = List.map fst new_changes in
+          let computable,order = FormulaOrder.get_new_computable_formulas pos_list order in
+          aux computable order (new_changes @ changes)
+     in graph, aux (FormulaOrder.get_computable_formulas order) order []
+  | None -> (* entier -> formule *)
+     let graph = add_formula_neighbours regions p1 p2 graph pos formula in
+     let order = FormulaOrder.build_order_from regions graph (pos,formula) in
+     match FormulaOrder.get_computable_formulas order with
+     | [] ->
+        let non_computable = FormulaOrder.get_non_computable_formulas order in
+        graph,(List.map (fun pos -> (pos,Undefined)) non_computable)
+     | [(pos_form,f)] when pos_form = pos ->
+        let eval = eval_formulas regions [(pos,f)] in
+        begin
+          match eval with
+          | [(pos_form,Int new_value)] when pos_form = pos ->
+             begin
+               match old_value with
+               | Empty -> failwith "Empty is bullshit"
+               | Int old_v when old_v = new_value -> graph,[]
+               | _ ->
+                  let computables, order =
+                    FormulaOrder.get_new_computable_formulas [pos] order in
+                  let fst_change = [(pos,(old_value, Int new_value))] in
+                  let order,change =
+                    something_to_value regions order computables fst_change graph in
+                  let change =
+                    List.fold_left
+                      (fun change pos -> (pos,Undefined) :: change)
+                      change (FormulaOrder.get_non_computable_formulas order)
+                  in
+                  graph,change
+             end
+          | _ -> failwith "eval_formulas ne renvoie pas la meme taille de liste"
+        end
+     | _ ->  failwith "entier -> formule créer plus d'une computable ?"
+
+
 let eval_one_change line regions graph =
   let string_list = String.split_on_char ' ' line in
   match string_list with
   | [] | [_] | [_;_] -> failwith "Parsing incorrect line"
   | r :: c :: t -> (* ajoute un entier d en (r,c) *)
-     let r = int_of_string r in
-     let c = int_of_string c in
-     let pos = Ast.build_pos r c in
+     let pos = string_to_pos r c in
      let region = pos_to_region regions pos in
-     let pos_region = Ast.relative_pos region pos in
+     let old_value = get_old_value regions region pos in
      let formulas_region = Graph.get_content region graph in
-     let data = get_region_data regions region in
-     let old_value = Ast.value (D.get data pos_region) in
      let t = String.concat "" t in
      let t = String.split_on_char ',' t in
      match t with
@@ -265,144 +372,14 @@ let eval_one_change line regions graph =
           match Mpos.find_opt pos formulas_region with
           | None -> graph (* entier -> entier*)
           | Some {fin = Occ((p1,p2),_);_} -> (* formule -> entier*)
-             let content = Graph.get_content region graph in
-             let content = Mpos.remove pos content in
-             let graph = Graph.change_content region content graph in
-             let list_region = Partitioner.regions_within regions p1 p2 in
-             let graph = List.fold_left
-               (fun graph region ->
-                 let neighbours = Graph.get_neighbours region graph in
-                 let neighbours = Mpos.remove pos neighbours in
-                 Graph.change_neighbours region neighbours graph
-               ) graph list_region in
-             graph
+             let graph = Graph.remove_content region pos graph in
+             remove_formula_neighbours regions p1 p2 graph pos
         in
-        begin
-          match old_value with
-          | Empty -> failwith "Empty n'existe pas"
-          | Int old_v when old_v = new_value -> graph,[]
-          | _ ->
-             let neighbours = Graph.get_neighbours region graph in
-             let formulas =
-               Graph.(Mpos.fold
-                        (fun pos_formula {subregion = zone; formula = f} l ->
-                          if Ast.pos_in_area pos zone
-                          then (pos_formula,f) :: l
-                          else l
-                        ) neighbours []) in
-             let order =
-               FormulaOrder.build_order_from_all regions graph formulas in
-             let computables = FormulaOrder.get_computable_formulas order in
-             let fst_change = [(pos,(old_value,Int new_value))] in
-             graph,
-             snd (something_to_value regions order computables fst_change graph)
-        end
+        add_int regions region graph pos old_value new_value
+
      | _ :: _ :: _ :: _ :: _ :: [] ->
         let data_cell = String.concat "," t in
-        let ((Occ((p1,p2),_)) as formula) =
-          Parser.parse_formula "L'erreur ajout formule" data_cell in
-        begin
-          match Mpos.find_opt pos formulas_region with
-          | None -> (* entier -> formule *)
-             let content = Graph.get_content region graph in
-             let content =
-               Mpos.add pos {fin = formula; eval = Undefined} content in
-             let graph = Graph.change_content region content graph in
-             let list_region = Partitioner.regions_within regions p1 p2 in
-             let graph =
-               List.fold_left
-                 ( fun graph region ->
-                   let neighbours = Graph.get_neighbours region graph in
-                   let l0, lf = Partitioner.get_region_area regions region in
-                   let subregion = Ast.narrowing p1 p2 l0 lf in
-                   match subregion with
-                   | None ->
-                      failwith "region_within et narrowing sont pas d'accord"
-                   | Some subregion ->
-                      let neighbour =
-                        {Graph.formula = formula; subregion = subregion} in
-                      let neighbours = Mpos.add pos neighbour neighbours in
-                      Graph.change_neighbours region neighbours graph
-                 ) graph list_region in
-             let order =
-               FormulaOrder.build_order_from regions graph (pos,formula) in
-             begin
-               match FormulaOrder.get_computable_formulas order with
-               | [] ->
-                  let non_computable =
-                    FormulaOrder.get_non_computable_formulas order in
-                  graph,(List.map (fun pos -> (pos,Undefined)) non_computable)
-               | [(pos_form,f)] when pos_form = pos ->
-                  let eval = eval_formulas regions [(pos,f)] in
-                  begin
-                    match eval with
-                    | [(pos_form,Int new_value)] when pos_form = pos ->
-                       begin
-                         match old_value with
-                         | Empty -> failwith "Empty is bullshit"
-                         | Int old_v when old_v = new_value ->
-                            graph,[]
-                         | _ ->
-                            let computables, order =
-                              FormulaOrder.get_new_computable_formulas [pos] order in
-                            let fst_change = [(pos,(old_value, Int new_value))] in
-                            let order,change =
-                              something_to_value regions order
-                                computables fst_change graph in
-                            let change =
-                              List.fold_left
-                                (fun change pos ->
-                                  (pos,Undefined) :: change)
-                                change (FormulaOrder.get_non_computable_formulas order)
-                            in
-                            graph,change
-                       end
-                    | _ -> failwith "eval_formulas ne renvoie pas la meme taille de liste"
-                  end
-               | _ -> failwith "entier -> formule créer plus d'une computable ?"
-             end
-          | Some {fin = (Occ((p1',p2'),_));_} ->
-             let content = Graph.get_content region graph in
-             let content = Mpos.add pos {fin = formula; eval = Undefined} content in
-             let graph = Graph.change_content region content graph in
-             let list_old_reg = Partitioner.regions_within regions p1' p2' in
-             let graph =
-               List.fold_left
-                 (fun graph region ->
-                   let content = Graph.get_content region graph in
-                   let content = Mpos.remove pos content in
-                   Graph.change_content region content graph
-                 ) graph list_old_reg in
-             let list_new_reg = Partitioner.regions_within regions p1 p2 in
-             let graph =
-               List.fold_left
-                 (fun graph region ->
-                   let lr,lc = Partitioner.get_region_area regions region in
-                   let subzone = Ast.narrowing p1 p2 lr lc in
-                   match subzone with
-                   | None -> failwith "narrowing et regions_within en contradiction"
-                   | Some subzone ->
-                      let neighbours = Graph.get_neighbours region graph in
-                      let neighbour = {Graph.formula = formula; subregion = subzone} in
-                      let neighbours = Mpos.add pos neighbour neighbours in
-                      Graph.change_neighbours region neighbours graph
-                 ) graph list_new_reg in
-             let order = FormulaOrder.build_order_from regions graph (pos,formula) in
-             let rec aux computable order changes =
-               match computable with
-               | [] ->
-                  let non_comput = FormulaOrder.get_non_computable_formulas order in
-                  List.fold_left
-                    (fun changes pos -> (pos,Undefined) :: changes)
-                    changes non_comput
-               | _ ->
-                  let new_changes = eval_formulas regions computable in
-                  let pos_list = List.map fst new_changes in
-                  let computable,order =
-                    FormulaOrder.get_new_computable_formulas pos_list order in
-                  aux computable order (new_changes @ changes)
-             in graph, aux (FormulaOrder.get_computable_formulas order) order []
-        end
+        add_formula data_cell regions graph formulas_region pos region old_value
      | _ -> failwith "changes incorrect"
 
 

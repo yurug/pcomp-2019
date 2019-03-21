@@ -63,6 +63,7 @@ let add_neighbour label_node label_neighbour new_neighbour g =
       build_node empty_content (singleton_neighbour label_neighbour new_neighbour) in
     Mint.add label_node new_node g
 
+
 let change_neighbours label_node neighbours g =
   match Mint.find_opt label_node g with
   | Some node ->
@@ -96,6 +97,21 @@ let get_neighbours_content label graph =
   match Mint.find_opt label graph with
   | None -> raise (NonExistingNode label)
   | Some n -> n.content, n.neighbours
+
+let add_content label_node pos formula graph =
+  let content = get_content label_node graph in
+  let content = Mpos.add pos formula content in
+  change_content label_node content graph
+
+let remove_content label_node pos graph =
+  let content = get_content label_node graph in
+  let content = Mpos.remove pos content in
+  change_content label_node content graph
+
+let remove_neighbour label_node pos graph =
+  let neighbours = get_neighbours label_node graph in
+  let neighbours = Mpos.remove pos neighbours in
+  change_neighbours label_node neighbours graph
 
 let fold_neighbours f (neighbours:neighbours) =
   Mpos.fold f neighbours

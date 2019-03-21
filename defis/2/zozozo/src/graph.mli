@@ -45,8 +45,11 @@ val add_node : nodeLabel -> node -> t -> t
 
 (** [add_neighbour label_node label_neighbour new_neighbour g] *)
 val add_neighbour : nodeLabel -> neighbourLabel -> neighbour -> t -> t
+val add_content : nodeLabel -> pos -> formula -> t -> t
 val change_neighbours : nodeLabel -> neighbours -> t -> t
 val change_content : nodeLabel -> content -> t -> t
+val remove_content : nodeLabel -> pos -> t -> t
+val remove_neighbour : nodeLabel -> pos -> t -> t
 
 (** [get_neighbours label g] returns the neighbours of node labelled
    [label] in graph [g] or raises [NonExistingNode]. *)
