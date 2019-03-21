@@ -14,8 +14,27 @@ let parse_input argv =
     prerr_endline "Usage: ws <data.csv> <user.txt> <view0.csv> <changes.txt>";
     exit 1 )
 
+let debug_write_view_final view0_filename regions =
+ let view_final =
+    String.split_on_char '/' view0_filename
+    |> List.rev
+    |> (function
+        | x :: xs ->
+          let name = String.split_on_char '.' x
+                     |> (function
+                         | _ :: ext -> "viewfinal."^(String.concat "" ext)
+                         | [] -> failwith "prout"
+                       )
+          in
+          name :: xs
+        | [] -> failwith "prout")
+    |> List.rev
+    |> String.concat "/"
+  in
+  Partitioner.recombine_regions view_final regions
+
 let main () =
-  let data_filename, user_filename, view0_filename, change_filename, _ =
+  let data_filename, user_filename, view0_filename, change_filename, verbose  =
     parse_input Sys.argv in
   Format.printf "%s@." data_filename;
   let max_nb_regions = 1000 in
@@ -29,7 +48,8 @@ let main () =
   let _ = Partitioner.free_all regions in
   let t3 = Unix.gettimeofday () in
   let _ = Spreadsheet.eval_changes regions user_filename change_filename g in
-  print_execution_time t0 t1 t2 t3
-
+  if verbose then
+    print_execution_time t0 t1 t2 t3
+  else ()
 
 let () = main ()

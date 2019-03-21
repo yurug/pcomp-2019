@@ -176,24 +176,6 @@ let first_evaluation regions formulas graph =
     |> List.map (fun p -> (p, Undefined)) in
   apply_changes regions formulas_indefined
 
-  (*
-  let tasks_list_map =
-    tasks_by_region region_depth computable in
-  (* Les taches sont triées par label de region = label d'esclaves *)
-  Mint.fold
-    (fun region tasks res ->
-       let filename = build_name_file_region filename region in
-       Region.partial_eval tasks filename (region*region_depth) ((region+1)*region_depth-1)::res
-    )
-    tasks_list_map
-    []
-  |> List.concat
-  |> List.sort (fun (p1, _, _) (p2, _, _) -> compare_pos p1 p2)
-  |> (fun x -> combine_evals x)
-  |> List.iter
-    (fun (p1, eval) ->
-       Format.printf "Formule en %s vaut %d@." (string_of_pos p1) eval)*)
-
 let get_diff list_values zone value =
     List.fold_left
       (fun n (pos_value,(old_v,new_v)) -> (*old_v <> new_v*)
@@ -406,47 +388,3 @@ let eval_changes regions filename_user filename_change graph =
       close_out oc;
       graph
   in aux graph
-
-
-
-(*
-(* Probablement à optimiser (linéaire ici). Peut-être construire une
-   map de formulas. A voir en fonction des autres utilisations de
-   formulas. *)
-let find_formulas pos formulas : (pos * is_formula content) option =
-  List.find_opt (fun (p, _) -> p = pos) formulas
-
-
-(* J'ai mis des arguments mais il faut probablement les revoir *)
-let rec apply_one_change regions formulas graph change =
-  let err = "Bad format in user.txt file" in
-  let (is_new_formula, pos, d) = read_change err change
-  in
-  let old_form_opt = find_formulas pos formulas in
-  if is_new_formula then
-    let new_formula = parse_formula err d in
-    match old_form_opt with
-    | None ->
-      change_value_with_formula graph pos new_formula
-    | Some (_, old_formula) ->
-      change_formula_with_formula graph pos old_formula new_formula
-  else
-    let new_value = Val (parse_value err d) in
-    match old_form_opt with
-    | None ->
-      change_value_with_value graph pos new_value
-    | Some (_, old_formula) ->
-      change_formula_with_value graph pos old_formula new_value
-
-and change_formula_with_value graph pos old_formula new_value =
-  failwith "TODO"
-
-and change_formula_with_formula graph pos old_formula new_formula =
-  failwith "TODO"
-
-and change_value_with_value graph pos new_value =
-    failwith "TODO"
-
-and change_value_with_formula graph pos new_formula =
-    failwith "TODO"
-    *)

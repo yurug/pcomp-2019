@@ -79,6 +79,7 @@ let preproc_user filename_user max_rows max_cols wbl =
   let update_maxs =
     fun (rows, cols) (p, _) ->
       let r, c = pos p in
+      let r, c = r, c+1 in
       let rows =
         if r > rows then r else rows in
       let cols =
@@ -123,7 +124,9 @@ let compute_cuts data_filename user_filename min_region_size max_regions_nb =
     preproc_data data_filename in
 
   let rows, cols, wbl = preproc_user user_filename rows cols wbl in
-  Format.printf "rows : %d cols %d @." rows cols;
+  let rows = rows in
+  let cols = cols in
+  Format.printf "Rows : %d Cols : %d@." rows cols;
 
   let total_work = Mint.fold (fun _ q acc -> q + acc) wbl 0 in
   let line_by_region = max min_region_size (rows/max_regions_nb) in
@@ -156,8 +159,10 @@ let compute_f_to_pos (regs: region R.t) : pos -> id =
   let bindings = R.bindings regs in
   let tmp = List.find_opt  (fun (_,{area=(l0, l1);_}) -> l0 <= r && r <= l1) bindings in
   match tmp with
-    | None -> failwith "Partitioner.compute_f_to_pos "
-    | Some (id, _) -> id
+  | None ->
+    let mess = "Partitioner.compute_f_to_pos : line "^(string_of_id r)^" out of bounds." in
+    failwith mess
+  | Some (id, _) -> id
 
 let compute_regions data_filename user_filename min_region_size max_regions_nb  =
   let formulas, cuts, max_col =
@@ -165,7 +170,6 @@ let compute_regions data_filename user_filename min_region_size max_regions_nb  
   let regs =
     List.fold_left
       (fun (i, map) ((l0, lf) as cut) ->
-         Format.printf "id %d cut : %d %d@." i l0 lf;
          let r = { area = cut ;
                    data = Regiondata.init (string_of_id i) (lf-l0+1) max_col } in
          (i+1, R.add i r map)
