@@ -53,15 +53,12 @@ object CSVParser {
       oldA: List[AChange],
       oldB: List[BChange]): Int = oldB.find(_.p.equals(c.p)) match {
     case Some(elem) =>
-      println("Fuck!")
       return elem.v
     case None =>
       oldA.find(_.p.equals(c.p)) match {
         case Some(elem) =>
-          println("The")
           return elem.v
         case None =>
-          println("What")
           file.getLines.drop(c.p.x).next.split(";")(c.p.y).toInt
       }
   }

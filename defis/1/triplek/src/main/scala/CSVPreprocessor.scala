@@ -108,7 +108,6 @@ object CSVPreProcessor {
     val cellsWithY: Iterator[(String, Int)] =
       str.split(";").iterator.zipWithIndex
     val fr: List[BChange] = processLine(cellsWithY, x, bcs)
-    println(x)
     process(linesWithX, fr)
   }
 
@@ -116,15 +115,15 @@ object CSVPreProcessor {
     *are by only considering the cell of type A in the file.
     *
     * @param file The CSV file to process.
-    * @param bcs The list of BChange whose initial value should be computed
-                 (assume they are sorted bu block position).
+    * @param bcs The list of BChange whose initial value should be computed.
     */
   def countInitialValues(file: io.BufferedSource, bcs: List[BChange]): Unit = {
     if(bcs.isEmpty)
       return
+    val sortedBcs = Change.sortByBlockPosition(bcs)
     val linesWithX = file.getLines.zipWithIndex
     linesWithX.drop(bcs.head.b.topLeft.x)
-    process(linesWithX, bcs)
+    process(linesWithX, sortedBcs)
   }
 
 

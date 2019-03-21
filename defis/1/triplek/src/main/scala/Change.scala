@@ -8,6 +8,7 @@ import utils._
 abstract class Change(val p: Position, var v: Int) {
 
   var affecteds: List[Change] = List()
+  var dependencies: List[Change] = List()
   var valueWithInitialA: Int = 0
 
   var hasChanged: Boolean = false

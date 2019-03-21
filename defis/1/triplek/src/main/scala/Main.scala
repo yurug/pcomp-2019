@@ -1,6 +1,3 @@
-
-package main
-
 import user_file_parser._
 import change._
 import utils._
@@ -54,29 +51,27 @@ object Main {
       return
     }
 
+    println("Parsage CSV.")
     val fbcs: List[BChange] = Reader.interpret(args(0)) { CSVParser.parse(_) }
+
+    println("Preprocessing.")
     Reader.interpret(args(0)) {
       CSVPreProcessor.countInitialValues(_, fbcs)
     }
-    println("Terminé")
-    /*val actorSystem = ActorSystem("PreprocessSystem")
-    val actorList: List[ActorRef] =
-      fbcs.map { c =>
-        actorSystem.actorOf(Props(new PreprocessActor(c, args(0))))
-      }
-    actorList.foreach { a => a ! Start}
-    actorList.foreach { a => grafec}
-    actorSystem.terminate()*/
 
+    println("Évaluation du fichier.")
     Dependencies.compute(fbcs)
     Evaluator.evaluateChanges(fbcs)
 
+    return
+    println("Création CSV")
     Reader.interpret(args(0)) { input =>
       Writer.write(args(2)) { output =>
         CSVPrinter.printCSVWithChanges(input, output, fbcs)
       }
     }
 
+    println("Évaluation des commandes.")
     Reader.interpret(args(1)) { commandsFile =>
       Writer.write(args(3)) { bw =>
         applyUserCommands(bw, args(2), commandsFile.getLines, fbcs, List())
