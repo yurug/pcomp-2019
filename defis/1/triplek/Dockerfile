@@ -6,6 +6,7 @@ RUN pacman -S jdk-openjdk --noconfirm
 RUN pacman -S scala --noconfirm
 RUN pacman -S git --noconfirm
 RUN pacman -S make --noconfirm
+RUN pacman -S sbt --noconfirm
 
 WORKDIR /home/triplek
 RUN git clone https://github.com/yurug/pcomp-2019.git
