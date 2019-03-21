@@ -5,13 +5,6 @@ use std::collections::HashMap;
 pub type Num = u8;
 pub type Index = u64;
 
-
-///===============================///
-///============ Point ============///
-///===============================///
-
-
-
 #[derive(Debug,Clone,Copy,PartialEq,Hash,Eq)]
 pub struct Point {
     pub x: Index,
@@ -37,12 +30,6 @@ pub type PointsList = HashSet<Point>;
 
 pub type PointsListsMap = HashMap<Point, PointsList>;
 
-
-///===============================///
-///============= Cell ============///
-///===============================///
-
-
 #[derive(Debug,Clone,Copy,PartialEq)]
 pub struct Cell {
     pub content: Data,
@@ -59,12 +46,6 @@ pub fn new_cell(d: Data, p: Point) -> Cell {
     Cell { content: d, loc: p}
 }
 
-
-///===============================///
-///============= Data ============///
-///===============================///
-
-
 #[derive(Debug,Clone,Copy,PartialEq)]
 pub enum Data {
     Val(Num),
@@ -72,21 +53,7 @@ pub enum Data {
     Wrong
 }
 
-
-///===============================///
-///=========== Function ==========///
-///===============================///
-
 #[derive(Debug,Clone,Copy,PartialEq)]
 pub enum Function {
     Count(Point, Point, Num)
 }
-
-
-/// For now we don't need requirements
-/// so the type is a "singleton" type
-/// to avoid to deal with passing Vec around.
-/// The type will be changed when we do need
-/// to split sheets
-// pub type Requirements = Vec<Cell>;
-pub enum Requirements { Empty }
