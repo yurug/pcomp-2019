@@ -36,12 +36,26 @@ ifeq ($(DEBUG), 1)
 else
 	FLAGS      += --release
 	EXECDIR    := release
+	LOGLVL     := error
 endif
 
 FLAGS       += $(FEATURES)
 
 all: docker
 	$(CP) scripts/ws.sh $(EXEC)
+
+help:
+	@echo "all      construit l'image docker"
+	@echo "build    compile le code"
+	@echo "test     compile et exécute les tests unitaires"
+	@echo "run      exécute le programme avec les paramètre suivants"
+	@echo "             - DATA le nom du tableur. Doit être dans le dossier tests/"
+	@echo "             - USER le nom de 'user.txt'. Doit être dans le dossier tests/"
+	@echo "             - VIEW le nom de 'view0.txt'. Sera généré dans le dossier tests/"
+	@echo "             - CHANGE le nom de 'changes.txt'. Sera généré dans le dossier tests/"
+	@echo "docker   construit l'image docker"
+	@echo "perf     exécute le programme avec 'perf' pour avoir le temps d'exécution du programme"
+	@echo "mrproper nettoye le dossier d'installation"
 
 build:
 	@mkdir -p data
@@ -56,7 +70,7 @@ run:
 docker:
 	docker build $(CLEAN) -t $(TARGET) .
 
-perf: build # FIXME check /usr/bin/time format string
+perf: build
 	@mkdir -p tests
 	@echo "File size: " `du -sch tests/$(DATA)`
 	RUST_LOG="$(LOGLVL)" $(TIME) ./target/$(EXECDIR)/$(TARGET) tests/$(DATA) tests/$(USER) tests/$(VIEW) tests/$(CHANGE)

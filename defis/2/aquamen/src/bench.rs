@@ -1,4 +1,14 @@
 
+// `bench.rs` contient un outil permettant mesurer le nombre de cellules
+// évalué par seconde.
+// Pour cela, il lance un thread qui attend des messages. Toutes les deux secondes,
+// ce thread affiche le nombre de cellule moyenne évalué par seconde.
+// Ce module peut être désactivé grâce à de la compilation conditionnelle.
+// Il est alors compilé en fonctions ne faisant rien.
+// La ligne `#[cfg(feature="bench")]` permet la compilation conditionnelle
+// grâce au drapeay `bench`
+
+
 #[cfg(feature="bench")]
 pub mod bench {
     use std::sync::mpsc;
