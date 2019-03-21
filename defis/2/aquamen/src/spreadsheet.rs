@@ -5,6 +5,7 @@ use data::{Cell, Data, Point};
 use data::Data::{Val, Fun, Wrong};
 use data::Function::Count;
 use data::PointsListsMap;
+use data::PointsList;
 use data::Function;
 use data::Index;
 use data::new_cell;
@@ -173,9 +174,9 @@ impl Spreadsheet {
 
     ///======== PRIVATE SCOPE ========///
 
-    fn get(&self, p: &Point) -> Option<Data> {
-        match self.inner.get(p) {
-            Some(d) => Some(*d),
+    fn get(&mut self, p: &Point) -> Option<Data> {
+        match self.inner.get(*p) {
+            Some(d) => Some(d.content),
             None => None
         }
     }

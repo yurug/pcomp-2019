@@ -32,7 +32,6 @@ pub fn read_data(begin: Point, end: Point, filename: &String) -> Vec<Cell> {
             _ => panic!("Unexpected value in data dump")
         };
         trace!("Reading cell {:?}", Cell{loc:Point{x:x,y:y},content:r});
-        bench::bench::get_sender().send(1);
         data.push(Cell{
             content: r,
             loc: Point{x: x, y: y},
@@ -76,7 +75,6 @@ pub fn dump_cells(filename: &String, data: Vec<Cell>) {
     let mut res = Vec::new();
     trace!("Writing data of node {} : {:?} ", filename, data);
     for c in data {
-        bench::bench::get_sender().send(-1);
         trace!("Dumping {:?}", c);
         match c.content {
             Val(i) => dump_val_to(i, &mut res),
