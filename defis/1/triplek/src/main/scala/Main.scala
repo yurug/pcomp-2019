@@ -7,9 +7,24 @@ import dependencies._
 import evaluator._
 import csv_parser._
 
+
+/** Main object, with two methods, `main` and `applyUserCommands`.
+    The program evaluates a CSV file with formulae, and apply commands to
+    the resulting CSV.
+    See the folder tests for some tests. They could be executed using
+    `ruby test.rb`.
+  */
 object Main {
 
-
+  /** Apply commands recursively.
+    *
+    * @param bw The buffer where the effects of the commands should be written.
+    * @param oldCSV The name of a CSV with the last evaluation.
+    * @param commands The commands to apply.
+    * @param formulae A list of all the `BChanges` currently in the CSV.
+    * @param newCSV the name of a CSV where the evaluation will be written
+    *                (it would be used in the next recursive call).
+    */
   def applyUserCommands(
       bw: java.io.BufferedWriter,
       oldCSV: String,

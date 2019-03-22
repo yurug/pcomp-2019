@@ -5,11 +5,12 @@ import cell_parser._
 
 /** Parser for CSV file. */
 object CSVParser {
-  /** Search all the formulae in a line.
+  /** Search recursively all the formulae in a line of cells.
     *
-    * @param str The line to parse.
-    * @param x The x position of the change.
-    * @return A list of BChange corresponding to the formulae in `str`.
+    * @param cellsWithY The cells to process with value and y position.
+    * @param x The x position of the change
+    * @param l The formulae which has been already found.
+    * @return A list of BChange corresponding to the formulae in `cellsWithY`.
     */
   private def searchFormulaeInLine(
       cellsWithY: Iterator[(String, Int)],
@@ -25,6 +26,12 @@ object CSVParser {
     }
   }
 
+  /** Search recursively all the formulae in lines of cells.
+    *
+    * @param linesWithX The lines to process with value and x position.
+    * @param returned The formulae which has been already found.
+    * @return A list of BChange corresponding to the formulae in `linesWithX`.
+    */
   private def process(
       linesWithX: Iterator[(String, Int)],
       returned: List[BChange]): List[BChange] = {
@@ -37,6 +44,7 @@ object CSVParser {
     process(linesWithX, searchFormulaeInLine(cellsWithY, x, returned))
   }
 
+
   /** Parse a CSV file.
     *
     * @param file The file to parse.
@@ -47,6 +55,17 @@ object CSVParser {
     process(linesWithX, List())
   }
 
+
+  /** Compute the old value of a `Change` in a CSV file (that is to say the values
+    *  which was present at its position).
+    *
+    * @param c The `Change` whose the old value should be computed.
+    * @param file The Buffer corresponding to the CSV file.
+    * @param oldB All the formulae `BChange`, because, maybe there was a
+                  formulae at this position (in fact it is useless since
+                  the file contains the value).
+    * @return The old value of `c`.
+    */
   def computeOldValue(
       c: Change,
       file: scala.io.BufferedSource,

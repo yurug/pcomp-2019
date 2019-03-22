@@ -57,7 +57,6 @@ object CSVPreProcessor {
     * @param c The change associeted to the cell.
     * @param p The position of the cell.
     * @param bcs The list of BChange which could be affected by `c`.
-    *
     * @return The list of BChange and AChange that could be impacted by the
               following cells.
     */
@@ -75,7 +74,6 @@ object CSVPreProcessor {
     * @param x The x position of the line to process.
     * @param bcs The list of BChange which could be affected by the cells of
                  this line.
-    *
     * @return The list of BChange and AChange that could be impacted by the
               following lines.
     */
@@ -95,7 +93,7 @@ object CSVPreProcessor {
 
   /** Propagate all the values of the cells of some lines in all the changes.
     *
-    * @param linesWithY The lines to process with value and y position.
+    * @param linesWithX The lines to process with value and y position.
     * @param bcs The list of BChange which could be affected by the cells.
     */
   private def process(
@@ -115,7 +113,7 @@ object CSVPreProcessor {
     *are by only considering the cell of type A in the file.
     *
     * @param file The CSV file to process.
-    * @param bcs The list of BChange whose initial value should be computed.
+    * @param bcs The list of BChange whose initial values should be computed.
     */
   def countInitialValues(file: io.BufferedSource, bcs: List[BChange]): Unit = {
     if(bcs.isEmpty)
@@ -127,6 +125,16 @@ object CSVPreProcessor {
   }
 
 
+  /** Count the initial value of a BChange, that is to say, the value that they
+    * are by only considering the cell of type A in the file. It is used for
+    * the evaluation of the commmands, and then the CSV file only contained
+    * values. Then, to know if they are really A Value, we need the positions
+    * of the formulaes.
+    *
+    * @param c The `Change` whose the initial value should be computed.
+    * @param csv The CSV file to process.
+    * @param old The list of previous BChange tand then of their positions).
+    */
   def computeInitialValue(
       c: BChange,
       csv: io.BufferedSource,
