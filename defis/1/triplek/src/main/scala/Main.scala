@@ -13,6 +13,13 @@ import csv_parser._
     the resulting CSV.
     See the folder tests for some tests. They could be executed using
     `ruby test.rb`.
+    
+    As there could be a lot of commands, it is not possible to have a very 
+    usefull preprocessing for the commands with a simple code. Else, if 
+    we assume that all the user commands could be loaded in memory, we 
+    avoid a lot of IO. For instance, with a File of 1.5 Go and around 
+    1000 formulae, the program takes around 10 minutes. With all the 
+    user commands in the memory, it takes less than 3 minutes.
   */
 object Main {
 
