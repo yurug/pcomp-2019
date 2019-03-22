@@ -140,9 +140,9 @@ object CSVPreProcessor {
       csv: io.BufferedSource,
       old: List[BChange]): Unit = {
     val lines: Iterator[(String, Int)] = csv.getLines.zipWithIndex
-    var changes: Iterator[BChange] =
-      old.sortBy {bc => (bc.p.x, bc.p.y) }.toIterator
-    lines.drop(c.b.topLeft.x).take(c.b.bottomRight.x - c.b.topLeft.x + 1)
+    var changes: List[BChange] =
+      old.sortBy {bc => (bc.p.x, bc.p.y) }
+    lines.take(c.b.bottomRight.x + 1).drop(c.b.topLeft.x)
     lines.foreach { elem =>
       val (line, x) = elem
       val cells = line.split(";")
