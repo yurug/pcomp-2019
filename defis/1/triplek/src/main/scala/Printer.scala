@@ -28,7 +28,6 @@ object CommandEffectsPrinter {
   }
 }
 
-
 object CSVPrinter {
 
   private def printLine(
@@ -54,6 +53,7 @@ object CSVPrinter {
     bw.write("\n")
     rest
   }
+
 
   def printCSVWithChanges(
       file: scala.io.BufferedSource,

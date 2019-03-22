@@ -70,6 +70,18 @@ extends Change(pos, value) {
     b.contains(c.p)
   }
 
+  private def applyPropagation(c: Change): Int = {
+    if(counted == c.v) {
+      v = v + 1;
+      return 1
+    }
+    else if(counted == c.oldValue) {
+      v = v - 1
+      return -1
+    }
+    return 0
+  }
+
   override def propagate(c: Change, viewed: HashMap[Change, Boolean]): Unit = {
     if(viewed(this)) {
       if(correct) {
@@ -85,9 +97,13 @@ extends Change(pos, value) {
     else {
       viewed(this) = true
       if(c.oldValue != c.v) {
-        if(counted == c.v) v = v + 1
-        else if(counted == c.oldValue) v = v - 1
+        val n = applyPropagation(c)
+        c match {
+          case c: AChange => valueWithInitialA += n
+          case _ => ()
+        }
       }
+
       affecteds.foreach { c1 =>
         if(c1.correct) {
           c1.propagate(this, viewed)

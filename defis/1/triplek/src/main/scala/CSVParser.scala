@@ -50,16 +50,10 @@ object CSVParser {
   def computeOldValue(
       c: Change,
       file: scala.io.BufferedSource,
-      oldA: List[AChange],
       oldB: List[BChange]): Int = oldB.find(_.p.equals(c.p)) match {
     case Some(elem) =>
       return elem.v
     case None =>
-      oldA.find(_.p.equals(c.p)) match {
-        case Some(elem) =>
-          return elem.v
-        case None =>
-          file.getLines.drop(c.p.x).next.split(";")(c.p.y).toInt
-      }
+      file.getLines.drop(c.p.x).next.split(";")(c.p.y).toInt
   }
 }

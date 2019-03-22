@@ -130,34 +130,20 @@ object CSVPreProcessor {
   def computeInitialValue(
       c: BChange,
       csv: io.BufferedSource,
-      old: List[AChange]): Unit = {
+      old: List[BChange]): Unit = {
     val lines: Iterator[(String, Int)] = csv.getLines.zipWithIndex
-    var changes: List[AChange] =
-      old.sortBy {ac => (ac.p.x, ac.p.y) }.filter { ac => c.b.contains(ac.p) }
+    var changes: Iterator[BChange] =
+      old.sortBy {bc => (bc.p.x, bc.p.y) }.toIterator
     lines.drop(c.b.topLeft.x).take(c.b.bottomRight.x - c.b.topLeft.x + 1)
     lines.foreach { elem =>
       val (line, x) = elem
-      while(!changes.isEmpty && (changes.head.p.x < x))
-        changes = changes.tail
       val cells = line.split(";")
       for(y <- c.b.topLeft.y to c.b.bottomRight.y) {
-        while(!changes.isEmpty && changes.head.p.x == x && changes.head.p.y < y)
-          changes = changes.tail
-        if(!changes.isEmpty && changes.head.p.equals(c.p)) {
-          if(changes.head.v == c.counted)
+        if(!changes.exists {c => c.p.x == x && c.p.y == y }) {
+          if(cells(y).toInt == c.counted)
             c.valueWithInitialA += 1
-          changes = changes.tail
-        }
-        else {
-          Try(cells(y).toInt) match {
-            case Failure(_) => ()
-            case Success(v) =>
-              if(v == c.counted)
-                c.valueWithInitialA += 1
-          }
         }
       }
     }
   }
-
 }

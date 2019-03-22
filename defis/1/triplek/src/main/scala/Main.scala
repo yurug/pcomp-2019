@@ -12,37 +12,40 @@ object Main {
 
   def applyUserCommands(
       bw: java.io.BufferedWriter,
-      csvName: String,
+      oldCSV: String,
       commands: Iterator[String],
       formulae: List[BChange],
-      oldAChanges: List[AChange]): Unit = {
+      newCSV: String): Unit = {
     if(commands.isEmpty)
       return
     val str: String = commands.next
     val c: Change = UserFileParser.parseCommand(str)
-    Reader.interpret(csvName) { csv =>
-      c.oldValue = CSVParser.computeOldValue(c, csv, oldAChanges, formulae)
+    Reader.interpret(oldCSV) { csv =>
+      c.oldValue = CSVParser.computeOldValue(c, csv, formulae)
     }
+
     c match {
       case c: BChange =>
-        Reader.interpret(csvName) { csv =>
-          CSVPreProcessor.computeInitialValue(c, csv, oldAChanges)
+        Reader.interpret(oldCSV) { csv =>
+          CSVPreProcessor.computeInitialValue(c, csv, formulae)
         }
-      case _ => ()
+      case _ =>
     }
 
     val newApplied: List[Change] = Modifier.applyNewChange(c, formulae)
 
     CommandEffectsPrinter.printEffect(bw, c, newApplied)
-    val (_, newFormulae) = Change.split(newApplied)
-    val newAC = oldAChanges.filter { ac => ac.p.equals(c.p) }
-    c match {
-      case c: BChange =>
-        applyUserCommands(bw, csvName, commands, newFormulae, newAC)
-      case c: AChange =>
-        applyUserCommands(bw, csvName, commands, newFormulae, c::newAC)
+    Reader.interpret(oldCSV) { input =>
+      Writer.write(newCSV) { output =>
+        CSVPrinter.printCSVWithChanges(input, output, newApplied)
+      }
     }
 
+    val (_, newFormulae) = Change.split(newApplied)
+    if(newCSV == "aux.csv")
+      applyUserCommands(bw, newCSV, commands, newFormulae, oldCSV)
+    else
+      applyUserCommands(bw, newCSV, commands, newFormulae, "aux.csv")
   }
 
   def main(args: Array[String]): Unit = {
@@ -63,7 +66,6 @@ object Main {
     Dependencies.compute(fbcs)
     Evaluator.evaluateChanges(fbcs)
 
-    return
     println("Création CSV")
     Reader.interpret(args(0)) { input =>
       Writer.write(args(2)) { output =>
@@ -74,7 +76,7 @@ object Main {
     println("Évaluation des commandes.")
     Reader.interpret(args(1)) { commandsFile =>
       Writer.write(args(3)) { bw =>
-        applyUserCommands(bw, args(2), commandsFile.getLines, fbcs, List())
+        applyUserCommands(bw, args(2), commandsFile.getLines, fbcs, "bux.csv")
       }
     }
   }
