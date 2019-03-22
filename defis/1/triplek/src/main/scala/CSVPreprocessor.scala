@@ -120,7 +120,7 @@ object CSVPreProcessor {
       return
     val sortedBcs = Change.sortByBlockPosition(bcs)
     val linesWithX = file.getLines.zipWithIndex
-    linesWithX.drop(bcs.head.b.topLeft.x)
+    linesWithX.drop(sortedBcs.head.b.topLeft.x)
     process(linesWithX, sortedBcs)
   }
 
