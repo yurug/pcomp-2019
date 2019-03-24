@@ -103,7 +103,7 @@ object Evaluator {
     (c.dependencies ++ c.affecteds).foreach { c1 =>
       if(!viewed.contains(c1)) {
         viewed += c1
-        r = computeConnectedComponent(c, viewed, c1::r)
+        r = computeConnectedComponent(c1, viewed, c1::r)
       }
     }
     return r
