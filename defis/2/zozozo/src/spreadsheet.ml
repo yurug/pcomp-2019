@@ -1,5 +1,5 @@
 open Ast
-open Partitioner
+module P = Partitioner
 module D = Regiondata
 
 (** [init_graph regions formulas] parses the file [ic] and initiates
@@ -9,7 +9,7 @@ module D = Regiondata
 let init_graph regions formulas =
 
   let aux (graph, curr_id, map) (pos, formulas)  =
-    let id = pos_to_region regions pos in
+    let id = P.pos_to_region regions pos in
     if id = curr_id then
       let map = Mpos.add pos {fin=formulas; eval= Undefined} map in
       graph, id, map
@@ -27,7 +27,6 @@ let init_graph regions formulas =
 
   Graph.(add_node last_id (build_node_no_neigh map) graph)
 
-
 (** [add_neighbours formulas g regions] goes through all regions
    [regions] and add their neigbours to the graph [g] i.e. the
    formulas whose value are dependant on some part of the region. *)
@@ -37,11 +36,11 @@ let add_neighbours formulas graph regions =
       Region.build_neighbours_map formulas l0 l1 in
     Graph.change_neighbours id neighbours g
   in
-  regions_fold aux regions graph
+  P.regions_fold aux regions graph
 
 (** [build_graph filename regions] create the dependency graph from
    the data file named [filename] and with the regions defined in
-   [regions] as node.*)
+   [regions] as nodes.*)
 let build_graph regions formulas =
   let graph = init_graph regions formulas in
   let graph = add_neighbours formulas graph regions in
@@ -59,15 +58,15 @@ let preprocessing data_filename user_filename min_region_size max_nb_regions =
 
 
 (* TODO : optimiser ! *)
-(** [tasks_by_region regions c] takes a list of computable formulus
+(** [tasks_by_region regions c] takes a list of computable formulas
    [c] and returns a map mapping region label (int) to a list of
-   formulas that has to be partially evaluated in the corresponding
+   formulas that have to be partially evaluated in the corresponding
    region. *)
 let tasks_by_region regions computable =
   let tasks_sorted_by_region =
     List.map
       (fun ((_, Occ ((p1, p2), _)) as formula) ->
-         let regions = regions_within regions p1 p2 in
+         let regions = P.regions_within regions p1 p2 in
          List.map
            (fun r -> (r, formula))
            regions
@@ -124,9 +123,9 @@ let combine_evals sorted_partial =
 let apply_changes regions evaluated_formulas =
   List.iter
     (fun (pos, v) ->
-       let id = pos_to_region regions pos in
-       let l0, _ = get_region_area regions id in
-       let data = get_region_data regions id in
+       let id = P.pos_to_region regions pos in
+       let l0, _ = P.get_region_area regions id in
+       let data = P.get_region_data regions id in
        Region.apply_change data l0 pos v
     )
     evaluated_formulas
@@ -134,19 +133,48 @@ let apply_changes regions evaluated_formulas =
 let eval_formulas regions computable =
   let tasks_list_map =
     tasks_by_region regions computable in
-  (* Les taches sont triées par label de region = label d'esclaves *)
+  (* Les taches sont triées par label de region *)
   if tasks_list_map = Mint.empty then []
   else
     Mint.fold
       (fun id tasks res ->
-         let data = get_region_data regions id in
-         let l0, lf = get_region_area regions id in
+         let data = P.get_region_data regions id in
+         let l0, lf = P.get_region_area regions id in
          Region.partial_eval tasks data l0 lf @ res
       )
       tasks_list_map
       []
     |> List.sort (fun (p1, _, _) (p2, _, _) -> compare_pos p1 p2)
     |> (fun x -> combine_evals x)
+
+
+
+
+(*let map_reduce ~(f: 'a -> b) ~(fold : 'c -> 'b -> 'c) acc l =*)
+let eval_new regions order  =
+  (* Initialisation *)
+  let computable = FormulaOrder.get_computable_formulas order in
+  let tasks_by_region =
+    Mint.bindings (tasks_by_region regions computable) in
+  let fold acc (id, tasks) =
+    let data = P.get_region_data regions id in
+    let l0, lf = P.get_region_area regions id in
+    Region.partial_eval tasks data l0 lf @ acc in
+
+  let partial_evals =
+    Functory.Cores.map_local_fold
+      ~f:(fun x -> x)
+      ~fold
+      []
+      tasks_by_region
+  in
+  let partial_evals =
+    List.sort
+      (fun (p1, _, _) (p2, _, _) -> compare_pos p1 p2)
+      partial_evals
+  in
+  combine_evals partial_evals
+
 
 let rec loop_eval regions order computable =
   let formulas_evaluated = eval_formulas regions computable in
@@ -176,6 +204,7 @@ let first_evaluation regions formulas graph =
     |> List.map (fun p -> (p, Undefined)) in
   apply_changes regions formulas_indefined
 
+
 let get_diff list_values zone value =
     List.fold_left
       (fun n (pos_value,(old_v,new_v)) -> (*old_v <> new_v*)
@@ -199,10 +228,10 @@ let rec something_to_value regions order computables list_values graph =
            match v with
            | Empty | Undefined -> failwith "On ne compte que des entiers"
            | Int v ->
-             let region = pos_to_region regions pos_compute in
-             let l0, _ = get_region_area regions region in
+             let region = P.pos_to_region regions pos_compute in
+             let l0, _ = P.get_region_area regions region in
              let pos_region = Ast.relative_pos l0 pos_compute in
-             let data = get_region_data regions region in
+             let data = P.get_region_data regions region in
              let old_value = Ast.value (D.get data pos_region) in
              (pos_compute :: pos_list),
              (match old_value with
@@ -276,15 +305,11 @@ let add_int regions region graph pos old_value new_value =
      snd (something_to_value regions order computables fst_change graph)
 
 let get_old_value regions region pos =
-  let l0, _ = get_region_area regions region in
+  let l0, _ = P.get_region_area regions region in
   let pos_region = Ast.relative_pos l0 pos in
-  let data = get_region_data regions region in
+  let data = P.get_region_data regions region in
   Ast.value (D.get data pos_region)
 
-let string_to_pos r c =
-  let r = int_of_string r in
-  let c = int_of_string c in
-  Ast.build_pos r c
 
 let rec complete_eval regions computable order changes =
   match computable with
@@ -297,7 +322,7 @@ let rec complete_eval regions computable order changes =
      let computable,order = FormulaOrder.get_new_computable_formulas pos_list order in
      complete_eval regions computable order (new_changes @ changes)
 
-let add_formula ((Occ((p1,p2),_)) as formula) regions graph formulas_region pos region old_value =
+let add_formula ((Occ((p1,p2),_)) as formula) regions graph formulas_region pos old_value =
   match Mpos.find_opt pos formulas_region with
   | Some {fin = (Occ((p1',p2'),_));_} -> (*formule -> formule*)
      let graph = remove_formula_content regions p1' p2' graph pos in
@@ -344,7 +369,7 @@ let eval_one_change line regions graph =
   | [] | [_] | [_;_] -> failwith "Parsing incorrect line"
   | r :: c :: t -> (* ajoute un entier d en (r,c) *)
      let pos = string_to_pos r c in
-     let region = pos_to_region regions pos in
+     let region = P.pos_to_region regions pos in
      let old_value = get_old_value regions region pos in
      let formulas_region = Graph.get_content region graph in
      let t = String.concat "" t in
@@ -365,7 +390,7 @@ let eval_one_change line regions graph =
         let data_cell = String.concat "," t in
         let formula = Parser.parse_formula "Erreur ajout formule" data_cell in
         let graph = Graph.add_content region pos {fin = formula; eval = Undefined} graph in
-        add_formula formula regions graph formulas_region pos region old_value
+        add_formula formula regions graph formulas_region pos old_value
      | _ -> failwith "changes incorrect"
 
 

@@ -49,3 +49,5 @@ val relative_pos : int -> pos -> pos
 val narrowing : pos -> pos -> int -> int -> (pos * pos) option
 
 val compare_pos : pos -> pos -> int
+
+val string_to_pos : string -> string -> pos

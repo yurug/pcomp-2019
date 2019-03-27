@@ -33,12 +33,23 @@ let debug_write_view_final view0_filename regions =
   in
   Partitioner.recombine_regions view_final regions
 
+let test_functory () =
+  Functory.Cores.(
+    let map x = x+1 in
+    Format.printf "Creation@.";
+    let a = Array.init 1000 (fun i -> i) in
+    let l = Array.to_list a in
+    let fold = (+) in
+    let () = Format.printf "Calcul@." in
+    let r = map_local_fold ~f:map ~fold 0 l in
+    Format.printf "Result : %d@." r)
+
 let main () =
   let data_filename, user_filename, view0_filename, change_filename, verbose  =
     parse_input Sys.argv in
-  Format.printf "%s@." data_filename;
   let max_nb_regions = 1000 in (* limitation du nombre de descripteur de fichier sous linux *)
   let min_region_size = 20 in (* A paramétrer avec benchmark *)
+  let () = Functory.Cores.set_number_of_cores 4 in (* à paramétrer *)
   let t0 = Unix.gettimeofday () in
   let f, regions, g =
     Spreadsheet.preprocessing data_filename user_filename min_region_size max_nb_regions in
@@ -47,10 +58,11 @@ let main () =
   let _ =  Partitioner.recombine_regions view0_filename regions in
   let t2 = Unix.gettimeofday () in
   let _ = Spreadsheet.eval_changes regions user_filename change_filename g in
-  let t3 = Unix.gettimeofday () in
-  let _ = Partitioner.free_all regions in
+    let t3 = Unix.gettimeofday () in
+    let _ = Partitioner.free_all regions in
   if verbose then
     print_execution_time t0 t1 t2 t3
   else ()
+
 
 let () = main ()

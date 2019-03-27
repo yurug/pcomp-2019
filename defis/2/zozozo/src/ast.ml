@@ -61,10 +61,6 @@ let empty_formulas = Mpos.empty
 let build_formula p1 p2 v =
   {fin = Occ ((p1, p2), v) ; eval = Undefined}
 
-let pos_to_region lf p =
-  let r, _ = pos p in
-  r / lf
-
 let pos_in_area p0 (p1, p2) =
   let (r0, c0), (r1, c1), (r2, c2) = pos p0, pos p1, pos p2 in
   r0 >= r1 && r0 <= r2 && c0 >= c1 && c0 <= c2
@@ -73,6 +69,11 @@ let relative_pos l0 p =
   let r, c = pos p in
   build_pos (r-l0) c
 
+
+let string_to_pos r c =
+  let r = int_of_string r in
+  let c = int_of_string c in
+  build_pos r c
 
 (** [narrowing p1 p2 l0 lf] returns the intersection between the area
    defined by ([p1], [p2]) and the area between lines [l0] and [lf].

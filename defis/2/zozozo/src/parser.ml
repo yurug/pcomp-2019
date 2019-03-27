@@ -1,7 +1,7 @@
 open Ast
 
 let try_int_of_string err s =
-  try int_of_string s with Failure _ -> failwith err
+  try int_of_string s with Failure _ -> failwith (err ^ "(with "^s^")")
 
 let parse_value err vstr =
   match vstr with

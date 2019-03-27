@@ -6,7 +6,7 @@
   (name	lib)
   (wrapped false)
   (modules regiondata ast graph formulaOrder parser partitioner printer region spreadsheet )
-  (libraries unix bigarray))
+  (libraries unix bigarray functory))
 
 ; Disable warning as errors
 (env
