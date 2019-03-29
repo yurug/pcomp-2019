@@ -1,5 +1,7 @@
 package spreadsheet
 
+import request.Change
+
 /*
  * printer data into string according to format specified in specification 
  */

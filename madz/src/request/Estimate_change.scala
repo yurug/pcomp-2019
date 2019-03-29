@@ -1,6 +1,9 @@
-package spreadsheet
+package request
 
-import request.Request_change
+import spreadsheet.Case
+import spreadsheet.CaseData
+import spreadsheet.Sheet_evalued
+import spreadsheet.Value
 
 case class Change(case_leftTop:Case, 
 	case_bottomRight:Case,

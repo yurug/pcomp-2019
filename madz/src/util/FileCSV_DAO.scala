@@ -1,6 +1,4 @@
-package spreadsheet
-
-import util.CSVFile
+package util
 
 abstract class FileCSV_DAO[T <: Any](fileName:String, separator:String) 
 extends CSVFile(fileName, separator) with Iterator[T]{
