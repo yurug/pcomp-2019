@@ -1,4 +1,4 @@
-package donnees
+package spreadsheet
 
 case class Change(case_leftTop:Case, 
 	case_bottomRight:Case,
