@@ -1,4 +1,10 @@
-package spreadsheet
+package request
+
+import request.Task
+
+import  spreadsheet.Case
+import spreadsheet.CaseData
+import spreadsheet.Sheet_evalued
 
 /*
  * request changement data of a case of spreedsheet

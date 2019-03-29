@@ -1,5 +1,7 @@
 package spreadsheet
 
+import util.CSVFile
+
 abstract class FileCSV_DAO[T <: Any](fileName:String, separator:String) 
 extends CSVFile(fileName, separator) with Iterator[T]{
   private var next_elt :List[T] = Nil

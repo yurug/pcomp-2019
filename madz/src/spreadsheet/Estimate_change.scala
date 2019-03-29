@@ -1,5 +1,7 @@
 package spreadsheet
 
+import request.Request_change
+
 case class Change(case_leftTop:Case, 
 	case_bottomRight:Case,
 	value: Value)
