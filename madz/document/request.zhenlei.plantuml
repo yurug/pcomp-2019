@@ -1,0 +1,29 @@
+@startuml
+package task_scheduler{
+	interface Task{
+		+exec():Unit
+		+def result_exec(): String
+	}
+	interface "scheduler[T <: Task]"{
+		+def add(T)
+		+def start_exec()
+		+get_task_done():List[T]
+	}
+
+	interface "Sequential_process[T <: Task]"			
+	"scheduler[T <: Task]" <|-- "Sequential_process[T <: Task]"
+
+	interface "Parralele_process[T <: Task]"			
+	note bottom: pour defi futur
+	"scheduler[T <: Task]" <|-- "Parralele_process[T <: Task]"
+
+
+}
+
+interface Estimate_change 
+Task <|-- Estimate_change
+
+interface Change_sheet
+note bottom: pour defi futur
+Estimate_change <|-- Change_sheet
+@enduml

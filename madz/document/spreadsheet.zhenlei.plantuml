@@ -1,0 +1,78 @@
+@startuml
+
+package spreadsheet{
+	class Case{
+		+(i:Int, j;Int)
+	}
+	package donnee{
+		abstract class CaseData
+		class Number{
+			(value: Int)
+		}
+		class Formule{
+			case_leftTop:Case, 
+			case_bottomRight:Case, 
+			value: Int
+		}
+		CaseData <|-- Number
+		CaseData <|-- Formule
+		interface FeuilleCalque{
+			+def getData(Case):Option[CaseData]{\n\
+si case dans le buffer, return\n\
+sinon, recharger buffer la region contenant la case	\n\
+}		
+
+		}
+
+
+		interface FeuilleWithDependance {
+	//trouver rapidement dependance de 1 case
+			+def getDependance(c:Case):List[Case]
+			+init(file)
+		}
+		FeuilleCalque <|-- FeuilleWithDependance
+		class FeuilleWithDependance_indexRegion
+		FeuilleWithDependance <|-- FeuilleWithDependance_indexRegion
+
+
+	}
+
+
+	package evaluation{		
+		abstract class Value
+		class VInt{
+			v : Int
+		}
+		Value <|-- VInt 
+
+		class VIncalculable
+		Value <|-- VIncalculable
+		interface Sheet_evalued{
+			def getValueData(Case):Option[Value]{ \n\
+si case déjà évalué, return: \n\
+	1. chercher dans le bufffer
+	2. save buffer in file, load file of region containing case in buffer; search in buffer
+sinon evalData; save in buffer \n\
+}
+
+
+		}
+		Sheet_evalued -up-* FeuilleCalque
+
+		interface PrinterCVS{
+			printValue(Option[Value]) : String
+			printValueSheet(Sheet_evalued): Iterator[String]
+		}		
+		
+	}
+
+
+
+}
+
+
+
+
+
+
+@enduml

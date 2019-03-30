@@ -1,0 +1,190 @@
+** fonctionnement prog
+   CLOCK: [2019-03-19 mar. 19:45]--[2019-03-19 mar. 19:55] =>  0:10
+input: data0.csv
+eval int, formule
+build graph
+detect cycle,eval graph
+si cycle, all formul is P
+
+output:view0.csv
+
+input: user.txt
+si change int,eval all formule dessus; propagation
+si formul -> eval region, propagation
+
+** diagram
+*** DONE replace i,j par case
+    CLOSED: [2019-02-10 dim. 23:52]
+** defi 1[8/11]
+*** DONE getValueData
+    CLOSED: [2019-02-16 sam. 22:59]
+*** DONE mv file in /madz
+    CLOSED: [2019-02-16 sam. 22:59]
+*** TODO docker
+    - State "WAIT"       from "TODO"       [2019-02-16 sam. 22:59] \\
+      help
+    
+**** TODO update docker to new architecture
+*** DONE [#A] test unit
+    CLOSED: [2019-02-17 dim. 22:34]
+**** DONE |ALL_DONE searchd old test
+     CLOSED: [2019-02-16 sam. 22:58]
+***** use git show
+****** get manuel
+******* makefile man_command
+******** use array in makefile
+********* PRATIQUE_DONE lire makefile
+
+*** TODO faire le rangement de changes output
+*** DONE write in file
+    CLOSED: [2019-03-11 lun. 13:20]
+*** DONE replace mock
+    CLOSED: [2019-03-11 lun. 13:20]
+*** DONE [#C] CSV parsing                                      :amelioration:
+    CLOSED: [2019-03-11 lun. 13:20]
+*** DONE [#A] prevenir de init auto copyF
+    CLOSED: [2019-02-18 lun. 13:06]
+** defi2
+finir av jeudi midi
+PR sur master
+*** CANCEL algo for feuille
+    CLOSED: [2019-03-19 mar. 15:50]
+*** RUNNING use BD pour interpreteur
+**** interpreteur
+recup 1 value from sheet
+**** TODO compris son code
+     CLOCK: [2019-03-19 mar. 20:00]--[2019-03-19 mar. 20:06] =>  0:06
+***** TODO lancer leur code test
+**** TODO conception new code
+
+** faire respecter architecture
+*** TODO factoriser
+**** TODO lire tool factoring
+/media/zhenlei/d9a893e2-fca5-420b-b051-6af76555b97e/home/zhenlei/XXX/savoir/science-math/Science/science-technologie/machine/computer/programmation/_technique/La refactorisation – De geek à directeur technique/Le refactoring/Le refactoring.org
+** task
+*** TODO [#C] solv bug
+*** TODO integrer code
+**** DONE find file ;put in branch
+     CLOSED: [2019-03-21 jeu. 09:34]
+**** TODO eval changes
+eval data;test de cycle
+eval update
+*** refactoris
+
+**** last version runnable de eux
+critere 
+sur madz
+aqv my changement sur file 
+
+
+***** branch
+av branch scheduler
+***** dataq
+#+BEGIN_EXAMPLE
+$ git log --merges --author=zhenlei
+commit 19a6a4bc2b88feb19a02dbd69474b4ced4c98d54
+Merge: 4152b66 d57a7bb
+Author: zhenlei <zhenleic@gmail.com>
+Date:   Sat Feb 16 15:59:33 2019 +0100
+
+    Merge branch 'madz' of github.com:yurug/pcomp-2019 into madz
+
+commit 9898298b8a053838937d9ddf665b1aadb8b803a1
+Merge: 91df358 0dfb1ac
+Author: zhenlei <zhenleic@gmail.com>
+Date:   Sun Feb 10 22:22:00 2019 +0100
+
+    Merge branch 'madz' into scheduler
+
+commit 0dfb1ac73eceef797916f5e2ff08059c28ad62e4
+Merge: 0545724 a02654d
+Author: zhenlei <zhenleic@gmail.com>
+Date:   Sun Feb 10 21:54:18 2019 +0100
+
+    solve problem merge
+
+commit 0545724e3a5c76d17a7bea6d22b81d41b4539fb0
+Merge: 04b2bb4 ee4b622
+Author: zhenlei <zhenleic@gmail.com>
+Date:   Sun Feb 10 21:50:41 2019 +0100
+
+    Merge branch 'scheduler' into madz
+
+commit 9f2bd5bb98c80e66f6929b03b29b9f1df0283334
+Merge: c28c8f8 a2f7984
+Author: zhenlei <zhenleic@gmail.com>
+Date:   Sun Feb 10 14:32:37 2019 +0100
+
+    Merge branch 'master' into scheduler
+
+#+END_EXAMPLE
+** defi3
+*** TODO strategie de parallelisation
+
+**** scheduler ordonne
+***** why
+long calcul put in fin,short end plus tot
+manner naturel laisser parallelisation termine , 1 request 1 thread
+long task take distribution ressource exec ==> ralenti petit task
+***** how
+scheduler OS distribue tp exec thread
+que fait mon scheduler
+- priorité distribution tp to short task
+- fait file, def nb task en exec
+****** tp calcul
+******* si change int
+operation = 
+verifie update formule;
+update_formule
+
+tp = nb_formule + update_formule
+
+******* si change formule
+size_region_dependant + update_formule
+
+**** paralle
+***** paralli requete
+***** palle task
+diviser pour regner plus parallel
+** notegc
+
+*** fonction pur
+**** 1 fonction doit terminer
+**** is fonction total
+pour tout domain de input, return 1 output in domain output
+pas de exception, it no is pur
+**** avantage 
+***** control plus fort
+si exist exception, need ecrit in comment "attention, traiter ce exception"
+***** plus facil optimisation
+dommage haskell is lazy, sino il serai lang tres efficace
+in Coq, c'est pas encore fait, cela will venir
+
+compilateur can optimisation plus aggressif
+compilateur can faire ce que il veut, car no exist 
+pas possible in ocaml
+
+on can detruit tout in fonction
+
+compilation rust tres aggressiv in si style fonctionnel pur
+***** plus facile raisonnement
+****** sur gros prog
+style fonctionnel pur is infiniment mieux
+***** stat 
+LT
+evolution ==> stat empeche paralleliser, serialiser
+
+CT
+stat facilite write prog
+
+can put stat in couche extern
+no stat in noyau
+
+sans stat, code robust pour evolution
+**** cout abstractio in lang haut nv
+all compilateur try solve it
+** exam 
+compris 90% code des projets
+eval code
+
+

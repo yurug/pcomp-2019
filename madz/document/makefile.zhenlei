@@ -1,0 +1,2 @@
+spreadsheet.png: spreadsheet.zhenlei.org
+	cat spreadsheet.zhenlei.org | plantuml -pipe  > "spreadsheet.png"

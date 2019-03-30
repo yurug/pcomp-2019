@@ -1,0 +1,25 @@
+plan
+** intro: 
+*** plan
+**** C'est quoi Akka
+**** Pourquoi utiliser Akka
+**** paragigme qu'on utilise en Akka pour la programmation des algorithmes distribués
+**** exemple de code
+** DONE C'est quoi Akka
+   CLOSED: [2019-03-03 dim. 09:46]
+librairie open source
+utilisable avec Scala, Java
+** DONE Pourquoi utiliser Akka
+   CLOSED: [2019-03-03 dim. 09:46]
+Faciliter la programmation des algorithmes distribués
+*** pb distribuer algo par rapport programmation classique
+**** problème lié à la concurrence
+**** pour le déploiement sur le réseau, problème de gestion de réseau
+*** En fournissant une gestion de tache de bas niveau des algorithmes distribués
+**** Comportement multithread sans l'utilisation de constructions de concurrence de bas niveau, 
+telles que les atomes ou les verrous
+évitant ainsi de penser aux problèmes de visibilité de la mémoire
+**** Une communication à distance transparente entre les systèmes et leurs composants 
+évite d'écrire et de maintenir un code réseau difficile.
+** DONE paragigme de programmation basé sur le acteur modèle
+   CLOSED: [2019-03-03 dim. 19:05]

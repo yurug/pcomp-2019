@@ -1,0 +1,40 @@
+@startuml
+:user1: <<Human>>
+:user2: <<Human>>
+:user3: <<Human>>
+
+
+rectangle "my application"{
+	cloud redirection<<Server>>
+:user1: -down-> redirection
+:user2: -down-> redirection
+:user3: -down-> redirection
+
+	rectangle spreadsheet1 <<Server>>{
+		(scheduler)
+		
+		scheduler -down-> (data) : thread1
+		scheduler -down-> (data) : thread2
+
+		
+	}
+	
+	redirection -down-> spreadsheet1
+
+	rectangle spreadsheet2 <<Server>>{	
+		(scheduler2)
+		scheduler2 -down-> (data2) : thread1
+		scheduler2 -down-> (data2) : thread2
+
+		
+	}
+	
+	redirection -down-> spreadsheet2
+
+	spreadsheet1 -left-> spreadsheet2
+	 spreadsheet2 -right-> spreadsheet1
+	
+}
+
+@enduml
+
