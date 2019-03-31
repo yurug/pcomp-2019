@@ -69,4 +69,8 @@ extends Formule_graph{
     eval_incalculable_formule()    
   }
 
+  def is_formule(c:Case) = get_FormuleId(c) match{
+    case None => false
+    case Some(_) => true
+  }
 }

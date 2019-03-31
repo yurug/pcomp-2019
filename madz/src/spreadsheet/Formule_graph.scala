@@ -8,11 +8,22 @@ class Formule_graph {
   def add_formule(f:Formule,numligne: Int ,numcol: Int) = {
     var node = new Formule_node()
     node.set_expression(f)
+    node.set_position(Case(numligne,numcol))
     listFormule += (listCoord.size -> (node,Nil))
     listCoord += (listCoord.size -> Case (numligne,numcol) )
   }
   
-
+  def isFormule(c:String):Boolean = {
+    println(c+" "+c.toInt)
+    return listCoord.contains(c.toInt)
+  }  
+  def all_node = listFormule.toList.map(
+      e => {
+        val _,(_,(node,_)) = e
+        node
+      }
+      )
+  
   protected def addDep(id:Int,l:List[Int]):Unit={
     val Some((data,l0)) = listFormule.get(id)
     listFormule(id) = (data,l)
@@ -38,6 +49,8 @@ class Formule_graph {
           case Some((id, _)) => Some(id) 
           }
         }  
+      
+        
         protected def setDependance(id:Int, idl:Int): Unit = {
           val l= getDependance(id)
           val data = getCaseData(id)

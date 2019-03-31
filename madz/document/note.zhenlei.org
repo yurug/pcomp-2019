@@ -15,16 +15,47 @@ si formul -> eval region, propagation
 ** diagram
 *** DONE replace i,j par case
     CLOSED: [2019-02-10 dim. 23:52]
-** defi 1[8/11]
-*** DONE getValueData
-    CLOSED: [2019-02-16 sam. 22:59]
-*** DONE mv file in /madz
-    CLOSED: [2019-02-16 sam. 22:59]
-*** TODO docker
+** defi 1[15/25]
+*** TODO [#C] docker
     - State "WAIT"       from "TODO"       [2019-02-16 sam. 22:59] \\
       help
     
 **** TODO update docker to new architecture
+*** TODO [#C] faire le rangement de changes output
+*** TODO fonctionne
+**** DONE generer file
+     CLOSED: [2019-03-31 dim. 14:29]
+***** [#A] generator
+****** DONE [#B] use old generetor
+       CLOSED: [2019-03-31 dim. 14:29]
+celui de defi/2
+****** [#A] use le new
+******* TODO search doc
+git log print file modif par yann
+******* TODO compris code
+***** [#B] manuel
+**** TODO fini code
+***** TODO eval formul
+****** eval current case, si diff init val, then update dependace(c)
+******* RUNNING def update_depend(c,v):List[Change]
+get depend d de case c , si d.to_count = c.v, then update_depend(d,new_val)
+******** DONE def get_depend sheet(c):List[Case] 
+         CLOSED: [2019-03-31 dim. 18:53]
+c is dependé par formul,
+********* def get_formule_expr have 
+********* DONE eval set val
+          CLOSED: [2019-03-31 dim. 17:55]
+********* DONE struct have expr et value
+          CLOSED: [2019-03-31 dim. 17:55]
+********* DONE eval data 
+          CLOSED: [2019-03-31 dim. 17:54]
+********* DONE formule
+          CLOSED: [2019-03-31 dim. 17:54]
+**** TODO debug
+*** DONE getValueData
+    CLOSED: [2019-02-16 sam. 22:59]
+*** DONE mv file in /madz
+    CLOSED: [2019-02-16 sam. 22:59]
 *** DONE [#A] test unit
     CLOSED: [2019-02-17 dim. 22:34]
 **** DONE |ALL_DONE searchd old test
@@ -34,8 +65,6 @@ si formul -> eval region, propagation
 ******* makefile man_command
 ******** use array in makefile
 ********* PRATIQUE_DONE lire makefile
-
-*** TODO faire le rangement de changes output
 *** DONE write in file
     CLOSED: [2019-03-11 lun. 13:20]
 *** DONE replace mock

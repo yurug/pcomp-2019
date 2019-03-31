@@ -109,8 +109,31 @@ class Sheet_evalued_Impl(data0:String,view0:String) extends Sheet_evalued {
     
    }
   
-   def getDependace(c:Case) = this.dep.getDependance(c)
-
+   def getDependace(c:Case):List[Case] = 
+     if (dep.is_formule(c)){
+       this.dep.getDependance(c)
+     } else {
+       //pour tout node, depend(c)
+       val dependances = dep.all_node.filter( 
+           node => depend(node.get_expression,c))
+       dependances.map(f => f.get_position)
+     }
+     
+   private def depend(f:Formule, c:Case) = {
+     val Formule(Case(i1,j1),Case(i2,j2),v) = f
+     val Case(i,j) = c
+     if( between(i1,i2,i) && between(j1,j2,j)){
+       true  
+     } else { false}     
+   }
+   
+   private def between(down:Int,up:Int,v:Int) = 
+     if (v <= up && v >= up) { true}
+     else {false}
+       
+     
+     
+       
    def getValue(c:Case):Option[Value]={
     var i=0;var j=0
     for(l <- io.Source.fromFile(view0).getLines){
