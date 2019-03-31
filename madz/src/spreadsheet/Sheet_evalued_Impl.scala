@@ -32,7 +32,7 @@ class Sheet_evalued_Impl(data0:String,view0:String) extends Sheet_evalued {
     try{
       out = new java.io.BufferedWriter( new java.io.FileWriter(view0) );
     var i=0
-    io.Source.fromFile(data0).getLines.foreach(
+    io.Source.fromFile(data0).getLines.foreach( //TODO optimise for read wide line
         s => {
           val l=copyligne(s,i)
           out.write(l,0,l.length);
@@ -45,27 +45,37 @@ class Sheet_evalued_Impl(data0:String,view0:String) extends Sheet_evalued {
     }
    
   }
-
+  
+  /*
+   * evaluate a expression 
+   */
+   def eval_expr(expr: CaseData)={
+      expr match{
+       case Number(n) => VInt(n)
+       case Formule(c1,c2,v) => throw new Exception("no implement") //TODO 
+         //dep.add_formule(Formule(c1,c2,v),-1,-1)	
+     }
+   }
   /*
    * precondition: exist a file data0 with correct syntax 
    * postcondition: file view0 's line numligne contain int data of file data0 's line numligne
    */  
   private def copyligne(s:String,numligne:Int):String={
-    var l=List[Int]()
+    var line_value=List[Int]()
     var numcol=0
     for(ss <-s.split(";")){
       val casedata=DataParser.parseData(ss)
       casedata match{
-        case Number(n) => l=n::l
+        case Number(n) => line_value=n::line_value
         case Formule(c1,c2,v) => dep.add_formule(Formule(c1,c2,v),numligne,numcol)
-              l=dep.listCoord_size::l
+              line_value=dep.listCoord_size::line_value
  
         case _ => Nil
      }
       numcol+=1
     }
-    l=l.reverse
-    l.mkString(";") 
+    line_value=line_value.reverse
+    line_value.mkString(";") 
   }
  
    def getView:String=view0
@@ -99,7 +109,7 @@ class Sheet_evalued_Impl(data0:String,view0:String) extends Sheet_evalued {
     
    }
   
-
+   def getDependace(c:Case) = this.dep.getDependance(c)
 
    def getValue(c:Case):Option[Value]={
     var i=0;var j=0

@@ -1,20 +1,18 @@
 package spreadsheet
 
 class Formule_graph {
-  protected var listFormule = scala.collection.mutable.Map[Int,(CaseData,List[Int])]()
+  protected var listFormule = scala.collection.mutable.Map[Int,(Formule_node,List[Int])]()
   protected var listCoord:Map[Int,(Case)] = Map()
   protected var listValue=scala.collection.mutable.Map[Int,Value]()
   def listCoord_size = listCoord.size
   def add_formule(f:Formule,numligne: Int ,numcol: Int) = {
-    val Formule(c1,c2,v) = f
-    listFormule += (listCoord.size -> (Formule(c1,c2,v),Nil))
-    listCoord += (listCoord.size -> Case (numligne,numcol) )//( -> Case(numligne,numcol))
+    var node = new Formule_node()
+    node.set_expression(f)
+    listFormule += (listCoord.size -> (node,Nil))
+    listCoord += (listCoord.size -> Case (numligne,numcol) )
   }
   
-  def isFormule(c:String):Boolean = {
-    println(c+" "+c.toInt)
-    return listCoord.contains(c.toInt)
-  }  
+
   protected def addDep(id:Int,l:List[Int]):Unit={
     val Some((data,l0)) = listFormule.get(id)
     listFormule(id) = (data,l)
@@ -42,23 +40,35 @@ class Formule_graph {
         }  
         protected def setDependance(id:Int, idl:Int): Unit = {
           val l= getDependance(id)
-          val data =getCaseData(id)
-          listFormule(id) = (data,idl::l) 
-
+          val data = getCaseData(id)
+          val (content,_),_ = listFormule(id)
+          content.set_expression(data)
+          listFormule(id) = (content,idl::l) 
         }    
         def getCaseData(id:Int):CaseData={
           val Some((data,l)) = listFormule.get(id)
-          data
+          data.get_expression
         }
+
+        def getCaseData(c:Case):CaseData={  
+          val Some(id) = get_FormuleId(c)
+          val Some((data,l)) = listFormule.get(id)
+          data.get_expression
+        }
+        
         protected def getCase(id:Int):Case={
           val Some(c) = listCoord.get(id)
           c
         }
         protected def setCaseData(id:Int,data:CaseData):Unit={
           val Some((data0,l0)) = listFormule.get(id)
-          listFormule(id) = (data,l0)
+          data0.set_expression(data)
+          
         }
         
+        /*
+         * delete formule num from dependance of formule id
+         */
         protected def remove(num:Int, l:List[Int],id:Int):Unit={
           var ll=List[Int]()
           for(i <- l){
@@ -72,7 +82,7 @@ class Formule_graph {
           val Some((data,l)) = listFormule.get(id)
           l
         }
-        protected def getDependance(c:Case):List[Case] = {
+         def getDependance(c:Case):List[Case] = {
           get_FormuleId(c) match {
             case None => Nil //case c is a int
               case Some(id) => { 

@@ -9,7 +9,7 @@ import java.io.PrintWriter
  */
 object DataInterpreteur {
   
-  def getEvalRegionV0(c1:Case, c2:Case,v:Int,view0:String):CaseData={
+  def getEvalRegionV0(c1:Case, c2:Case,v:Int,view0:String):Value={
     var count=0
     var i=0;var j=0
     for(l <- io.Source.fromFile(view0).getLines){
@@ -21,7 +21,7 @@ object DataInterpreteur {
         }
       i+=1;j=0
     }
-    Number(count)
+    VInt(count)
   }
   
   def getEvalRegionV1(id:Int,v:Int):CaseData={

@@ -5,9 +5,7 @@ import spreadsheet.CaseData
 import spreadsheet.Sheet_evalued
 import spreadsheet.Value
 
-case class Change(case_leftTop:Case, 
-	case_bottomRight:Case,
-	value: Value)
+case class Change(case_toChange:Case,value: Value)
 
 /*
  * estimate changement to do for execution of a request change
@@ -21,7 +19,7 @@ extends Request_change(case_toChange, expression){
     this(c, value)
     this.set_sheet(sheet)
     
-  def exec():Unit = { result = estimate_update_case(case_toChange)}
+  def exec():Unit = { result = estimate_update_case(case_toChange,expression)}
   
   /*
    * precondition: a case valid c
@@ -31,16 +29,22 @@ extends Request_change(case_toChange, expression){
    * then update value of its dependance case
    * postcondition: return all changement on case 's value to do on the view
    */
-  private def estimate_update_case(c : Case) : List[Change] = { 
-    throw new Exception("no implement")
-    /*
-    val init_val = DataInterpreteur.evalData(c)
-    val result = Interpreteur.evalData(c, c,:Int,view0:String)
-    if (init != current) {
-      
-      this.sheet.getDependance(c).map(
-      c =>     
-    )}   */   
+  private def estimate_update_case(c : Case, expr:CaseData) : List[Change] = { 
+    val init_val = this.sheet.getValue(c)
+    val current_val = this.sheet.eval_expr(expr) 
+    if (init_val == current_val) {
+      List()
+    }else {
+      //change current case et all dependanc case      
+      val change_current_case = Change(c,current_val)
+      val changes_all_dependance = {
+        val dependances = this.sheet.getDependace(c)
+        dependances.map( c =>
+            
+        )
+      }
+      change_current_case::changes_all_dependance
+    }
   }
   
   /*

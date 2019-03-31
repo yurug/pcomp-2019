@@ -19,8 +19,8 @@ let _ = Random.self_init ()
 (******************************************************************************)
 
 let area_size                   = ref 1000
-let nb_rows                     = ref 10000
-let nb_cols                     = ref 10000
+let nb_rows                     = ref 10
+let nb_cols                     = ref 10
 let depth                       = ref 10
 let branching_factor            = ref 10
 let level_depth                 = ref 10

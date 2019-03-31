@@ -9,6 +9,7 @@ class CSVFile(fileName:String, separator:String) extends BufferedReader(new File
 	
   /*
    * return next line of CSV file
+   * TODO better gestion empty line 
    */
 	final def nextData : Array[String] = { 
 	  var tmp:String = null

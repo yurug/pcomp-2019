@@ -21,7 +21,7 @@ extends Formule_graph{
       var ll=List[Int]()
       for((id1,Case(x,y))<- listCoord)
         if(id0!=id1){
-          f match {
+          f.get_expression match {
             case Formule(Case(r1,c1),Case(r2,c2),v) =>
               if(r1<=x && x<=r2 && c1<=y && y<=c2){
                 ll=id1::ll
@@ -44,9 +44,10 @@ extends Formule_graph{
    */  
   private def eval_calculable_formule():Unit={
     var i=0
-     for ((id,(Formule(c1,c2,v),l)) <- listFormule)
+     for ((id,(content,l)) <- listFormule)       
        if (l==Nil){
-         setCaseData(id,DataInterpreteur.getEvalRegionV0(c1,c2,v,fs.getView))
+         val Formule(c1,c2,v) = content.get_expression
+         content.set_value(id,DataInterpreteur.getEvalRegionV0(c1,c2,v,fs.getView))
          SuppDependance(id) //remove direct cycle
          i+=1
        }
@@ -60,11 +61,7 @@ extends Formule_graph{
    */    
   private def eval_incalculable_formule():Unit={
       for ((k,(f,l)) <- listFormule)
-        f match{
-          case Formule(c1,c2,v) => 
-            setCaseData(k,P())
-          case _ => Nil
-        }
+        f.set_value(VUncalculable())
   }
   
   private def eval_formules = {
