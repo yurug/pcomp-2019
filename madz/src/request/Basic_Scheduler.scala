@@ -11,7 +11,9 @@ class Basic_Scheduler[T <: Task] extends java.util.ArrayList[T] with Sequential_
    * precondition: exist 1 list task TODO
    * postcondition: all executed task is move from list TODO into a list DONE
    */  
-  def start_exec() : Unit = this.asScala.foreach (task => {task.exec ; 
+  def start_exec() : Unit = this.asScala.foreach (
+      task => {
+        task.exec ; 
   task_done = task::task_done})
   
   /*

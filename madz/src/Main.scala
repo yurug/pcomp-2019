@@ -17,11 +17,13 @@ object Main {
     val request_file = args(1)
     val viewOut_file = args(2)
     val changeTODO_file = args(3)
-    generate_view0(data_file,viewOut_file)
-    generate_change(request_file,changeTODO_file)
+    
+    val f= new Sheet_evalued_Impl(data_file, viewOut_file)
+    generate_view0(data_file,viewOut_file,f)
+    generate_change(request_file,changeTODO_file,f)
   
   }
-  def load_scheduler(file : String) ={
+  def load_scheduler(file : String,sheet :Sheet_evalued) ={
     import scala.collection.mutable.MutableList
     import scala.collection.JavaConverters._
 
@@ -29,7 +31,7 @@ object Main {
     with Request_parser
     tmp.init
     val scheduler = new Basic_Scheduler[Estimate_change]
-    tmp.foreach {e => scheduler.add(e)}
+    tmp.foreach {e => e.set_sheet(sheet);scheduler.add(e)}
     scheduler
   }
   def write_change(scheduler: Scheduler[Estimate_change],changeTODO_file : String)={
@@ -43,14 +45,13 @@ object Main {
     output.close()
   }
 
-  def generate_view0(data:String, view:String) = {
-    val f= new Sheet_evalued_Impl(data, view)
+  def generate_view0(data:String, view:String,f :Sheet_evalued_Impl) = {
     f.start_evaluation
     f.export()    
   }
   
-  def generate_change(request: String,change: String) = {
-     val scheduler = load_scheduler(request)
+  def generate_change(request: String,change: String,sheet :Sheet_evalued) = {
+     val scheduler = load_scheduler(request,sheet)
     scheduler.start_exec()
     write_change(scheduler,change)
   }

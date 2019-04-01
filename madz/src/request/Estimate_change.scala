@@ -18,9 +18,16 @@ extends Request_change(case_toChange, expression){
     this.set_sheet(sheet)
     
   def exec():Unit = { 
-    val new_val = this.sheet.eval_expr(expression)
-    result = estimate_update_case(case_toChange,new_val)}
-  
+    try{
+      val new_val = this.sheet.eval_expr(expression)
+    result = estimate_update_case(case_toChange,new_val)
+    }catch {
+      case e : Exception => println("error execute request")
+      e.printStackTrace()
+    }
+  }
+
+      
   /*
    * precondition: a case valid c
    * c = Case(i,j) with (i:Integer) >= 0 and (j:Integer) >= 0
@@ -29,8 +36,11 @@ extends Request_change(case_toChange, expression){
    * then update value of its dependance case
    * postcondition: return all changement on case 's value to do on the view
    */
-  private def estimate_update_case(c : Case, new_val:Value) : List[Change] = { 
-        val Some(init_val) = this.sheet.getValue(c)
+  private def estimate_update_case(c : Case, new_val:Value) : List[Change] = {
+    var init_val = this.sheet.getValue(c) match {
+      case None => throw new Exception("case " + Printer.toString(c) + " no found in sheet")
+      case Some(v) => v
+    }
     if (init_val == new_val) { //value of case change
       List()
     }else { //value of case no change
