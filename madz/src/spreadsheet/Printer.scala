@@ -15,9 +15,8 @@ object Printer {
       }
       
       def toString (op : Change) : String= { op match {
-        case Change(lt,br,v) => 
+        case Change(lt,v) => 
           (Printer.toString(lt ) 
-            + " "  + Printer.toString(br) 
             + " " + toString_value(v)
           )
           

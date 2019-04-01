@@ -49,7 +49,6 @@ class Formule_graph {
           case Some((id, _)) => Some(id) 
           }
         }  
-      def get
         
         protected def setDependance(id:Int, idl:Int): Unit = {
           val l= getDependance(id)
