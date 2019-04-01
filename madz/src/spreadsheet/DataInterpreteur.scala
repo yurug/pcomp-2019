@@ -24,14 +24,6 @@ object DataInterpreteur {
     VInt(count)
   }
   
-  def getEvalRegionV1(id:Int,v:Int):CaseData={
-    var count=0
-    for(l <- io.Source.fromFile(id+"").getLines){
-       val lignelist =l.split(" ")
-       count+=lignelist.filter(_ == v).size
-    }
-    Number(count)
-  }
   
 
     
