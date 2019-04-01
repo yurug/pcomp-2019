@@ -39,6 +39,8 @@ class Sheet_evalued_Impl(data0:String,view0:String) extends Sheet_evalued {
           out.write("\n",0,1)
           i+=1
           });
+    }catch{
+      case e => println("unsuccefull evaluation") ; throw e
     }
     finally{
        out.close()
