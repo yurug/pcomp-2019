@@ -56,7 +56,8 @@ class Formule_graph {
           val (content,_),_ = listFormule(id)
           content.set_expression(data)
           listFormule(id) = (content,idl::l) 
-        }    
+        } 
+        
         def getCaseData(id:Int):Formule={
           val Some((data,l)) = listFormule.get(id)
           data.get_expression
