@@ -13,5 +13,7 @@ package spreadsheet
 
 
 abstract class Value
-case class VInt(v : Int) extends Value 
+case class VInt(v : Int) extends Value {
+  def to_int = v
+}
 case class VUncalculable() extends Value

@@ -49,7 +49,7 @@ class Formule_graph {
           case Some((id, _)) => Some(id) 
           }
         }  
-      
+      def get
         
         protected def setDependance(id:Int, idl:Int): Unit = {
           val l= getDependance(id)
@@ -58,12 +58,12 @@ class Formule_graph {
           content.set_expression(data)
           listFormule(id) = (content,idl::l) 
         }    
-        def getCaseData(id:Int):CaseData={
+        def getCaseData(id:Int):Formule={
           val Some((data,l)) = listFormule.get(id)
           data.get_expression
         }
 
-        def getCaseData(c:Case):CaseData={  
+        def getCaseData(c:Case):Formule ={  
           val Some(id) = get_FormuleId(c)
           val Some((data,l)) = listFormule.get(id)
           data.get_expression
@@ -73,7 +73,7 @@ class Formule_graph {
           val Some(c) = listCoord.get(id)
           c
         }
-        protected def setCaseData(id:Int,data:CaseData):Unit={
+        protected def setCaseData(id:Int,data:Formule):Unit={
           val Some((data0,l0)) = listFormule.get(id)
           data0.set_expression(data)
           

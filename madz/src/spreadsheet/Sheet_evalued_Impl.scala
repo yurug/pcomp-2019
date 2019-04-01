@@ -131,7 +131,18 @@ class Sheet_evalued_Impl(data0:String,view0:String) extends Sheet_evalued {
      if (v <= up && v >= up) { true}
      else {false}
        
-     
+   def formule_of(c:Case):Option[Formule] = {
+     def is_in_case_c (formule:Formule_node) = 
+       if(formule.get_position == c){true}
+           else{false}
+     val formule_of_c = this.dep.all_node
+     .filter(is_in_case_c)
+     .map(node => node.get_expression) 
+     formule_of_c match{
+       case nil => None
+       case h::t => Some(h)
+     }    
+   }
      
        
    def getValue(c:Case):Option[Value]={

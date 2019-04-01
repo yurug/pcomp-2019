@@ -47,7 +47,7 @@ extends Formule_graph{
      for ((id,(content,l)) <- listFormule)       
        if (l==Nil){
          val Formule(c1,c2,v) = content.get_expression
-         content.set_value(id,DataInterpreteur.getEvalRegionV0(c1,c2,v,fs.getView))
+         content.set_value(DataInterpreteur.getEvalRegionV0(c1,c2,v,fs.getView))
          SuppDependance(id) //remove direct cycle
          i+=1
        }

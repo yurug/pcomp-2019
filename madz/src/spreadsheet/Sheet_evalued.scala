@@ -5,4 +5,5 @@ trait Sheet_evalued {
   def start_evaluation
   def eval_expr(expr: CaseData):Value
   def getDependace(c:Case):List[Case]
+  def formule_of(c:Case):Option[Formule]
 }
