@@ -1,5 +1,7 @@
 package spreadsheet
 
+import util.Connection
+
 /*
  * detect if exist a cycle between set of formule
  */
@@ -17,22 +19,16 @@ extends Formule_graph{
    * postcondition: dependancie graph of formule 
    */
   private def build_dependancie_between_formule():Unit={
-    for ((id0,(f,l)) <- listFormule){
-      var ll=List[Int]()
-      for((id1,Case(x,y))<- listCoord)
-        if(id0!=id1){
-          f.get_expression match {
-            case Formule(Case(r1,c1),Case(r2,c2),v) =>
-              if(r1<=x && x<=r2 && c1<=y && y<=c2){
-                ll=id1::ll
-              }
-            case _ =>Nil
-          }
-      }
-      addDep(id0,ll)
+    def build_dependancie_between_2_formule (n:Formule_node,n2:Formule_node) = {
+      val f = n.get_expression
+        val p = n.get_position
+        if( FormuleEvaluator.depend(f,p)) {
+          this.addLink(new Connection(n,n2))
+        }else{}
     }
+    def build_all_dependancie_of_formule (n:Formule_node) = this.getNodes.map( build_dependancie_between_2_formule(n,_))
+    this.getNodes.map( build_all_dependancie_of_formule)
   }
-
   
 
   /*
@@ -44,8 +40,8 @@ extends Formule_graph{
    */  
   private def eval_calculable_formule():Unit={
     var i=0
-     for ((id,(content,l)) <- listFormule)       
-       if (l==Nil){
+     for (content <- this.getNodes)       
+       if (neighbour_of(content) == Nil){
          val Formule(c1,c2,v) = content.get_expression
          content.set_value(DataInterpreteur.getEvalRegionV0(c1,c2,v,fs.getView))
          SuppDependance(id) //remove direct cycle
@@ -60,8 +56,8 @@ extends Formule_graph{
    * postcondition: graph with incalculable formule
    */    
   private def eval_incalculable_formule():Unit={
-      for ((k,(f,l)) <- listFormule)
-        f.set_value(VUncalculable())
+    this.getNodes.map(
+        f => f.set_value(VUncalculable()))  
   }
   
   private def eval_formules = {
@@ -69,8 +65,23 @@ extends Formule_graph{
     eval_incalculable_formule()    
   }
 
-  def is_formule(c:Case) = get_FormuleId(c) match{
-    case None => false
-    case Some(_) => true
+  def is_formule(c:Case) = {
+    this.getNodes.exists(n => n.get_position == c)
   }
+
+  
+}
+object FormuleEvaluator{
+        def depend(f:Formule, c:Case) = {
+     val Formule(Case(i1,j1),Case(i2,j2),v) = f
+     val Case(i,j) = c
+     if( between(i1,i2,i) && between(j1,j2,j)){
+       true  
+     } else { false}     
+   }
+   private def between(down:Int,up:Int,v:Int) = 
+     if (v <= up && v >= up) { true}
+     else {false}
+  
+
 }

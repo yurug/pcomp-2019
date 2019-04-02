@@ -70,7 +70,7 @@ class Sheet_evalued_Impl(data0:String,view0:String) extends Sheet_evalued {
       casedata match{
         case Number(n) => line_value=n::line_value
         case Formule(c1,c2,v) => dep.add_formule(Formule(c1,c2,v),numligne,numcol)
-              line_value=dep.listCoord_size::line_value
+              line_value=dep.all_node.size::line_value
  
         case _ => Nil
      }
@@ -89,7 +89,7 @@ class Sheet_evalued_Impl(data0:String,view0:String) extends Sheet_evalued {
   private def regionToFile(id:Int):Unit ={
      var writer:PrintWriter = null
      try{
-     var Formule(c1,c2,v)=dep.getCaseData(this.dep.idToCase(id))
+     var Formule(c1,c2,v)=dep.all_node(id).get_expression
      writer = new PrintWriter(new File(id+""))
      var i=0;var j=0; var ll=List[String]()
      for(l <- io.Source.fromFile(view0).getLines){
@@ -111,27 +111,24 @@ class Sheet_evalued_Impl(data0:String,view0:String) extends Sheet_evalued {
     
    }
   
+   /*
+    * get all case that its formule depend case c
+    */
    def getDependace(c:Case):List[Case] = 
      if (dep.is_formule(c)){
-       this.dep.getDependance(c)
+       val node = this.dep.node_of_formule(c)
+       def formule_position (n:Formule_node) = ( n.get_position)
+       this.dep.neighbour_of(node).map(formule_position)
      } else {
        //pour tout node, depend(c)
        val dependances = dep.all_node.filter( 
-           node => depend(node.get_expression,c))
+           node => FormuleEvaluator.depend(node.get_expression,c))
        dependances.map(f => f.get_position)
      }
      
-   private def depend(f:Formule, c:Case) = {
-     val Formule(Case(i1,j1),Case(i2,j2),v) = f
-     val Case(i,j) = c
-     if( between(i1,i2,i) && between(j1,j2,j)){
-       true  
-     } else { false}     
-   }
+
    
-   private def between(down:Int,up:Int,v:Int) = 
-     if (v <= up && v >= up) { true}
-     else {false}
+
        
    def formule_of(c:Case):Option[Formule] = {
      def is_in_case_c (formule:Formule_node) = 
@@ -168,7 +165,7 @@ class Sheet_evalued_Impl(data0:String,view0:String) extends Sheet_evalued {
     for(l <- io.Source.fromFile(view0).getLines){
       for(c <- l.split(";")){
         if(dep.isFormule(c)) {
-          w.write(DataParser.formuleToString(dep.getCaseData(this.dep.idToCase(i)))+";")
+          w.write(DataParser.formuleToString(this.dep.all_node(i).get_expression) +";")
           i+=1
         }
         else w.write(c+";")
