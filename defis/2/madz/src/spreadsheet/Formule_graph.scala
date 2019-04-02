@@ -28,9 +28,9 @@ class Formule_graph {
     val Some((data,l0)) = listFormule.get(id)
     listFormule(id) = (data,l)
   }
-  protected def idToCase (id:Int)  = listCoord.get(id) match{
-    case None => Nil
-    case Some(c) => List(c)
+   def idToCase (id:Int)  = listCoord.get(id) match{
+    case None => throw new Exception("id "+ id + "no associé to a case")
+    case Some(c) => c
     }
     
     protected def SuppDependance(id:Int):Unit={
@@ -52,16 +52,13 @@ class Formule_graph {
         
         protected def setDependance(id:Int, idl:Int): Unit = {
           val l= getDependance(id)
-          val data = getCaseData(id)
+          val data = getCaseData(idToCase(id))
           val (content,_),_ = listFormule(id)
           content.set_expression(data)
           listFormule(id) = (content,idl::l) 
         } 
         
-        def getCaseData(id:Int):Formule={
-          val Some((data,l)) = listFormule.get(id)
-          data.get_expression
-        }
+
 
         def getCaseData(c:Case):Formule ={  
           val Some(id) = get_FormuleId(c)
@@ -69,10 +66,7 @@ class Formule_graph {
           data.get_expression
         }
         
-        protected def getCase(id:Int):Case={
-          val Some(c) = listCoord.get(id)
-          c
-        }
+
         protected def setCaseData(id:Int,data:Formule):Unit={
           val Some((data0,l0)) = listFormule.get(id)
           data0.set_expression(data)

@@ -89,7 +89,7 @@ class Sheet_evalued_Impl(data0:String,view0:String) extends Sheet_evalued {
   private def regionToFile(id:Int):Unit ={
      var writer:PrintWriter = null
      try{
-     var Formule(c1,c2,v)=dep.getCaseData(id)
+     var Formule(c1,c2,v)=dep.getCaseData(this.dep.idToCase(id))
      writer = new PrintWriter(new File(id+""))
      var i=0;var j=0; var ll=List[String]()
      for(l <- io.Source.fromFile(view0).getLines){
@@ -168,7 +168,7 @@ class Sheet_evalued_Impl(data0:String,view0:String) extends Sheet_evalued {
     for(l <- io.Source.fromFile(view0).getLines){
       for(c <- l.split(";")){
         if(dep.isFormule(c)) {
-          w.write(DataParser.formuleToString(dep.getCaseData(i))+";")
+          w.write(DataParser.formuleToString(dep.getCaseData(this.dep.idToCase(i)))+";")
           i+=1
         }
         else w.write(c+";")
