@@ -18,10 +18,10 @@ class Formule_graph extends Graph[Formule_node,Connection[Formule_node]]{
   def all_node = this.getNodes     
 
 
-        def expression_of_formule_in(c:Case):Formule ={ node_of_formule(c).get_expression} 
+  def expression_of_formule_in(c:Case):Formule ={ node_of_formule(c).get_expression} 
 
-       
-       
+  
+  
          /*
           * precondition: case of a formule
           * postcondition: node of formule in dependancie graph
@@ -32,8 +32,8 @@ class Formule_graph extends Graph[Formule_node,Connection[Formule_node]]{
              graph_formule.keys.filter(node_match_case(_,c)).head  
            }catch{
              case _ => throw new Exception("case" +Printer.toString(c)+"no contain formule")
+             }
+             
            }
-           
-         }
 
-}
+         }
