@@ -1,0 +1,14 @@
+(executable
+  (name main)
+  (libraries lib)
+  (modules main))
+(library
+  (name	lib)
+  (wrapped false)
+  (modules data ast graph formulaOrder spreadsheet)
+  (libraries unix))
+
+; Disable warning as errors
+(env
+  (dev
+    (flags (:standard -warn-error -A))))

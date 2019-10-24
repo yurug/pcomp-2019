@@ -1,0 +1,59 @@
+* Todo list :
+Indiquer votre nom devant une tache quand vous la commencer, histoire
+qu'on ne se marche pas sur les pieds.
+
+Merci de passer la tâche en DONE quand finie.
+
+** TODO Spreadsheet : commenter, nettoyer, raccourcir les fonctions
+** TODO AST : commenter, nettoyer, raccourcir les fonctions
+** TODO compléter le README
+** TODO Ajouter plus de tests
+** TODO Message d'erreurs quand problème à la lecture du fichier
+** TODO Optimisation position avec un unique int et Patricia trees
+** TODO Sur changement utilisateur : si case en fait inchangée (1 dans 1) -> pas besoin de faire du calcul
+
+* Antonin
+** TODO Faire marcher "make tests"
+** TODO Trouver une facon efficace de définir l'utilité de chaque test (lire commentaire en dessous)
+Idée : pouvoir déterminer quels tests lancés pour tester quelque chose
+(genre : cycle, gros fichier)
+
+Suggestion : par exemple, un fichier dans le dossier test avec des
+catégories et le numéro de chaque test rentrant dans cette catégorie
+
+** TODO Ajouter diff à test.sh et affichage résultats avec option verbose ou pas
+** TODO [DataArray] Avoir une taille de tableau logique pour ne pas en afficher trop ou faire des folds sur trop
+* Carine
+* Kostia
+** TODO [Spreadsheet] Séparer fonction IO du reste et uniformiser les parseurs
+  sur parseur avoir une option "formule only"
+
+* Pierre
+
+* Question
+Si une case recalculée donne le même résultat que sa valeur précédent
+ou que on change une case pour la même valeur, doit -on enregistrer le
+changement ?
+
+Carine : Je dirais que non vu que l'idée est de connaitre la liste des
+différences entre le fichier view0 et le résultat après chaque modif
+utilisateur
+
+
+
+* Résultats Tests (à déplacer)
+** 1 -8 ok
+** 9 un changement de trop inscrit (case recalculée mais non modifiée)
+** 10 -12 ok
+
+
+* DONE
+** DONE [Data] Implémenter une version purement fonctionnelle
+
+** DONE [Dependency] : commenter, nettoyer, raccourcir les fonctions
+** DONE Relire tests pierre et vérifier que les résultats attendus sont justes
+** DONE debugger les changements (changes.txt)
+** DONE Graph : commenter, nettoyer, raccourcir les fonctions
+** DONE Data : commenter, nettoyer, raccourcir les fonctions
+** DONE Data : ajouter d'autres implémentations (Fonctionnelle pure, qui ne stocke rien en mémoire, etc).
+** DONE Ecrire un générateur de test pour générer automatiquement des gros tableurs (int entre 0 et 255)
